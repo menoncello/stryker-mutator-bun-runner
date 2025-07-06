@@ -51,7 +51,8 @@ function startProcessMonitor(interval = 1000) {
   return {
     stop: () => {
       clearInterval(monitor);
-      return { maxCount, counts, average: counts.reduce((a, b) => a + b, 0) / counts.length };
+      const average = counts.length > 0 ? counts.reduce((a, b) => a + b, 0) / counts.length : 0;
+      return { maxCount, counts, average };
     }
   };
 }
