@@ -99,3 +99,36 @@ Coverage flow:
 3. Mutants can call `__stryker__.trackMutant()` to register coverage
 4. Coverage data is converted to StrykerJS MutantCoverage format
 5. During mutant runs, only tests that cover the mutant are executed
+
+### ESLint Guidelines
+
+When writing code, follow these ESLint rules to avoid common errors:
+
+1. **No unused variables**: Prefix unused variables with underscore (_) or remove them
+2. **No explicit `any` types**: Use proper type assertions with `unknown` as intermediate:
+   ```typescript
+   // Bad
+   const obj = someValue as any;
+   
+   // Good
+   const obj = someValue as unknown as SpecificType;
+   ```
+3. **Use const for variables that are never reassigned**
+4. **No unused function parameters**: Prefix with underscore (_) if needed:
+   ```typescript
+   // Bad
+   function handler(data, error) { /* only uses data */ }
+   
+   // Good
+   function handler(data, _error) { /* only uses data */ }
+   ```
+5. **Type assertions for accessing private methods in tests**:
+   ```typescript
+   // Define interface for private methods
+   interface ClassWithPrivates {
+     privateMethod(): void;
+   }
+   // Use proper type assertion
+   const instance = publicInstance as unknown as ClassWithPrivates;
+   ```
+6. **Run `npm run lint` before committing** to catch and fix any ESLint errors

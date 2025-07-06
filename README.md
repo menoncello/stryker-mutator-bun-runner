@@ -21,16 +21,18 @@ A test runner plugin to use [Bun](https://bun.sh) with [StrykerJS](https://stryk
 - **Fast Test Execution** - Leverage Bun's speed for quick test runs
 - **TypeScript & JSX Support** - No configuration needed
 - **Coverage Analysis** - Smart test filtering with perTest coverage
+- **Process Pool** - Reuse Bun processes for faster execution
 - **Flexible Configuration** - Extensive options for customization
 - **Timeout Handling** - Configurable timeouts with graceful handling
 - **Test Filtering** - Run only tests that can kill specific mutants
 - **Environment Variables** - Full control over test environment
 - **Custom Commands** - Support for custom test scripts
+- **TypeScript Strict Mode** - Full support for strict TypeScript projects
 
 ### 🚧 Coming Soon
-- **Process Reuse** - Even faster execution by reusing Bun processes
 - **Watch Mode** - Real-time mutation testing during development
 - **Snapshot Testing** - Support for Bun's snapshot features
+- **Performance Benchmarks** - Built-in performance tracking
 
 ## Installation
 
@@ -83,11 +85,13 @@ Open `reports/mutation/mutation.html` in your browser to see detailed results.
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `testFiles` | `string[]` | `["**/*.test.{js,ts,jsx,tsx}", "**/*.spec.{js,ts,jsx,tsx}"]` | Test file patterns |
-| `timeout` | `number` | `5000` | Timeout per test in milliseconds |
+| `timeout` | `number` | `10000` | Timeout per test in milliseconds |
 | `bail` | `boolean` | `false` | Stop on first test failure |
 | `nodeArgs` | `string[]` | `[]` | Additional Bun process arguments |
 | `env` | `object` | `{}` | Environment variables |
 | `command` | `string` | `undefined` | Custom test command |
+| `processPool` | `boolean` | `true` | Enable process pooling for performance |
+| `maxWorkers` | `number` | `4` | Maximum number of worker processes |
 
 ### Example Configurations
 
@@ -198,10 +202,12 @@ See the [troubleshooting guide](./docs/GUIDE.md#troubleshooting) for more soluti
 ## Project Status
 
 This plugin is actively maintained and tested with:
-- ✅ 100% code coverage
+- ✅ 100% line coverage
+- ✅ 97.66% function coverage
 - ✅ 100% mutation score
-- ✅ Comprehensive test suite
+- ✅ Comprehensive test suite (230+ tests)
 - ✅ ESLint clean (0 errors, 0 warnings)
+- ✅ TypeScript strict mode
 
 ## Contributing
 

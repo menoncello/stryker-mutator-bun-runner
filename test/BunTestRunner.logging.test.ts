@@ -157,8 +157,8 @@ describe('BunTestRunner Logging Tests', () => {
     });
   });
 
-  describe('info logging', () => {
-    test('should log info message for coverage collection', async () => {
+  describe('debug logging for coverage', () => {
+    test('should log debug message for coverage collection', async () => {
       mockBunAdapter.runTests.mockResolvedValueOnce({
         tests: [{ id: 'test1', name: 'Test 1', status: 'passed' }],
         passed: 1,
@@ -178,10 +178,10 @@ describe('BunTestRunner Logging Tests', () => {
         coverageAnalysis: 'perTest'
       });
 
-      expect(mockLogger.info).toHaveBeenCalledWith('Collected coverage for 2 tests');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Collected coverage for 2 tests');
     });
 
-    test('should log info message for zero coverage tests', async () => {
+    test('should log debug message for zero coverage tests', async () => {
       mockBunAdapter.runTests.mockResolvedValueOnce({
         tests: [{ id: 'test1', name: 'Test 1', status: 'passed' }],
         passed: 1,
@@ -201,7 +201,7 @@ describe('BunTestRunner Logging Tests', () => {
         coverageAnalysis: 'perTest'
       });
 
-      expect(mockLogger.info).toHaveBeenCalledWith('Collected coverage for 0 tests');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Collected coverage for 0 tests');
     });
   });
 
@@ -288,8 +288,8 @@ describe('BunTestRunner Logging Tests', () => {
         coverageAnalysis: 'perTest'
       });
 
-      // Info should be called for coverage results
-      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Collected coverage for'));
+      // Debug should be called for coverage results
+      expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('Collected coverage for'));
       
       // Debug should also be called for processing
       expect(mockLogger.debug).toHaveBeenCalledWith('Processing coverage data');

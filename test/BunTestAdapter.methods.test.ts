@@ -312,92 +312,96 @@ describe('BunTestAdapter Method Tests', () => {
     test('should clean up coverage hook file', async () => {
       const options: BunTestRunnerOptions = {};
       adapter = new BunTestAdapter(mockLogger, options);
-      (adapter as TestableClass<BunTestAdapter>).coverageHookPath = '/tmp/coverage-hook.js';
 
       const collector = adapter.getCoverageCollector();
       spyOn(collector, 'dispose').mockResolvedValue(undefined);
       
-      const unlinkSpy = spyOn(fs, 'unlink').mockResolvedValue(undefined);
+      // Mock the coverageHookGenerator cleanup method
+      const hookGenerator = (adapter as TestableClass<BunTestAdapter>).coverageHookGenerator;
+      const cleanupSpy = spyOn(hookGenerator, 'cleanup').mockResolvedValue(undefined);
 
       await adapter.dispose();
 
       expect(collector.dispose).toHaveBeenCalled();
-      expect(unlinkSpy).toHaveBeenCalledWith('/tmp/coverage-hook.js');
+      expect(cleanupSpy).toHaveBeenCalled();
     });
 
-    test('should handle file cleanup error gracefully', async () => {
-      const options: BunTestRunnerOptions = {};
+    test('should handle cleanup errors gracefully', async () => {
+      const options: BunTestRunnerOptions = {
+        coverageAnalysis: 'perTest'
+      };
       adapter = new BunTestAdapter(mockLogger, options);
-      (adapter as TestableClass<BunTestAdapter>).coverageHookPath = '/tmp/coverage-hook.js';
-
+      
       const collector = adapter.getCoverageCollector();
       spyOn(collector, 'dispose').mockResolvedValue(undefined);
       
-      const unlinkSpy = spyOn(fs, 'unlink').mockRejectedValue(new Error('File not found'));
+      // Mock the coverageHookGenerator cleanup to resolve (it handles errors internally)
+      const hookGenerator = (adapter as TestableClass<BunTestAdapter>).coverageHookGenerator;
+      spyOn(hookGenerator, 'cleanup').mockResolvedValue(undefined);
 
-      await adapter.dispose();
+      // Should not throw
+      await expect(adapter.dispose()).resolves.toBeUndefined();
 
       expect(collector.dispose).toHaveBeenCalled();
-      expect(unlinkSpy).toHaveBeenCalledWith('/tmp/coverage-hook.js');
-      expect(mockLogger.debug).toHaveBeenCalledWith('Failed to clean up coverage hook file', expect.any(Error));
+      expect(hookGenerator.cleanup).toHaveBeenCalled();
     });
 
-    test('should not attempt to clean up if no hook path', async () => {
-      const options: BunTestRunnerOptions = {};
+    test('should clean up without errors when no hook path exists', async () => {
+      const options: BunTestRunnerOptions = {
+        coverageAnalysis: 'off'  // This ensures no hook file is created
+      };
       adapter = new BunTestAdapter(mockLogger, options);
-      // No coverageHookPath set
 
       const collector = adapter.getCoverageCollector();
       spyOn(collector, 'dispose').mockResolvedValue(undefined);
       
-      // Don't spy on fs.unlink since we want to verify it's not called
-
-      await adapter.dispose();
+      // Initialize without creating hook file
+      spyOn(collector, 'init').mockResolvedValue(undefined);
+      await adapter.init();
+      
+      // Dispose should complete without errors
+      await expect(adapter.dispose()).resolves.toBeUndefined();
 
       expect(collector.dispose).toHaveBeenCalled();
-      // Cannot verify unlink wasn't called without spy, just verify no error thrown
     });
   });
 
   describe('coverage hook file operations', () => {
-    test('should create coverage hook file with correct content', async () => {
-      const options: BunTestRunnerOptions = {};
+    test('should handle hook file creation during init', async () => {
+      const options: BunTestRunnerOptions = {
+        coverageAnalysis: 'perTest'
+      };
       adapter = new BunTestAdapter(mockLogger, options);
+      
+      // Mock coverage collector init
+      const collector = adapter.getCoverageCollector();
+      spyOn(collector, 'init').mockResolvedValue(undefined);
 
-      const mkdirSpy = spyOn(fs, 'mkdir').mockResolvedValue(undefined);
-      const writeFileSpy = spyOn(fs, 'writeFile').mockResolvedValue(undefined);
+      // Mock the coverageHookGenerator createHookFile method
+      const hookGenerator = (adapter as TestableClass<BunTestAdapter>).coverageHookGenerator;
+      spyOn(hookGenerator, 'createHookFile').mockResolvedValue('/tmp/.stryker-tmp/coverage-hook.js');
 
-      await (adapter as TestableClass<BunTestAdapter>).createCoverageHookFile();
+      await adapter.init();
 
-      expect(mkdirSpy).toHaveBeenCalledWith(
-        path.join(process.cwd(), '.stryker-tmp'),
-        { recursive: true }
-      );
-
-      expect(writeFileSpy).toHaveBeenCalledWith(
-        expect.stringContaining('coverage-hook.js'),
-        expect.stringContaining('Stryker Bun Coverage Hook'),
-        'utf-8'
-      );
-
-      const writtenContent = writeFileSpy.mock.calls[0][1];
-      expect(writtenContent).toContain('globalThis.__stryker__');
-      expect(writtenContent).toContain('trackMutant');
-      expect(writtenContent).toContain('originalTest');
-
-      expect((adapter as TestableClass<BunTestAdapter>).coverageHookPath).toBeDefined();
-      expect((adapter as TestableClass<BunTestAdapter>).coverageHookPath).toContain('.stryker-tmp');
-      expect((adapter as TestableClass<BunTestAdapter>).coverageHookPath).toContain('coverage-hook.js');
+      expect(collector.init).toHaveBeenCalled();
+      expect(hookGenerator.createHookFile).toHaveBeenCalled();
     });
 
-    test('should handle writeFile error', async () => {
-      const options: BunTestRunnerOptions = {};
+    test('should handle writeFile error during init', async () => {
+      const options: BunTestRunnerOptions = {
+        coverageAnalysis: 'perTest'
+      };
       adapter = new BunTestAdapter(mockLogger, options);
+      
+      // Mock coverage collector init
+      const collector = adapter.getCoverageCollector();
+      spyOn(collector, 'init').mockResolvedValue(undefined);
 
-      spyOn(fs, 'mkdir').mockResolvedValue(undefined);
-      spyOn(fs, 'writeFile').mockRejectedValue(new Error('Disk full'));
+      // Mock the coverageHookGenerator createHookFile to throw error
+      const hookGenerator = (adapter as TestableClass<BunTestAdapter>).coverageHookGenerator;
+      spyOn(hookGenerator, 'createHookFile').mockRejectedValue(new Error('Disk full'));
 
-      await expect((adapter as TestableClass<BunTestAdapter>).createCoverageHookFile()).rejects.toThrow('Disk full');
+      await expect(adapter.init()).rejects.toThrow('Disk full');
     });
   });
 

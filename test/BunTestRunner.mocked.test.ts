@@ -172,7 +172,7 @@ describe('BunTestRunner Mocked Tests - Async Methods', () => {
 
       expect(result.mutantCoverage).toBeDefined();
       expect(mockLogger.debug).toHaveBeenCalledWith('Processing coverage data');
-      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Collected coverage for'));
+      expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('Collected coverage for'));
     });
 
     test('should not process coverage when coverageAnalysis is off', async () => {

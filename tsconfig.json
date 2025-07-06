@@ -9,6 +9,8 @@
     "declarationMap": true,
     "sourceMap": true,
     "strict": true,
+    "strictPropertyInitialization": true,
+    "noUncheckedIndexedAccess": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

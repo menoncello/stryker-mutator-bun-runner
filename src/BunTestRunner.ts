@@ -20,9 +20,9 @@ import { Logger } from '@stryker-mutator/api/logging';
 import { tokens, commonTokens } from '@stryker-mutator/api/plugin';
 import { execa } from 'execa';
 import * as semver from 'semver';
-import { BunTestRunnerOptions, BunRunOptions, StrykerBunOptions, BunTestResult, BunTestResultData } from './BunTestRunnerOptions';
-import { BunTestAdapter } from './BunTestAdapter';
-import { TestFilter, CoverageResult } from './coverage';
+import { BunTestRunnerOptions, BunRunOptions, StrykerBunOptions, BunTestResult, BunTestResultData } from './BunTestRunnerOptions.js';
+import { BunTestAdapter } from './BunTestAdapter.js';
+import { TestFilter, CoverageResult } from './coverage/index.js';
 
 class Timer {
   private startTime: number = 0;
@@ -34,17 +34,17 @@ export class BunTestRunner implements TestRunner {
   private readonly log: Logger;
   private readonly options: BunTestRunnerOptions;
   private readonly bunAdapter: BunTestAdapter;
-  private timer = new Timer();
+  private readonly timer = new Timer();
   private mutantCoverage?: MutantCoverage;
 
-  public static inject = tokens(commonTokens.logger, commonTokens.options);
+  public static readonly inject = tokens(commonTokens.logger, commonTokens.options);
 
   constructor(logger: Logger, options: StrykerOptions) {
     this.log = logger;
     const strykerBunOptions = options as StrykerBunOptions;
     this.options = {
       testFiles: ['**/*.test.{js,ts,jsx,tsx}', '**/*.spec.{js,ts,jsx,tsx}'],
-      timeout: 5000,
+      timeout: 10000,
       bail: false,
       ...strykerBunOptions.bun
     };
@@ -138,7 +138,7 @@ export class BunTestRunner implements TestRunner {
     
     result.mutantCoverage = mutantCoverage;
     this.mutantCoverage = mutantCoverage;
-    this.log.info(`Collected coverage for ${Object.keys(mutantCoverage.perTest).length} tests`);
+    this.log.debug(`Collected coverage for ${Object.keys(mutantCoverage.perTest).length} tests`);
   }
 
   private handleDryRunError(error: unknown, options: DryRunOptions): DryRunResult {
@@ -218,7 +218,7 @@ export class BunTestRunner implements TestRunner {
     try {
       const { stdout } = await execa('bun', ['--version']);
       const version = stdout.trim();
-      this.log.info(`Found Bun version: ${version}`);
+      this.log.debug(`Found Bun version: ${version}`);
       
       if (!semver.gte(version.replace('bun ', ''), '1.0.0')) {
         throw new Error('Bun version 1.0.0 or higher is required');

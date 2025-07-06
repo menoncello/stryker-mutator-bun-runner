@@ -37,6 +37,16 @@ export interface BunTestRunnerOptions {
    * Coverage analysis setting
    */
   coverageAnalysis?: 'off' | 'all' | 'perTest';
+
+  /**
+   * Enable process pooling for better performance
+   */
+  processPool?: boolean;
+
+  /**
+   * Maximum number of worker processes in the pool
+   */
+  maxWorkers?: number;
 }
 
 export interface BunRunOptions {

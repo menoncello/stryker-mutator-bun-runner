@@ -1,6 +1,7 @@
-import { describe, test, expect, beforeEach, mock } from 'bun:test';
+import { describe, test, expect, beforeEach, mock, spyOn } from 'bun:test';
 import { BunTestAdapter } from '../src/BunTestAdapter';
 import { BunTestRunnerOptions } from '../src/BunTestRunnerOptions';
+import { CoverageHookGenerator } from '../src/coverage/CoverageHookGenerator';
 import { MockLogger, TestableClass } from './types/mocks';
 
 describe('BunTestAdapter Basic Tests', () => {
@@ -91,7 +92,8 @@ describe('BunTestAdapter Basic Tests', () => {
     });
 
     test('should generate initialization code', () => {
-      const initCode = (adapter as TestableClass<BunTestAdapter>).getInitializationCode();
+      const hookGenerator = new CoverageHookGenerator();
+      const initCode = hookGenerator.getInitializationCode();
 
       expect(initCode).toBeDefined();
       expect(typeof initCode).toBe('string');
@@ -102,7 +104,8 @@ describe('BunTestAdapter Basic Tests', () => {
     });
 
     test('should generate test wrapper code', () => {
-      const wrapperCode = (adapter as TestableClass<BunTestAdapter>).getTestWrapperCode();
+      const hookGenerator = new CoverageHookGenerator();
+      const wrapperCode = hookGenerator.getTestWrapperCode();
 
       expect(wrapperCode).toBeDefined();
       expect(typeof wrapperCode).toBe('string');
@@ -118,7 +121,8 @@ describe('BunTestAdapter Basic Tests', () => {
     });
 
     test('should generate mutant tracking code', () => {
-      const trackingCode = (adapter as TestableClass<BunTestAdapter>).getMutantTrackingCode();
+      const hookGenerator = new CoverageHookGenerator();
+      const trackingCode = hookGenerator.getMutantTrackingCode();
 
       expect(trackingCode).toBeDefined();
       expect(typeof trackingCode).toBe('string');
@@ -132,7 +136,8 @@ describe('BunTestAdapter Basic Tests', () => {
     });
 
     test('should generate complete hook content', () => {
-      const hookContent = (adapter as TestableClass<BunTestAdapter>).generateHookContent();
+      const hookGenerator = new CoverageHookGenerator();
+      const hookContent = hookGenerator.generateHookContent();
 
       expect(hookContent).toBeDefined();
       expect(typeof hookContent).toBe('string');
@@ -146,12 +151,13 @@ describe('BunTestAdapter Basic Tests', () => {
     });
 
     test('should validate hook content structure', () => {
-      const hookContent = (adapter as TestableClass<BunTestAdapter>).generateHookContent();
+      const hookGenerator = new CoverageHookGenerator();
+      const hookContent = hookGenerator.generateHookContent();
       
       // Should contain all three main sections
-      const initCode = (adapter as TestableClass<BunTestAdapter>).getInitializationCode();
-      const wrapperCode = (adapter as TestableClass<BunTestAdapter>).getTestWrapperCode();
-      const trackingCode = (adapter as TestableClass<BunTestAdapter>).getMutantTrackingCode();
+      const initCode = hookGenerator.getInitializationCode();
+      const wrapperCode = hookGenerator.getTestWrapperCode();
+      const trackingCode = hookGenerator.getMutantTrackingCode();
       
       expect(hookContent).toContain(initCode);
       expect(hookContent).toContain(wrapperCode);
@@ -242,58 +248,58 @@ describe('BunTestAdapter Basic Tests', () => {
   });
 
   describe('bun args building basic tests', () => {
-    test('should build basic args with default command', () => {
+    test('should build basic args with default command', async () => {
       const options: BunTestRunnerOptions = {};
       adapter = new BunTestAdapter(mockLogger, options);
 
-      const args = (adapter as TestableClass<BunTestAdapter>).buildBunArgs([], {});
+      const args = await (adapter as TestableClass<BunTestAdapter>).buildBunArgs([], {});
 
       expect(args).toBeDefined();
       expect(Array.isArray(args)).toBe(true);
       expect(args).toContain('test'); // Default command
     });
 
-    test('should build args with custom command', () => {
+    test('should build args with custom command', async () => {
       const options: BunTestRunnerOptions = {
         command: 'custom-test --verbose'
       };
       adapter = new BunTestAdapter(mockLogger, options);
 
-      const args = (adapter as TestableClass<BunTestAdapter>).buildBunArgs([], {});
+      const args = await (adapter as TestableClass<BunTestAdapter>).buildBunArgs([], {});
 
       expect(args).toContain('custom-test');
       expect(args).toContain('--verbose');
       expect(args).not.toContain('test'); // Should not contain default
     });
 
-    test('should add test files to args', () => {
+    test('should add test files to args', async () => {
       const options: BunTestRunnerOptions = {};
       adapter = new BunTestAdapter(mockLogger, options);
 
       const testFiles = ['test1.ts', 'test2.ts'];
-      const args = (adapter as TestableClass<BunTestAdapter>).buildBunArgs(testFiles, {});
+      const args = await (adapter as TestableClass<BunTestAdapter>).buildBunArgs(testFiles, {});
 
       expect(args).toContain('test1.ts');
       expect(args).toContain('test2.ts');
     });
 
-    test('should add node args', () => {
+    test('should add node args', async () => {
       const options: BunTestRunnerOptions = {
         nodeArgs: ['--experimental-modules', '--max-old-space-size=4096']
       };
       adapter = new BunTestAdapter(mockLogger, options);
 
-      const args = (adapter as TestableClass<BunTestAdapter>).buildBunArgs([], {});
+      const args = await (adapter as TestableClass<BunTestAdapter>).buildBunArgs([], {});
 
       expect(args).toContain('--experimental-modules');
       expect(args).toContain('--max-old-space-size=4096');
     });
 
-    test('should not add node args when not specified', () => {
+    test('should not add node args when not specified', async () => {
       const options: BunTestRunnerOptions = {};
       adapter = new BunTestAdapter(mockLogger, options);
 
-      const args = (adapter as TestableClass<BunTestAdapter>).buildBunArgs([], {});
+      const args = await (adapter as TestableClass<BunTestAdapter>).buildBunArgs([], {});
 
       expect(args.filter(arg => arg.startsWith('--experimental'))).toHaveLength(0);
     });
@@ -328,31 +334,39 @@ describe('BunTestAdapter Basic Tests', () => {
       expect(args).toHaveLength(3);
     });
 
-    test('should add test files when provided', () => {
+    test('should add test files when provided', async () => {
       const args: string[] = [];
       const testFiles = ['file1.test.ts', 'file2.test.ts'];
-      (adapter as TestableClass<BunTestAdapter>).addTestFiles(args, testFiles);
+      await (adapter as TestableClass<BunTestAdapter>).addTestFiles(args, testFiles);
 
       expect(args).toContain('file1.test.ts');
       expect(args).toContain('file2.test.ts');
       expect(args).toHaveLength(2);
     });
 
-    test('should add test files from options when no files provided', () => {
+    test('should add test files from options when no files provided', async () => {
       const options: BunTestRunnerOptions = {
         testFiles: ['default1.test.ts', 'default2.test.ts']
       };
       adapter = new BunTestAdapter(mockLogger, options);
 
+      // Mock glob to return the test files directly
+      const glob = await import('glob');
+      spyOn(glob, 'glob').mockImplementation(async (pattern: string) => {
+        if (pattern === 'default1.test.ts') return ['default1.test.ts'];
+        if (pattern === 'default2.test.ts') return ['default2.test.ts'];
+        return [];
+      });
+
       const args: string[] = [];
-      (adapter as TestableClass<BunTestAdapter>).addTestFiles(args, []);
+      await (adapter as TestableClass<BunTestAdapter>).addTestFiles(args, []);
 
       expect(args).toContain('default1.test.ts');
       expect(args).toContain('default2.test.ts');
       expect(args).toHaveLength(2);
     });
 
-    test('should not add default test files when custom command is used', () => {
+    test('should not add default test files when custom command is used', async () => {
       const options: BunTestRunnerOptions = {
         testFiles: ['default.test.ts'],
         command: 'custom-command'
@@ -360,7 +374,7 @@ describe('BunTestAdapter Basic Tests', () => {
       adapter = new BunTestAdapter(mockLogger, options);
 
       const args: string[] = [];
-      (adapter as TestableClass<BunTestAdapter>).addTestFiles(args, []);
+      await (adapter as TestableClass<BunTestAdapter>).addTestFiles(args, []);
 
       expect(args).toHaveLength(0); // Should not add any files
     });

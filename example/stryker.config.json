@@ -1,11 +1,8 @@
 {
-  "testRunner": "command",
-  "commandRunner": {
-    "command": "bun test"
-  },
+  "testRunner": "bun",
+  "plugins": ["@stryker-mutator/bun-runner"],
   "mutate": [
-    "src/**/*.ts",
-    "!src/**/*.test.ts"
+    "src/**/*.ts"
   ],
   "logLevel": "info",
   "thresholds": {
@@ -13,7 +10,13 @@
     "low": 60,
     "break": 50
   },
-  "coverageAnalysis": "perTest",
+  "coverageAnalysis": "off",
   "tempDirName": ".stryker-tmp",
-  "cleanTempDir": true
+  "cleanTempDir": true,
+  "bun": {
+    "testFiles": ["tests/**/*.test.ts"],
+    "timeout": 30000,
+    "processPool": true,
+    "maxWorkers": 4
+  }
 }

@@ -362,7 +362,7 @@ describe('BunTestRunner Coverage Integration Tests', () => {
 
       expect(result.mutantCoverage).toBeDefined();
       expect(mockLogger.debug).toHaveBeenCalledWith('Processing coverage data');
-      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('Collected coverage for'));
+      expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('Collected coverage for'));
       expect(coverageCollector.toMutantCoverage).toHaveBeenCalled();
     });
   });

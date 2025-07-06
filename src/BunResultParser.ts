@@ -4,9 +4,9 @@ import { BunTestResult, BunTestResultData } from './BunTestRunnerOptions';
 export class BunResultParser {
   private readonly log: Logger;
   
-  private static readonly PASSED_PATTERN = /✓\s+(.+?)(?:\s+\((\d+(?:\.\d+)?)ms\))?$/;
-  private static readonly FAILED_PATTERN = /✗\s+(.+?)(?:\s+\((\d+(?:\.\d+)?)ms\))?$/;
-  private static readonly SKIPPED_PATTERN = /⏭\s+(.+)/;
+  private static readonly PASSED_PATTERN = /(?:✓|\(pass\))\s+(.+?)(?:\s+\[(\d+(?:\.\d+)?)ms\])?$/;
+  private static readonly FAILED_PATTERN = /(?:✗|\(fail\))\s+(.+?)(?:\s+\[(\d+(?:\.\d+)?)ms\])?$/;
+  private static readonly SKIPPED_PATTERN = /(?:⏭|\(skip\))\s+(.+)/;
   private static readonly SUMMARY_PATTERN = /(\d+)\s+pass\s*\|\s*(\d+)\s+fail/;
   private static readonly DURATION_PATTERN = /(\d+(?:\.\d+)?)ms\)/;
 
@@ -74,15 +74,15 @@ export class BunResultParser {
     updateCounts?: { passed: number; failed: number };
     currentTest: Partial<BunTestResultData> | null;
   } {
-    if (line.includes('✓')) {
+    if (line.includes('✓') || line.includes('(pass)')) {
       return this.handlePassedTest(line);
     }
     
-    if (line.includes('✗')) {
+    if (line.includes('✗') || line.includes('(fail)')) {
       return this.handleFailedTest(line);
     }
     
-    if (line.includes('⏭')) {
+    if (line.includes('⏭') || line.includes('(skip)')) {
       return this.handleSkippedTest(line);
     }
     
@@ -100,7 +100,7 @@ export class BunResultParser {
     
     return {
       test: {
-        name: match[1].trim(),
+        name: match[1]?.trim() ?? 'unknown',
         status: 'passed' as const,
         duration: match[2] ? parseFloat(match[2]) : undefined
       },
@@ -114,7 +114,7 @@ export class BunResultParser {
     
     return {
       test: {
-        name: match[1].trim(),
+        name: match[1]?.trim() ?? 'unknown',
         status: 'failed' as const,
         duration: match[2] ? parseFloat(match[2]) : undefined
       },
@@ -128,7 +128,7 @@ export class BunResultParser {
     
     return {
       test: {
-        name: match[1].trim(),
+        name: match[1]?.trim() ?? 'unknown',
         status: 'skipped' as const
       },
       currentTest: null
@@ -141,8 +141,8 @@ export class BunResultParser {
     
     return {
       updateCounts: {
-        passed: parseInt(summaryMatch[1], 10),
-        failed: parseInt(summaryMatch[2], 10)
+        passed: parseInt(summaryMatch[1] ?? '0', 10),
+        failed: parseInt(summaryMatch[2] ?? '0', 10)
       },
       currentTest: null
     };
@@ -153,7 +153,9 @@ export class BunResultParser {
       return { currentTest };
     }
     
-    const isNewTest = line.includes('✓') || line.includes('✗') || line.includes('⏭') || line.trim() === '';
+    const isNewTest = line.includes('✓') || line.includes('✗') || line.includes('⏭') || 
+                      line.includes('(pass)') || line.includes('(fail)') || line.includes('(skip)') || 
+                      line.trim() === '';
     if (isNewTest) {
       return {
         test: currentTest as BunTestResultData,
@@ -170,6 +172,6 @@ export class BunResultParser {
 
   private extractDuration(output: string): number | undefined {
     const durationMatch = BunResultParser.DURATION_PATTERN.exec(output);
-    return durationMatch ? parseFloat(durationMatch[1]) : undefined;
+    return durationMatch ? parseFloat(durationMatch[1] ?? '0') : undefined;
   }
 }

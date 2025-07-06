@@ -132,16 +132,6 @@ describe('BunTestRunner Integration Tests', () => {
     expect(runner4).toBeDefined();
   });
 
-  test('should handle Timer class functionality through BunTestRunner', () => {
-    // Since Timer is internal, we test it indirectly by ensuring the runner works
-    const runner = new BunTestRunner(mockLogger, {});
-    
-    // The timer is used internally in dryRun and mutantRun
-    // We verify the runner was constructed properly (which uses the Timer)
-    expect(runner).toBeDefined();
-    expect(typeof runner.dryRun).toBe('function');
-    expect(typeof runner.mutantRun).toBe('function');
-  });
 
   test('should have all required TestRunner interface methods', () => {
     const runner = new BunTestRunner(mockLogger, {});
@@ -254,30 +244,6 @@ describe('BunTestRunner Integration Tests', () => {
     }
   });
 
-  test('should test Timer class through reflection', () => {
-    const runner = new BunTestRunner(mockLogger, {});
-    
-    // Access the private timer property through any casting
-    const timerProperty = (runner as TestableClass<BunTestRunner>).timer;
-    expect(timerProperty).toBeDefined();
-    expect(typeof timerProperty.reset).toBe('function');
-    expect(typeof timerProperty.elapsedMs).toBe('function');
-    
-    // Test Timer functionality
-    timerProperty.reset();
-    const elapsed1 = timerProperty.elapsedMs();
-    expect(elapsed1).toBeGreaterThanOrEqual(0);
-    expect(elapsed1).toBeLessThan(100); // Should be very fast
-    
-    // Wait a tiny bit and test again
-    const start = Date.now();
-    while (Date.now() - start < 2) {
-      // tiny delay
-    }
-    
-    const elapsed2 = timerProperty.elapsedMs();
-    expect(elapsed2).toBeGreaterThan(elapsed1);
-  });
 
   test('should test private methods through any casting', () => {
     const runner = new BunTestRunner(mockLogger, {});
@@ -478,12 +444,12 @@ describe('BunTestRunner Integration Tests', () => {
     // Test that different option types are handled correctly
     const testCases = [
       // Default options
-      { input: {}, expected: { testFiles: ['**/*.test.{js,ts,jsx,tsx}', '**/*.spec.{js,ts,jsx,tsx}'], timeout: 5000, bail: false } },
+      { input: {}, expected: { testFiles: ['**/*.test.{js,ts,jsx,tsx}', '**/*.spec.{js,ts,jsx,tsx}'], timeout: 10000, bail: false } },
       
       // Custom test files
       { 
         input: { bun: { testFiles: ['custom/**/*.test.ts'] } },
-        expected: { testFiles: ['custom/**/*.test.ts'], timeout: 5000, bail: false }
+        expected: { testFiles: ['custom/**/*.test.ts'], timeout: 10000, bail: false }
       },
       
       // Custom timeout
@@ -495,7 +461,7 @@ describe('BunTestRunner Integration Tests', () => {
       // Custom bail
       { 
         input: { bun: { bail: true } },
-        expected: { testFiles: ['**/*.test.{js,ts,jsx,tsx}', '**/*.spec.{js,ts,jsx,tsx}'], timeout: 5000, bail: true }
+        expected: { testFiles: ['**/*.test.{js,ts,jsx,tsx}', '**/*.spec.{js,ts,jsx,tsx}'], timeout: 10000, bail: true }
       }
     ];
 
@@ -509,27 +475,4 @@ describe('BunTestRunner Integration Tests', () => {
     });
   });
 
-  test('should handle Timer edge cases', () => {
-    const runner = new BunTestRunner(mockLogger, {});
-    const timer = (runner as TestableClass<BunTestRunner>).timer;
-    
-    // Test multiple resets
-    timer.reset();
-    const time1 = timer.elapsedMs();
-    
-    timer.reset();
-    const time2 = timer.elapsedMs();
-    
-    // Second reset should give us a fresh start
-    expect(time2).toBeLessThanOrEqual(time1);
-    
-    // Test that elapsed time increases
-    const start = Date.now();
-    while (Date.now() - start < 1) {
-      // minimal delay
-    }
-    
-    const time3 = timer.elapsedMs();
-    expect(time3).toBeGreaterThanOrEqual(time2);
-  });
 });

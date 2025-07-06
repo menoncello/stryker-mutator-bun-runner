@@ -56,7 +56,7 @@ describe('BunResultParser', () => {
   });
 
   test('should parse test with no duration', () => {
-    const output = `✓ quick test\n✓ another test (5ms)\n\n2 pass | 0 fail | 0 skip | 2 total (5ms)`;
+    const output = `✓ quick test\n✓ another test [5ms]\n\n2 pass | 0 fail | 0 skip | 2 total (5ms)`;
     const result = parser.parse(output);
     expect(result.tests[0].duration).toBeUndefined();
     expect(result.tests[1].duration).toBe(5);

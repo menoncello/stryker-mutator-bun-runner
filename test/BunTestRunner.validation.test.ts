@@ -59,7 +59,7 @@ describe('BunTestRunner Validation Tests', () => {
 
       expect(mockExeca).toHaveBeenCalledWith('bun', ['--version']);
       expect(mockSemver.gte).toHaveBeenCalledWith('1.2.0', '1.0.0');
-      expect(mockLogger.info).toHaveBeenCalledWith('Found Bun version: bun 1.2.0');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Found Bun version: bun 1.2.0');
     });
 
     test('should handle bun version with trimming', async () => {
@@ -71,7 +71,7 @@ describe('BunTestRunner Validation Tests', () => {
       await runner.init();
 
       expect(mockSemver.gte).toHaveBeenCalledWith('1.5.2', '1.0.0');
-      expect(mockLogger.info).toHaveBeenCalledWith('Found Bun version: bun 1.5.2');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Found Bun version: bun 1.5.2');
     });
 
     test('should handle bun version without "bun " prefix', async () => {
