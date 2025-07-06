@@ -47,6 +47,16 @@ export interface BunTestRunnerOptions {
    * Maximum number of worker processes in the pool
    */
   maxWorkers?: number;
+
+  /**
+   * Enable watch mode for continuous test execution
+   */
+  watchMode?: boolean;
+
+  /**
+   * Update snapshots during test runs
+   */
+  updateSnapshots?: boolean;
 }
 
 export interface BunRunOptions {
@@ -57,6 +67,7 @@ export interface BunRunOptions {
   coverage?: boolean;
   testNamePattern?: string;
   testFilter?: string[];
+  updateSnapshots?: boolean;
 }
 
 export interface BunTestResult {

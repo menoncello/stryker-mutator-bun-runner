@@ -35,6 +35,7 @@ export interface MockCoverageCollector {
 
 export interface MockBunResultParser {
   parse: MockFunction;
+  dispose: MockFunction;
 }
 
 export interface MockExecaResult {

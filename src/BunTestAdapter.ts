@@ -4,6 +4,7 @@ import { glob } from 'glob';
 import { BunTestRunnerOptions, BunRunOptions, BunTestResult } from './BunTestRunnerOptions.js';
 import { BunResultParser } from './BunResultParser.js';
 import { MutantCoverageCollector, CoverageResult, CoverageHookGenerator } from './coverage/index.js';
+import { BunProcessPool } from './process/BunProcessPool.js';
 
 export class BunTestAdapter {
   private readonly log: Logger;
@@ -12,6 +13,7 @@ export class BunTestAdapter {
   private readonly coverageCollector: MutantCoverageCollector;
   private readonly coverageHookGenerator: CoverageHookGenerator;
   private coverageHookPath?: string;
+  private processPool?: BunProcessPool;
 
   constructor(logger: Logger, options: BunTestRunnerOptions) {
     this.log = logger;
@@ -19,6 +21,15 @@ export class BunTestAdapter {
     this.parser = new BunResultParser(logger);
     this.coverageCollector = new MutantCoverageCollector(logger);
     this.coverageHookGenerator = new CoverageHookGenerator();
+    
+    // Initialize process pool if enabled
+    if (options.processPool) {
+      this.processPool = new BunProcessPool(logger, {
+        maxWorkers: options.maxWorkers,
+        timeout: options.timeout,
+        watchMode: options.watchMode
+      });
+    }
   }
 
   public async init(): Promise<void> {
@@ -30,6 +41,7 @@ export class BunTestAdapter {
     }
   }
 
+  // eslint-disable-next-line max-lines-per-function, complexity
   public async runTests(testFiles: string[], runOptions: BunRunOptions): Promise<BunTestResult> {
     const args = await this.buildBunArgs(testFiles, runOptions);
     const env = this.buildEnvironment(runOptions);
@@ -46,24 +58,38 @@ export class BunTestAdapter {
     this.log.debug(`Test files config: ${JSON.stringify(this.options.testFiles)}`);
 
     try {
-      const { stdout, stderr } = await execa('bun', args, {
-        env,
-        timeout: runOptions.timeout,
-        reject: false // Don't reject on non-zero exit code
-      });
+      let execResult: { stdout: string; stderr: string; timedOut?: boolean };
+      
+      // Use process pool if available, otherwise fall back to direct execution
+      if (this.processPool) {
+        this.log.debug('Using process pool for test execution');
+        const poolResult = await this.processPool.runTests(args, env);
+        execResult = poolResult as { stdout: string; stderr: string; timedOut?: boolean };
+      } else {
+        const { stdout, stderr } = await execa('bun', args, {
+          env,
+          timeout: runOptions.timeout,
+          reject: false // Don't reject on non-zero exit code
+        });
+        execResult = { stdout, stderr };
+      }
 
-      if (stderr) {
-        this.log.debug(`Bun stderr: ${stderr}`);
+      if (execResult.timedOut) {
+        throw { timedOut: true, message: 'Test execution timed out' };
+      }
+
+      if (execResult.stderr) {
+        this.log.debug(`Bun stderr: ${execResult.stderr}`);
       }
       
-      if (stdout) {
-        this.log.debug(`Bun stdout: ${stdout}`);
+      if (execResult.stdout) {
+        this.log.debug(`Bun stdout: ${execResult.stdout}`);
       }
 
       // Bun outputs test results to stderr when BUN_TEST_QUIET=1
       // So we need to parse stderr instead of stdout
-      const outputToParse = stderr || stdout;
-      const result = this.parser.parse(outputToParse);
+      const outputToParse = execResult.stderr || execResult.stdout;
+      const result = await this.parser.parse(outputToParse);
 
       // Stop coverage collection if it was started
       if (runOptions.coverage) {
@@ -92,6 +118,14 @@ export class BunTestAdapter {
 
   public async dispose(): Promise<void> {
     await this.coverageCollector.dispose();
+    
+    // Dispose process pool if it exists
+    if (this.processPool) {
+      await this.processPool.dispose();
+    }
+    
+    // Dispose the parser to clean up source map consumers
+    await this.parser.dispose();
     
     // CoverageHookGenerator already handles errors internally in cleanup()
     // so we don't need to wrap this in try-catch
@@ -187,6 +221,10 @@ export class BunTestAdapter {
     
     if (options.bail) {
       args.push('--bail');
+    }
+    
+    if (options.updateSnapshots || this.options.updateSnapshots) {
+      args.push('--update-snapshots');
     }
   }
 

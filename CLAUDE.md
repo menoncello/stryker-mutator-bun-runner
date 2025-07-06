@@ -58,6 +58,7 @@ This is a StrykerJS test runner plugin that enables Bun as a test runner for mut
    - Parses Bun test output (supports ✓, ✗, ⏭ markers)
    - Extracts test results, durations, and failure information
    - Converts Bun output format to StrykerJS TestResult format
+   - Supports source map resolution for error stack traces
 
 ### Important Implementation Details
 
@@ -75,13 +76,17 @@ The plugin accepts configuration through the `bun` property in stryker.config.js
 - `nodeArgs`: Additional Bun process arguments
 - `env`: Custom environment variables
 - `command`: Override default 'bun test' command
+- `processPool`: Enable process pooling (default: true)
+- `maxWorkers`: Maximum worker processes (default: 4)
+- `watchMode`: Enable watch mode for continuous testing
+- `updateSnapshots`: Update snapshots during test runs
 
 ### Development Roadmap
 
-Current state: Phase 2 (Optimizations) - Coverage analysis and test filtering implemented
+Current state: Phase 3 (Advanced Features) - Process pooling, watch mode, and snapshot testing completed
 - ✅ Phase 1: Basic test execution (completed)
 - ✅ Phase 2: Coverage analysis, test filtering (completed)
-- 🚧 Phase 3: Process reuse, watch mode, snapshot testing
+- ✅ Phase 3: Process reuse, watch mode, snapshot testing (completed)
 - 🚧 Phase 4: Documentation, examples, NPM publication
 
 The detailed roadmap is documented in STRYKER_BUN_RUNNER.md.
@@ -99,6 +104,27 @@ Coverage flow:
 3. Mutants can call `__stryker__.trackMutant()` to register coverage
 4. Coverage data is converted to StrykerJS MutantCoverage format
 5. During mutant runs, only tests that cover the mutant are executed
+
+### Process Pool Architecture (Phase 3)
+
+The process pool system improves performance by reusing Bun worker processes:
+1. **BunProcessPool**: Manages a pool of worker processes
+2. **WorkerManager**: Handles worker lifecycle and communication
+3. **BunWorker**: Worker process that executes test commands
+
+Features:
+- Configurable pool size with `maxWorkers` option
+- Automatic cleanup of idle workers
+- Support for watch mode with persistent processes
+- Graceful error handling and recovery
+
+### Source Map Support (Phase 3)
+
+The plugin now includes automatic source map resolution:
+1. **SourceMapHandler**: Resolves TypeScript/JSX stack traces to original source
+2. Automatically detects and loads `.map` files
+3. Caches source map consumers for performance
+4. Provides accurate error locations in mutation reports
 
 ### ESLint Guidelines
 

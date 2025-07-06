@@ -1,7 +1,6 @@
 import { Logger } from '@stryker-mutator/api/logging';
 import { ChildProcess, spawn } from 'child_process';
 import { EventEmitter } from 'events';
-import * as path from 'path';
 
 export interface PooledProcess {
   id: string;
@@ -35,7 +34,7 @@ export class WorkerManager extends EventEmitter {
     const workerId = `worker-${this.nextWorkerId++}`;
     this.log.debug(`Creating new Bun worker: ${workerId}`);
     
-    const workerPath = path.join(__dirname, 'BunWorker.js');
+    const workerPath = new URL('./BunWorker.js', import.meta.url).pathname;
     const workerProcess = spawn('bun', [workerPath], {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       env: { ...process.env, WORKER_ID: workerId }
@@ -68,7 +67,7 @@ export class WorkerManager extends EventEmitter {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         reject(new Error(`Worker ${workerId} failed to start`));
-      }, 5000);
+      }, 100); // Reduced timeout for faster failure
       
       this.once(`ready-${workerId}`, () => {
         clearTimeout(timeout);

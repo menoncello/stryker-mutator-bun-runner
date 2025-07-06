@@ -126,11 +126,9 @@ describe('BunTestAdapter Basic Tests', () => {
 
       expect(trackingCode).toBeDefined();
       expect(typeof trackingCode).toBe('string');
-      expect(trackingCode).toContain('trackMutant');
-      expect(trackingCode).toContain('function(mutantId)');
+      expect(trackingCode).toContain('Hook is loaded');
+      expect(trackingCode).toContain('Stryker\'s instrumentation will handle coverage tracking');
       expect(trackingCode).toContain('currentTestId');
-      expect(trackingCode).toContain('mutantCoverage');
-      expect(trackingCode).toContain('add(mutantId)');
       expect(trackingCode.length).toBeGreaterThan(50);
       expect(trackingCode).not.toBe('');
     });
@@ -144,7 +142,7 @@ describe('BunTestAdapter Basic Tests', () => {
       expect(hookContent).toContain('Stryker Bun Coverage Hook');
       expect(hookContent).toContain('automatically generated');
       expect(hookContent).toContain('globalThis.__stryker__');
-      expect(hookContent).toContain('trackMutant');
+      expect(hookContent).toContain('Hook is loaded');
       expect(hookContent).toContain('originalTest');
       expect(hookContent.length).toBeGreaterThan(200);
       expect(hookContent).not.toBe('');

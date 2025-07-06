@@ -5,6 +5,7 @@ export interface ProcessPoolOptions {
   maxWorkers?: number;
   timeout?: number;
   idleTimeout?: number;
+  watchMode?: boolean;
 }
 
 interface WorkerMessage {
@@ -27,7 +28,8 @@ export class BunProcessPool {
     this.options = {
       maxWorkers: options.maxWorkers || 4,
       timeout: options.timeout || 60000,
-      idleTimeout: options.idleTimeout || 30000
+      idleTimeout: options.idleTimeout || 30000,
+      watchMode: options.watchMode || false
     };
     
     this.workerManager = new WorkerManager(logger);
@@ -164,7 +166,15 @@ export class BunProcessPool {
     timeoutHandle: NodeJS.Timeout, 
     reject: (reason: Error) => void
   ): void {
-    const message: WorkerMessage = { type: 'run', id: requestId, data: { args, env } };
+    const message: WorkerMessage = { 
+      type: 'run', 
+      id: requestId, 
+      data: { 
+        args, 
+        env,
+        watchMode: this.options.watchMode 
+      } 
+    };
     worker.process.send(message, (error) => {
       if (error) {
         clearTimeout(timeoutHandle);

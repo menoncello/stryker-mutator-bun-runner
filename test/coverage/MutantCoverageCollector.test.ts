@@ -26,9 +26,10 @@ function getStrykerGlobal() {
 function createTestCoverage() {
   const strykerGlobal = getStrykerGlobal();
   if (strykerGlobal?.mutantCoverage) {
+    // Use Stryker's format: Record<string, Record<string, number>>
     strykerGlobal.mutantCoverage.perTest = {
-      'test1': new Set(['mutant1', 'mutant2']),
-      'test2': new Set(['mutant2', 'mutant3'])
+      'test1': { 'mutant1': 1, 'mutant2': 1 },
+      'test2': { 'mutant2': 1, 'mutant3': 1 }
     };
   }
 }

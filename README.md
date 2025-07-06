@@ -21,7 +21,10 @@ A test runner plugin to use [Bun](https://bun.sh) with [StrykerJS](https://stryk
 - **Fast Test Execution** - Leverage Bun's speed for quick test runs
 - **TypeScript & JSX Support** - No configuration needed
 - **Coverage Analysis** - Smart test filtering with perTest coverage
-- **Process Pool** - Reuse Bun processes for faster execution
+- **Process Pool** - Reuse Bun processes for faster execution (Phase 3 ✨)
+- **Watch Mode** - Real-time mutation testing during development (Phase 3 ✨)
+- **Snapshot Testing** - Full support for Bun's snapshot features (Phase 3 ✨)
+- **Source Maps** - Accurate error reporting with source map support (Phase 3 ✨)
 - **Flexible Configuration** - Extensive options for customization
 - **Timeout Handling** - Configurable timeouts with graceful handling
 - **Test Filtering** - Run only tests that can kill specific mutants
@@ -30,9 +33,8 @@ A test runner plugin to use [Bun](https://bun.sh) with [StrykerJS](https://stryk
 - **TypeScript Strict Mode** - Full support for strict TypeScript projects
 
 ### 🚧 Coming Soon
-- **Watch Mode** - Real-time mutation testing during development
-- **Snapshot Testing** - Support for Bun's snapshot features
 - **Performance Benchmarks** - Built-in performance tracking
+- **Advanced Reporting** - Enhanced mutation testing reports
 
 ## Installation
 
@@ -92,6 +94,8 @@ Open `reports/mutation/mutation.html` in your browser to see detailed results.
 | `command` | `string` | `undefined` | Custom test command |
 | `processPool` | `boolean` | `true` | Enable process pooling for performance |
 | `maxWorkers` | `number` | `4` | Maximum number of worker processes |
+| `watchMode` | `boolean` | `false` | Enable watch mode for continuous testing |
+| `updateSnapshots` | `boolean` | `false` | Update snapshots during test runs |
 
 ### Example Configurations
 
@@ -128,6 +132,39 @@ Open `reports/mutation/mutation.html` in your browser to see detailed results.
       "CI": "true",
       "NODE_ENV": "test"
     }
+  }
+}
+```
+
+#### Performance Optimized with Process Pool
+```json
+{
+  "bun": {
+    "processPool": true,
+    "maxWorkers": 8,
+    "testFiles": ["**/*.test.ts"],
+    "coverageAnalysis": "perTest"
+  }
+}
+```
+
+#### Watch Mode for Development
+```json
+{
+  "bun": {
+    "watchMode": true,
+    "processPool": true,
+    "maxWorkers": 2
+  }
+}
+```
+
+#### Snapshot Testing
+```json
+{
+  "bun": {
+    "updateSnapshots": false,  // Set to true to update snapshots
+    "testFiles": ["**/*.snapshot.test.ts"]
   }
 }
 ```

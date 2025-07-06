@@ -119,10 +119,9 @@ describe('CoverageHookGenerator', () => {
     const generatorWithPrivates = generator as unknown as GeneratorWithPrivates;
     const trackingCode = generatorWithPrivates.getMutantTrackingCode();
     
-    expect(trackingCode).toContain('trackMutant');
-    expect(trackingCode).toContain('mutantId');
+    expect(trackingCode).toContain('Hook is loaded');
+    expect(trackingCode).toContain('Stryker\'s instrumentation will handle coverage tracking');
     expect(trackingCode).toContain('currentTestId');
-    expect(trackingCode).toContain('.add(mutantId)');
   });
 
   test('should create hook file multiple times with same path', async () => {

@@ -95,14 +95,15 @@ describe('BunTestAdapter Method Tests', () => {
       
       // Mock parser
       mockParser = {
-        parse: mock(() => ({
+        parse: mock(() => Promise.resolve({
           tests: [
             { id: '1', name: 'test1', status: 'passed', duration: 10 }
           ],
           passed: 1,
           failed: 0,
           total: 1
-        }))
+        })),
+        dispose: mock(() => Promise.resolve())
       };
       (adapter as TestableClass<BunTestAdapter>).parser = mockParser;
     });

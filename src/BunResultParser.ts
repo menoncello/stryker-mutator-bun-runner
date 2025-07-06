@@ -1,8 +1,10 @@
 import { Logger } from '@stryker-mutator/api/logging';
 import { BunTestResult, BunTestResultData } from './BunTestRunnerOptions';
+import { SourceMapHandler } from './utils/SourceMapHandler.js';
 
 export class BunResultParser {
   private readonly log: Logger;
+  private readonly sourceMapHandler: SourceMapHandler;
   
   private static readonly PASSED_PATTERN = /(?:✓|\(pass\))\s+(.+?)(?:\s+\[(\d+(?:\.\d+)?)ms\])?$/;
   private static readonly FAILED_PATTERN = /(?:✗|\(fail\))\s+(.+?)(?:\s+\[(\d+(?:\.\d+)?)ms\])?$/;
@@ -12,13 +14,14 @@ export class BunResultParser {
 
   constructor(logger: Logger) {
     this.log = logger;
+    this.sourceMapHandler = new SourceMapHandler(logger);
   }
 
-  public parse(output: string): BunTestResult {
+  public async parse(output: string): Promise<BunTestResult> {
     this.log.debug('Parsing Bun test output');
     
     const lines = output.split('\n');
-    const parseResult = this.parseTestLines(lines);
+    const parseResult = await this.parseTestLines(lines);
     const duration = this.extractDuration(output);
     
     this.log.debug(`Parsed ${parseResult.total} tests: ${parseResult.passed} passed, ${parseResult.failed} failed`);
@@ -30,19 +33,27 @@ export class BunResultParser {
     };
   }
 
-  private parseTestLines(lines: string[]) {
+  // eslint-disable-next-line complexity
+  private async parseTestLines(lines: string[]) {
     const tests: BunTestResultData[] = [];
     let passed = 0;
     let failed = 0;
     let currentTest: Partial<BunTestResultData> | null = null;
+    let errorBuffer: string[] = [];
 
     for (const line of lines) {
       const result = this.processLine(line, currentTest);
       
       if (result.test) {
+        // Map error stack trace if test failed
+        if (result.test.status === 'failed' && result.test.error) {
+          result.test.error = await this.sourceMapHandler.mapStackTrace(result.test.error);
+        }
+        
         tests.push(result.test);
         if (result.test.status === 'passed') passed++;
         if (result.test.status === 'failed') failed++;
+        errorBuffer = [];
       }
       
       if (result.updateCounts) {
@@ -51,9 +62,18 @@ export class BunResultParser {
       }
       
       currentTest = result.currentTest;
+      
+      // Collect error lines for failed tests
+      if (currentTest && currentTest.status === 'failed' && line.trim()) {
+        errorBuffer.push(line);
+      }
     }
 
     if (currentTest) {
+      // Map error stack trace for remaining test
+      if (currentTest.status === 'failed' && errorBuffer.length > 0) {
+        currentTest.error = await this.sourceMapHandler.mapStackTrace(errorBuffer.join('\n'));
+      }
       tests.push(currentTest as BunTestResultData);
     }
 
@@ -148,6 +168,7 @@ export class BunResultParser {
     };
   }
 
+  // eslint-disable-next-line complexity
   private handleErrorLine(line: string, currentTest: Partial<BunTestResultData> | null) {
     if (!currentTest || !line.trim() || line.startsWith(' ')) {
       return { currentTest };
@@ -173,5 +194,9 @@ export class BunResultParser {
   private extractDuration(output: string): number | undefined {
     const durationMatch = BunResultParser.DURATION_PATTERN.exec(output);
     return durationMatch ? parseFloat(durationMatch[1] ?? '0') : undefined;
+  }
+  
+  public async dispose(): Promise<void> {
+    await this.sourceMapHandler.dispose();
   }
 }

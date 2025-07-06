@@ -12,10 +12,6 @@ import {
 export class MutantCoverageCollector implements ICoverageCollector {
   private readonly log: Logger;
   private startTime: number = 0;
-  private currentCoverage: BunCoverageData = {
-    perTest: {},
-    executedLines: {}
-  };
 
   constructor(logger: Logger) {
     this.log = logger;
@@ -30,30 +26,49 @@ export class MutantCoverageCollector implements ICoverageCollector {
   public startCoverage(): void {
     this.log.debug('Starting coverage collection');
     this.startTime = Date.now();
-    this.currentCoverage = {
-      perTest: {},
-      executedLines: {}
-    };
     
-    // Make coverage collector available globally for tests
+    // Don't overwrite Stryker's instrumentation, just ensure the object exists
     const global = globalThis as Record<string, unknown>;
-    const existingStryker = (global.__stryker__ as Record<string, unknown>) || {};
-    global.__stryker__ = {
-      ...existingStryker,
-      mutantCoverage: this.currentCoverage,
-      currentTestId: null
+    if (!global.__stryker__) {
+      global.__stryker__ = {};
+    }
+    
+    // Reset coverage for this run
+    const strykerGlobal = global.__stryker__ as Record<string, unknown>;
+    strykerGlobal.mutantCoverage = {
+      static: {},
+      perTest: {}
     };
+    strykerGlobal.currentTestId = null;
   }
 
   public stopCoverage(): CoverageResult {
     this.log.debug('Stopping coverage collection');
     
     const elapsedMs = Date.now() - this.startTime;
-    const coverage = { ...this.currentCoverage };
     
-    // Clean up global state
+    // Read coverage data from Stryker's global
     const global = globalThis as Record<string, unknown>;
     const strykerGlobal = global.__stryker__ as Record<string, unknown>;
+    
+    let coverage: BunCoverageData = {
+      perTest: {},
+      executedLines: {}
+    };
+    
+    if (strykerGlobal && strykerGlobal.mutantCoverage) {
+      const mutantCoverage = strykerGlobal.mutantCoverage as { static: Record<string, number>; perTest: Record<string, Record<string, number>> };
+      
+      // Convert from Stryker's format to our format
+      coverage.perTest = {};
+      for (const [testId, mutants] of Object.entries(mutantCoverage.perTest)) {
+        coverage.perTest[testId] = new Set(Object.keys(mutants));
+      }
+      
+      this.log.debug(`Collected coverage for ${Object.keys(coverage.perTest).length} tests`);
+    }
+    
+    // Clean up global state
     if (strykerGlobal) {
       delete strykerGlobal.mutantCoverage;
       delete strykerGlobal.currentTestId;

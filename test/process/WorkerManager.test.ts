@@ -107,7 +107,7 @@ describe('WorkerManager', () => {
       const originalSetTimeout = global.setTimeout;
       let timeoutCallback: Function | null = null;
       global.setTimeout = mock((callback: Function, ms: number) => {
-        if (ms === 5000) {
+        if (ms === 100) {
           timeoutCallback = callback;
           return 123 as unknown as NodeJS.Timeout; // Return a fake timeout ID
         }
