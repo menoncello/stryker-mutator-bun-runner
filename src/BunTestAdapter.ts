@@ -1,4 +1,4 @@
-import { Logger } from '@stryker-mutator/api/dist/src/logging';
+import { Logger } from '@stryker-mutator/api/logging';
 import { execa } from 'execa';
 import { BunTestRunnerOptions, BunRunOptions, BunTestResult } from './BunTestRunnerOptions';
 import { BunResultParser } from './BunResultParser';

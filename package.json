@@ -8,8 +8,8 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc -w",
-    "test": "bun test",
-    "test:watch": "bun test --watch",
+    "test": "bun test test/",
+    "test:watch": "bun test test/ --watch",
     "test:coverage": "c8 --reporter=lcov --reporter=text --reporter=clover --exclude='test/**' --exclude='dist/**' --exclude='example/**' bun test",
     "test:coverage:report": "c8 report --reporter=lcov",
     "lint": "eslint src test",

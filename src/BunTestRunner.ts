@@ -14,13 +14,13 @@ import {
   FailedTestResult,
   SkippedTestResult,
   SuccessTestResult
-} from '@stryker-mutator/api/dist/src/test-runner';
-import { StrykerOptions, MutantCoverage } from '@stryker-mutator/api/dist/src/core';
-import { Logger } from '@stryker-mutator/api/dist/src/logging';
-import { tokens, commonTokens } from '@stryker-mutator/api/dist/src/plugin';
+} from '@stryker-mutator/api/test-runner';
+import { StrykerOptions, MutantCoverage } from '@stryker-mutator/api/core';
+import { Logger } from '@stryker-mutator/api/logging';
+import { tokens, commonTokens } from '@stryker-mutator/api/plugin';
 import { execa } from 'execa';
 import * as semver from 'semver';
-import { BunTestRunnerOptions, BunRunOptions, StrykerBunOptions, BunTestResult } from './BunTestRunnerOptions';
+import { BunTestRunnerOptions, BunRunOptions, StrykerBunOptions, BunTestResult, BunTestResultData } from './BunTestRunnerOptions';
 import { BunTestAdapter } from './BunTestAdapter';
 import { TestFilter } from './coverage';
 
@@ -107,7 +107,7 @@ export class BunTestRunner implements TestRunner {
   public async dispose(): Promise<void> { await this.bunAdapter.dispose(); }
   public capabilities(): TestRunnerCapabilities { return { reloadEnvironment: true }; }
 
-  private mapTestResults(tests: TestResult[]): TestResult[] {
+  private mapTestResults(tests: BunTestResultData[]): TestResult[] {
     return tests.map((test, index) => {
       const baseProps = {
         id: test.id || index.toString(),
@@ -132,9 +132,9 @@ export class BunTestRunner implements TestRunner {
     return { status: DryRunStatus.Complete, tests };
   }
 
-  private processCoverageData(coverage: unknown, result: CompleteDryRunResult): void {
+  private processCoverageData(coverage: any, result: CompleteDryRunResult): void {
     this.log.debug('Processing coverage data');
-    const mutantCoverage = this.bunAdapter.getCoverageCollector().toMutantCoverage(coverage);
+    const mutantCoverage = this.bunAdapter.getCoverageCollector().toMutantCoverage(coverage.coverage);
     
     result.mutantCoverage = mutantCoverage;
     this.mutantCoverage = mutantCoverage;
@@ -158,7 +158,7 @@ export class BunTestRunner implements TestRunner {
     };
   }
 
-  private getFilteredTests(options: MutantRunOptions) {
+  private getFilteredTests(options: MutantRunOptions): { testNamePattern?: string; shouldSkip?: boolean } {
     if (this.mutantCoverage && options.testFilter) {
       const testNamePattern = TestFilter.createTestNamePattern(options.testFilter);
       this.log.debug(`Using test filter for ${options.testFilter.length} tests`);
@@ -172,7 +172,7 @@ export class BunTestRunner implements TestRunner {
     return {};
   }
 
-  private filterTestsByCoverage(options: MutantRunOptions) {
+  private filterTestsByCoverage(options: MutantRunOptions): { testNamePattern?: string; shouldSkip?: boolean } {
     const coveringTests = TestFilter.getTestsForMutant(options.activeMutant, this.mutantCoverage!);
     
     if (coveringTests.length > 0) {

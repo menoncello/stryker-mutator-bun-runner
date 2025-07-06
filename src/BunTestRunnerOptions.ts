@@ -1,4 +1,4 @@
-import { StrykerOptions } from '@stryker-mutator/api/dist/src/core';
+import { StrykerOptions } from '@stryker-mutator/api/core';
 import { CoverageResult } from './coverage';
 
 export interface BunTestRunnerOptions {
@@ -50,16 +50,16 @@ export interface BunRunOptions {
 }
 
 export interface BunTestResult {
-  tests: TestResult[];
+  tests: BunTestResultData[];
   passed: number;
   failed: number;
   total: number;
   duration?: number;
-  failedTests?: TestResult[];
+  failedTests?: BunTestResultData[];
   coverage?: CoverageResult;
 }
 
-export interface TestResult {
+export interface BunTestResultData {
   id?: string;
   name: string;
   status: 'passed' | 'failed' | 'skipped';

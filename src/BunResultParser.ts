@@ -1,5 +1,5 @@
-import { Logger } from '@stryker-mutator/api/dist/src/logging';
-import { BunTestResult, TestResult } from './BunTestRunnerOptions';
+import { Logger } from '@stryker-mutator/api/logging';
+import { BunTestResult, BunTestResultData } from './BunTestRunnerOptions';
 
 export class BunResultParser {
   private readonly log: Logger;
@@ -31,10 +31,10 @@ export class BunResultParser {
   }
 
   private parseTestLines(lines: string[]) {
-    const tests: TestResult[] = [];
+    const tests: BunTestResultData[] = [];
     let passed = 0;
     let failed = 0;
-    let currentTest: Partial<TestResult> | null = null;
+    let currentTest: Partial<BunTestResultData> | null = null;
 
     for (const line of lines) {
       const result = this.processLine(line, currentTest);
@@ -54,7 +54,7 @@ export class BunResultParser {
     }
 
     if (currentTest) {
-      tests.push(currentTest as TestResult);
+      tests.push(currentTest as BunTestResultData);
     }
 
     return {
@@ -66,7 +66,7 @@ export class BunResultParser {
     };
   }
 
-  private processLine(line: string, currentTest: Partial<TestResult> | null) {
+  private processLine(line: string, currentTest: Partial<BunTestResultData> | null): { test?: BunTestResultData; updateCounts?: { passed: number; failed: number }; currentTest: Partial<BunTestResultData> | null } {
     if (line.includes('✓')) {
       return this.handlePassedTest(line);
     }
@@ -141,7 +141,7 @@ export class BunResultParser {
     };
   }
 
-  private handleErrorLine(line: string, currentTest: Partial<TestResult> | null) {
+  private handleErrorLine(line: string, currentTest: Partial<BunTestResultData> | null) {
     if (!currentTest || !line.trim() || line.startsWith(' ')) {
       return { currentTest };
     }
@@ -149,7 +149,7 @@ export class BunResultParser {
     const isNewTest = line.includes('✓') || line.includes('✗') || line.includes('⏭') || line.trim() === '';
     if (isNewTest) {
       return {
-        test: currentTest as TestResult,
+        test: currentTest as BunTestResultData,
         currentTest: null
       };
     }

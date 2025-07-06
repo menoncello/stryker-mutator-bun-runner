@@ -1,4 +1,4 @@
-import { PluginKind, declareClassPlugin } from '@stryker-mutator/api/dist/src/plugin';
+import { PluginKind, declareClassPlugin } from '@stryker-mutator/api/plugin';
 import { BunTestRunner } from './BunTestRunner';
 
 export const strykerPlugins = [
