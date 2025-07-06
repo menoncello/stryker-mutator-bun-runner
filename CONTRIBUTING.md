@@ -30,9 +30,10 @@ Pull requests are the best way to propose changes to the codebase. We actively w
 
 ### Prerequisites
 
-- Node.js >= 16.0.0
+- Node.js >= 20.0.0
 - Bun >= 1.0.0
 - npm (comes with Node.js)
+- Git
 
 ### Getting Started
 
@@ -82,8 +83,12 @@ src/
 ### Running Tests
 
 - **Unit tests**: `npm test`
+- **Unit tests with coverage**: `npm run test:coverage`
+- **Watch mode**: `npm run test:watch`
 - **Linting**: `npm run lint`
+- **Linting with auto-fix**: `npm run lint:fix`
 - **Build**: `npm run build`
+- **Build watch mode**: `npm run build:watch`
 - **Integration tests**: `cd example && npx stryker run`
 
 ## Code Style
@@ -108,6 +113,27 @@ Key style guidelines:
 - Use descriptive test names that explain the behavior
 - Mock external dependencies appropriately
 - Ensure tests are deterministic
+- Aim for 100% code coverage
+- Run mutation testing to verify test quality
+
+### Test Structure
+
+```typescript
+describe('Component/Feature', () => {
+  describe('method/functionality', () => {
+    test('should behave correctly when...', () => {
+      // Arrange
+      const input = setupTestData();
+      
+      // Act
+      const result = functionUnderTest(input);
+      
+      // Assert
+      expect(result).toEqual(expectedOutput);
+    });
+  });
+});
+```
 
 ## Bug Reports
 

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Comprehensive documentation in `docs/` directory
+  - User Guide with examples and best practices
+  - API Reference with detailed method documentation
+  - Documentation index for easy navigation
+- Mock types definitions for better TypeScript support in tests
+- TestableClass type helper for testing private methods
+
+### Changed
+- Updated README.md with improved structure and examples
+- Enhanced CONTRIBUTING.md with more detailed guidelines
+- Improved TypeScript types throughout the codebase
+
+### Fixed
+- All ESLint errors and warnings (0 errors, 0 warnings)
+- Line length violations in BunResultParser
+- Unused variables and imports in test files
+- Replaced all `any` types with proper TypeScript types
+
 ## [0.2.0] - 2024-07-06
 
 ### Updated

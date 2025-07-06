@@ -14,6 +14,8 @@
     "test:coverage:report": "c8 report --reporter=lcov",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
+    "docs": "typedoc --out docs/typedoc src/index.ts",
+    "docs:watch": "typedoc --watch --out docs/typedoc src/index.ts",
     "sonar": "npm run test:coverage && npm run lint && sonar-scanner",
     "sonar:dev": "sonar-scanner",
     "prepare": "npm run build"

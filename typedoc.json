@@ -1,0 +1,19 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "out": "docs/typedoc",
+  "exclude": ["**/node_modules/**", "**/test/**", "**/dist/**"],
+  "theme": "default",
+  "name": "@stryker-mutator/bun-runner",
+  "readme": "README.md",
+  "excludePrivate": false,
+  "excludeProtected": false,
+  "excludeInternal": true,
+  "includeVersion": true,
+  "categorizeByGroup": true,
+  "navigationLinks": {
+    "GitHub": "https://github.com/stryker-mutator/stryker-bun",
+    "NPM": "https://www.npmjs.com/package/@stryker-mutator/bun-runner"
+  },
+  "plugin": ["typedoc-plugin-markdown"],
+  "hideGenerator": true
+}

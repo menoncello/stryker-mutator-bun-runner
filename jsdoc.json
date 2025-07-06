@@ -1,0 +1,20 @@
+{
+  "source": {
+    "include": ["src"],
+    "includePattern": ".+\\.ts$",
+    "excludePattern": "(node_modules|dist)"
+  },
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": true
+  },
+  "opts": {
+    "destination": "docs/jsdoc",
+    "recurse": true,
+    "readme": "README.md"
+  },
+  "plugins": ["plugins/markdown", "node_modules/jsdoc-plugin-typescript"],
+  "markdown": {
+    "idInHeadings": true
+  }
+}
