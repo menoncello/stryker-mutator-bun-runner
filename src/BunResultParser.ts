@@ -106,11 +106,12 @@ export class BunResultParser {
     if (!match) return { currentTest: null };
     
     return {
-      currentTest: {
+      test: {
         name: match[1].trim(),
         status: 'failed' as const,
         duration: match[2] ? parseFloat(match[2]) : undefined
-      }
+      },
+      currentTest: null
     };
   }
 

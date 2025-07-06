@@ -8,7 +8,7 @@ import importPlugin from 'eslint-plugin-import';
 export default [
   js.configs.recommended,
   {
-    files: ['src/**/*.ts', 'test/**/*.ts'],
+    files: ['src/**/*.ts'],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
@@ -87,6 +87,36 @@ export default [
       'security/detect-object-injection': 'off',
       'security/detect-non-literal-fs-filename': 'off',
       'security/detect-unsafe-regex': 'off',
+    },
+  },
+  {
+    files: ['test/**/*.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+    },
+    rules: {
+      // Basic TypeScript rules only for tests
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        'argsIgnorePattern': '^_',
+        'varsIgnorePattern': '^_' 
+      }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'prefer-const': 'error',
+      'no-undef': 'off',
+      'no-unused-vars': 'off',
+      
+      // Relaxed rules for tests
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      'max-len': ['error', { code: 150, tabWidth: 2, ignoreUrls: true, ignoreStrings: true }],
+      'complexity': 'off',
     },
   },
   {
