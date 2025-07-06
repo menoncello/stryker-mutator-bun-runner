@@ -39,7 +39,7 @@ export default {
   },
   
   // Performance - reduce concurrency to limit process creation
-  concurrency: 2,
+  concurrency: 8,
   
   // Temp directory
   tempDirName: '.stryker-tmp',

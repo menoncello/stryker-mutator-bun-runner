@@ -76,7 +76,7 @@ function createMinimalConfig() {
     timeoutFactor: 1.5,
     logLevel: 'debug',
     fileLogLevel: 'trace',
-    concurrency: 1, // Single concurrency to isolate issue
+    concurrency: 8, // Use 8 concurrent runners
     tempDirName: '.stryker-pool-test',
     cleanTempDir: true,
     checkers: [],
@@ -193,7 +193,7 @@ async function testLimitedMutations() {
     timeoutMS: 5000,
     timeoutFactor: 1.2,
     logLevel: 'info',
-    concurrency: 1,
+    concurrency: 8,
     cleanTempDir: true,
     reporters: ['progress', 'clear-text'],
     thresholds: {

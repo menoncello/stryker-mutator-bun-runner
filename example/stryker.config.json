@@ -13,7 +13,7 @@
   "coverageAnalysis": "off",
   "tempDirName": ".stryker-tmp",
   "cleanTempDir": true,
-  "concurrency": 4,
+  "concurrency": 8,
   "bun": {
     "testFiles": ["tests/**/*.test.ts"],
     "timeout": 30000,

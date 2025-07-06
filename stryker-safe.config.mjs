@@ -46,7 +46,7 @@ export default {
   },
   
   // Performance settings
-  concurrency: 2,
+  concurrency: 8,
   
   // Temp directory
   tempDirName: '.stryker-tmp',

@@ -33,7 +33,7 @@ export default {
   },
   
   // Performance - reduced to prevent process explosion
-  concurrency: 2,
+  concurrency: 8,
   
   // Temp directory
   tempDirName: '.stryker-tmp',

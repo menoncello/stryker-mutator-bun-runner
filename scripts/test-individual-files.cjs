@@ -26,7 +26,7 @@ const config = {
   mutatePattern: 'src/**/*.ts',
   excludePattern: ['**/*.test.ts', '**/*.d.ts'],
   timeout: 120000, // 2 minutes per file
-  concurrency: 1, // Use single concurrency to isolate issues
+  concurrency: 8, // Use 8 concurrent runners
   logDir: 'stryker-individual-logs'
 };
 
@@ -78,7 +78,7 @@ function createTempConfig(file) {
     timeoutFactor: 2,
     logLevel: 'info',
     fileLogLevel: 'trace',
-    concurrency: 1,
+    concurrency: 8,
     tempDirName: '.stryker-tmp-individual',
     cleanTempDir: true,
     checkers: [],
