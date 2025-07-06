@@ -153,11 +153,22 @@ describe('BunTestRunner Integration Tests', () => {
     expect(typeof runner.capabilities).toBe('function');
   });
 
-  test('should validate method signatures', () => {
+  test('should validate method signatures', async () => {
     const runner = new BunTestRunner(mockLogger, {});
     
+    // Mock the internal validateBunInstallation to avoid actual validation
+    (runner as any).validateBunInstallation = mock(async () => {});
+    
+    // Mock the bunAdapter to avoid actual initialization
+    (runner as any).bunAdapter = {
+      init: mock(async () => {}),
+      dispose: mock(async () => {})
+    };
+    
     // init should return Promise<void>
-    expect(runner.init()).toBeInstanceOf(Promise);
+    const initPromise = runner.init();
+    expect(initPromise).toBeInstanceOf(Promise);
+    await initPromise; // Wait for completion to avoid hanging promises
     
     // capabilities should return object with reloadEnvironment
     const caps = runner.capabilities();
@@ -165,7 +176,9 @@ describe('BunTestRunner Integration Tests', () => {
     expect('reloadEnvironment' in caps).toBe(true);
     
     // dispose should return Promise<void>
-    expect(runner.dispose()).toBeInstanceOf(Promise);
+    const disposePromise = runner.dispose();
+    expect(disposePromise).toBeInstanceOf(Promise);
+    await disposePromise; // Wait for completion to avoid hanging promises
   });
 
   test('should create runner with different logger configurations', () => {
