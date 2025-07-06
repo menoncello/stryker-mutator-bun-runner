@@ -1,25 +1,31 @@
 /**
+ * Stryker configuration for testing the plugin itself
+ * Uses command runner to avoid recursive process creation
  * @type {import('@stryker-mutator/api/core').PartialStrykerOptions}
  */
 export default {
   testRunner: 'command',
+  // Don't load the plugin when testing itself
   plugins: [],
   
   // Files to mutate
   mutate: [
     'src/**/*.ts',
+    '!src/**/*.test.ts',
+    '!src/**/*.d.ts'
   ],
 
+  // Command runner configuration for self-testing
   commandRunner: {
-    command: 'bun test'
+    command: 'npm test'
   },
 
-// Coverage analysis
+  // Coverage analysis
   coverageAnalysis: 'perTest',
   
   // Timeout configuration
-  timeoutMS: 30000, // 30 seconds base timeout
-  timeoutFactor: 3, // Multiply timeout by 3 for mutant runs
+  timeoutMS: 30000,
+  timeoutFactor: 3,
 
   // Logging
   logLevel: 'info',
@@ -32,7 +38,7 @@ export default {
     break: 50
   },
   
-  // Performance - reduced to prevent process explosion
+  // Performance - reduce concurrency to limit process creation
   concurrency: 2,
   
   // Temp directory

@@ -158,7 +158,7 @@ class BunWorker {
     }
   }
 
-  private stopWatchMode(): void {
+  public stopWatchMode(): void {
     if (this.watchProcess) {
       this.watchProcess.kill('SIGTERM');
       this.watchProcess = undefined;
@@ -181,4 +181,15 @@ class BunWorker {
 }
 
 // Start the worker
-new BunWorker();
+const worker = new BunWorker();
+
+// Clean up on process exit
+process.on('SIGTERM', () => {
+  worker.stopWatchMode();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  worker.stopWatchMode();
+  process.exit(0);
+});

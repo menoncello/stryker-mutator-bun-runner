@@ -50,7 +50,7 @@ describe('BunProcessPool', () => {
 
   describe('runTests', () => {
     test('should handle timeout by resolving with timedOut flag', async () => {
-      pool = new BunProcessPool(mockLogger, { timeout: 100 });
+      pool = new BunProcessPool(mockLogger, { timeout: 50 });
       
       // Mock the workerManager to create a fake worker that doesn't respond
       const poolAny = pool as unknown as { 
@@ -251,10 +251,10 @@ describe('BunProcessPool', () => {
       // Start waiting for worker
       const workerPromise = poolAny.getAvailableWorker();
       
-      // Simulate worker becoming available after 150ms
+      // Simulate worker becoming available after 50ms
       setTimeout(() => {
         busyWorker.busy = false;
-      }, 150);
+      }, 50);
       
       const worker = await workerPromise;
       
@@ -265,7 +265,7 @@ describe('BunProcessPool', () => {
 
   describe('idle check functionality', () => {
     test('should terminate idle workers after timeout', async () => {
-      const idleTimeout = 50; // 50ms for testing
+      const idleTimeout = 10; // 10ms for testing
       pool = new BunProcessPool(mockLogger, { idleTimeout });
       
       const poolAny = pool as unknown as { 

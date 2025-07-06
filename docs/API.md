@@ -2,6 +2,7 @@
 
 ## Table of Contents
 
+- [Plugin Exports](#plugin-exports)
 - [BunTestRunner](#buntestrunner)
 - [BunTestAdapter](#buntestadapter)
 - [BunResultParser](#bunresultparser)
@@ -10,6 +11,41 @@
 - [Source Map Support](#source-map-support)
 - [Configuration Options](#configuration-options)
 - [Types and Interfaces](#types-and-interfaces)
+
+## Plugin Exports
+
+The plugin exports the following from its main entry point:
+
+### strykerPlugins
+
+Array of StrykerJS plugin declarations:
+
+```typescript
+export const strykerPlugins = [
+  declareClassPlugin(PluginKind.TestRunner, 'bun', BunTestRunner)
+];
+```
+
+### strykerValidationSchema
+
+JSON schema for validating the `bun` configuration options:
+
+```typescript
+export const strykerValidationSchema = {
+  properties: {
+    bun: {
+      title: 'BunTestRunnerOptions',
+      description: 'Configuration options for the Bun test runner plugin',
+      type: 'object',
+      properties: {
+        // ... configuration properties
+      }
+    }
+  }
+};
+```
+
+This schema is used by StrykerJS to validate configuration and provide IDE support.
 
 ## BunTestRunner
 
@@ -47,6 +83,16 @@ capabilities(): TestRunnerCapabilities
   reloadEnvironment: true
 }
 ```
+
+##### `resetInstanceCount()` (static)
+
+Resets the static instance counter. Useful for testing and debugging.
+
+```typescript
+static resetInstanceCount(): void
+```
+
+**Note**: This method is primarily for internal use and testing.
 
 ##### `init()`
 
@@ -370,6 +416,16 @@ Manages individual worker processes within the pool.
 class WorkerManager extends EventEmitter
 ```
 
+#### Constructor
+
+```typescript
+constructor(logger: Logger, workerStartupTimeout?: number)
+```
+
+**Parameters:**
+- `logger`: Logger instance for debugging and error reporting
+- `workerStartupTimeout`: Timeout in milliseconds for worker startup (default: 5000)
+
 #### Methods
 
 ##### `createWorker()`
@@ -382,11 +438,17 @@ async createWorker(): Promise<PooledProcess>
 
 ##### `terminateProcess(pooled)`
 
-Gracefully terminates a worker process.
+Gracefully terminates a worker process with a 1-second timeout before forcing SIGKILL.
 
 ```typescript
 async terminateProcess(pooled: PooledProcess): Promise<void>
 ```
+
+**Features:**
+- Attempts graceful shutdown with SIGTERM
+- Forces termination with SIGKILL after 1 second
+- Automatically removes process from tracking
+- Prevents zombie processes
 
 ##### `getProcesses()`
 
@@ -395,6 +457,55 @@ Returns the current map of active processes.
 ```typescript
 getProcesses(): Map<string, PooledProcess>
 ```
+
+### ProcessPoolSingleton
+
+Singleton manager for the BunProcessPool to prevent multiple instances from being created.
+
+```typescript
+class ProcessPoolSingleton
+```
+
+#### Static Methods
+
+##### `getInstance(logger, options)`
+
+Returns the singleton instance of BunProcessPool. Creates it on first call.
+
+```typescript
+static getInstance(logger: Logger, options: ProcessPoolOptions): BunProcessPool
+```
+
+**Features:**
+- Default maxWorkers increased to 8 for better performance
+- Reference counting tracks active users
+- Ensures only one process pool exists across all test runner instances
+
+##### `release(logger)`
+
+Decrements reference count and disposes the pool when count reaches 0.
+
+```typescript
+static async release(logger: Logger): Promise<void>
+```
+
+##### `forceDispose()`
+
+Immediately disposes the pool regardless of reference count.
+
+```typescript
+static async forceDispose(): Promise<void>
+```
+
+##### `reset()`
+
+Resets the singleton state. Useful for testing and cleanup.
+
+```typescript
+static reset(): void
+```
+
+**Note**: Does not dispose the existing instance - call forceDispose() first if needed.
 
 ### BunWorker
 
@@ -529,15 +640,21 @@ interface ProcessPoolOptions {
 
   /**
    * Timeout for worker operations in milliseconds
-   * @default 30000
+   * @default 60000
    */
   timeout?: number;
 
   /**
    * Time before idle workers are terminated in milliseconds
-   * @default 5000
+   * @default 30000
    */
   idleTimeout?: number;
+
+  /**
+   * Enable watch mode for continuous test execution
+   * @default false
+   */
+  watchMode?: boolean;
 }
 ```
 

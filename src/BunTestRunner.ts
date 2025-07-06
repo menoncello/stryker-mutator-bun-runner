@@ -31,6 +31,8 @@ class Timer {
 }
 
 export class BunTestRunner implements TestRunner {
+  private static instanceCount = 0;
+  private readonly instanceId: number;
   private readonly log: Logger;
   private readonly options: BunTestRunnerOptions;
   private readonly bunAdapter: BunTestAdapter;
@@ -38,9 +40,18 @@ export class BunTestRunner implements TestRunner {
   private mutantCoverage?: MutantCoverage;
 
   public static readonly inject = tokens(commonTokens.logger, commonTokens.options);
+  
+  /**
+   * Reset the static instance counter - useful for testing and cleanup
+   */
+  public static resetInstanceCount(): void {
+    BunTestRunner.instanceCount = 0;
+  }
 
   constructor(logger: Logger, options: StrykerOptions) {
+    this.instanceId = ++BunTestRunner.instanceCount;
     this.log = logger;
+    this.log.debug(`BunTestRunner instance ${this.instanceId} created (total instances: ${BunTestRunner.instanceCount})`);
     const strykerBunOptions = options as StrykerBunOptions;
     this.options = {
       testFiles: ['**/*.test.{js,ts,jsx,tsx}', '**/*.spec.{js,ts,jsx,tsx}'],
@@ -104,7 +115,10 @@ export class BunTestRunner implements TestRunner {
     }
   }
 
-  public async dispose(): Promise<void> { await this.bunAdapter.dispose(); }
+  public async dispose(): Promise<void> { 
+    this.log.debug(`BunTestRunner instance ${this.instanceId} disposing`);
+    await this.bunAdapter.dispose(); 
+  }
   public capabilities(): TestRunnerCapabilities { return { reloadEnvironment: true }; }
 
   private mapTestResults(tests: BunTestResultData[]): TestResult[] {

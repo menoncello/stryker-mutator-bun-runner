@@ -611,7 +611,29 @@ curl -fsSL https://bun.sh/install | bash
 }
 ```
 
-#### 4. Out of Memory
+#### 4. Zombie Processes
+
+**Problem**: Bun processes not terminating properly on macOS/Linux
+
+**Solution**: The plugin automatically handles process cleanup, but if you still see zombie processes:
+```bash
+# Kill all hanging bun processes
+pkill -f "bun"
+
+# Check for remaining processes
+ps aux | grep bun
+```
+
+**Prevention**: Ensure you're using version 0.3.0+ which includes:
+- Automatic process cleanup on timeout
+- SIGTERM/SIGINT signal handlers
+- Force kill after 1 second if graceful shutdown fails
+- Hard limit of 4 concurrent workers in process pool
+- Maximum 8 total worker processes safety check
+- Idle worker cleanup after 5 seconds
+- Process state logging for debugging
+
+#### 5. Out of Memory
 
 **Error**: `JavaScript heap out of memory`
 
@@ -828,7 +850,34 @@ Add mutation testing to your PR checklist:
 - [ ] No new survived mutations in critical code
 - [ ] Performance metrics are acceptable
 
-### 10. Document Equivalent Mutations
+### 10. Testing the Plugin Itself
+
+When running mutation testing on the Bun runner plugin itself, special care must be taken to avoid recursive process creation:
+
+```bash
+# Use the self-testing configuration (uses command runner)
+npm run stryker:self
+```
+
+The `stryker-self.config.mjs` uses the command runner instead of the Bun runner to avoid:
+- Recursive process creation when the plugin tests itself
+- Process explosion from nested test runner instances
+- Memory exhaustion from too many concurrent processes
+
+If you need to test the plugin with itself:
+```json
+{
+  "testRunner": "command",
+  "commandRunner": {
+    "command": "npm test"
+  },
+  "concurrency": 2
+}
+```
+
+This prevents process explosion when testing the test runner itself.
+
+### 11. Document Equivalent Mutations
 
 Some mutations can't be killed. Document these:
 

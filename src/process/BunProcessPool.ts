@@ -26,7 +26,7 @@ export class BunProcessPool {
   constructor(logger: Logger, options: ProcessPoolOptions = {}) {
     this.log = logger;
     this.options = {
-      maxWorkers: options.maxWorkers || 4,
+      maxWorkers: options.maxWorkers || 4, // Default to 4 workers, no hard limit
       timeout: options.timeout || 60000,
       idleTimeout: options.idleTimeout || 30000,
       watchMode: options.watchMode || false
@@ -70,11 +70,15 @@ export class BunProcessPool {
   private async getAvailableWorker(): Promise<PooledProcess> {
     const processes = this.workerManager.getProcesses();
     
+    // Log current state for debugging
+    this.log.debug(`Process pool state: ${processes.size} workers, looking for available`);
+    
     // Find idle worker
     for (const pooled of processes.values()) {
       if (!pooled.busy) {
         pooled.busy = true;
         pooled.lastUsed = Date.now();
+        this.log.debug(`Found idle worker: ${pooled.id}`);
         return pooled;
       }
     }
@@ -114,7 +118,7 @@ export class BunProcessPool {
           });
         }
       }
-    }, 10000);
+    }, 5000); // Check every 5 seconds instead of 10
   }
 
   private generateRequestId(): string {

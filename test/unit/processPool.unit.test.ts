@@ -65,8 +65,8 @@ describe('BunProcessPool Unit Tests', () => {
     // This will timeout because the worker won't start properly in test env
     const resultPromise = processPool.runTests(['test', '--version'], {});
     
-    // Wait a bit for timeout (longer than worker timeout of 100ms)
-    await new Promise(resolve => setTimeout(resolve, 150));
+    // Wait a bit for timeout
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     const result = await resultPromise as unknown as { timedOut?: boolean };
     expect(result).toBeDefined();

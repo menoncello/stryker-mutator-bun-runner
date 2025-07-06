@@ -5,6 +5,7 @@ import { BunTestRunnerOptions, BunRunOptions, BunTestResult } from './BunTestRun
 import { BunResultParser } from './BunResultParser.js';
 import { MutantCoverageCollector, CoverageResult, CoverageHookGenerator } from './coverage/index.js';
 import { BunProcessPool } from './process/BunProcessPool.js';
+import { ProcessPoolSingleton } from './process/ProcessPoolSingleton.js';
 
 export class BunTestAdapter {
   private readonly log: Logger;
@@ -22,13 +23,17 @@ export class BunTestAdapter {
     this.coverageCollector = new MutantCoverageCollector(logger);
     this.coverageHookGenerator = new CoverageHookGenerator();
     
-    // Initialize process pool if enabled
+    // Initialize process pool if enabled (using singleton)
     if (options.processPool) {
-      this.processPool = new BunProcessPool(logger, {
-        maxWorkers: options.maxWorkers,
+      logger.debug(`BunTestAdapter: Creating process pool (processPool: ${options.processPool})`);
+      this.processPool = ProcessPoolSingleton.getInstance(logger, {
+        maxWorkers: options.maxWorkers || 8, // Default to 8 workers
         timeout: options.timeout,
+        idleTimeout: 5000, // Reduce idle timeout to 5 seconds  
         watchMode: options.watchMode
       });
+    } else {
+      logger.debug('BunTestAdapter: Process pool disabled');
     }
   }
 
@@ -66,12 +71,17 @@ export class BunTestAdapter {
         const poolResult = await this.processPool.runTests(args, env);
         execResult = poolResult as { stdout: string; stderr: string; timedOut?: boolean };
       } else {
-        const { stdout, stderr } = await execa('bun', args, {
+        const execaResult = await execa('bun', args, {
           env,
           timeout: runOptions.timeout,
-          reject: false // Don't reject on non-zero exit code
+          reject: false, // Don't reject on non-zero exit code
+          cleanup: true // Ensure child processes are killed on timeout
         });
-        execResult = { stdout, stderr };
+        execResult = { 
+          stdout: execaResult.stdout, 
+          stderr: execaResult.stderr,
+          timedOut: execaResult.timedOut
+        };
       }
 
       if (execResult.timedOut) {
@@ -119,9 +129,9 @@ export class BunTestAdapter {
   public async dispose(): Promise<void> {
     await this.coverageCollector.dispose();
     
-    // Dispose process pool if it exists
+    // Release process pool reference if it exists
     if (this.processPool) {
-      await this.processPool.dispose();
+      await ProcessPoolSingleton.release(this.log);
     }
     
     // Dispose the parser to clean up source map consumers

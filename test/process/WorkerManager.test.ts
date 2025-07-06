@@ -101,7 +101,7 @@ describe('WorkerManager', () => {
     });
 
     test('should handle worker ready timeout', async () => {
-      workerManager = new WorkerManager(mockLogger);
+      workerManager = new WorkerManager(mockLogger, 100); // Use short timeout for test
       
       // Mock setTimeout to execute immediately for testing
       const originalSetTimeout = global.setTimeout;

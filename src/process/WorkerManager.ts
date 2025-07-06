@@ -20,10 +20,12 @@ export class WorkerManager extends EventEmitter {
   private readonly log: Logger;
   private readonly processes: Map<string, PooledProcess> = new Map();
   private nextWorkerId = 0;
+  private readonly workerStartupTimeout: number;
 
-  constructor(logger: Logger) {
+  constructor(logger: Logger, workerStartupTimeout = 5000) {
     super();
     this.log = logger;
+    this.workerStartupTimeout = workerStartupTimeout;
   }
 
   public getProcesses(): Map<string, PooledProcess> {
@@ -31,13 +33,19 @@ export class WorkerManager extends EventEmitter {
   }
 
   public async createWorker(): Promise<PooledProcess> {
+    // Safety check to prevent too many processes
+    if (this.processes.size >= 8) {
+      throw new Error('Maximum number of worker processes (8) reached');
+    }
+    
     const workerId = `worker-${this.nextWorkerId++}`;
     this.log.debug(`Creating new Bun worker: ${workerId}`);
     
     const workerPath = new URL('./BunWorker.js', import.meta.url).pathname;
     const workerProcess = spawn('bun', [workerPath], {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-      env: { ...process.env, WORKER_ID: workerId }
+      env: { ...process.env, WORKER_ID: workerId },
+      detached: false // Ensure process is killed when parent dies
     });
     
     const pooled: PooledProcess = {
@@ -66,8 +74,11 @@ export class WorkerManager extends EventEmitter {
     // Wait for worker to be ready
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
+        // Kill the process if it fails to start
+        workerProcess.kill('SIGKILL');
+        this.processes.delete(workerId);
         reject(new Error(`Worker ${workerId} failed to start`));
-      }, 100); // Reduced timeout for faster failure
+      }, this.workerStartupTimeout);
       
       this.once(`ready-${workerId}`, () => {
         clearTimeout(timeout);
@@ -78,15 +89,24 @@ export class WorkerManager extends EventEmitter {
 
   public async terminateProcess(pooled: PooledProcess): Promise<void> {
     return new Promise((resolve) => {
-      pooled.process.once('exit', () => resolve());
+      const cleanup = () => {
+        this.processes.delete(pooled.id);
+        resolve();
+      };
+      
+      pooled.process.once('exit', cleanup);
+      
+      // Try SIGTERM first
       pooled.process.kill('SIGTERM');
       
+      // Force kill after shorter timeout in production
       setTimeout(() => {
         if (!pooled.process.killed) {
+          pooled.process.removeListener('exit', cleanup);
           pooled.process.kill('SIGKILL');
+          cleanup();
         }
-        resolve();
-      }, 5000);
+      }, 1000); // Reduced from 5000ms to 1000ms
     });
   }
 

@@ -13,10 +13,14 @@
   "coverageAnalysis": "off",
   "tempDirName": ".stryker-tmp",
   "cleanTempDir": true,
+  "concurrency": 4,
   "bun": {
     "testFiles": ["tests/**/*.test.ts"],
     "timeout": 30000,
     "processPool": true,
-    "maxWorkers": 4
+    "maxWorkers": 8,
+    "env": {
+      "NODE_ENV": "test"
+    }
   }
 }

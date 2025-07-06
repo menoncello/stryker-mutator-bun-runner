@@ -17,6 +17,7 @@
     "check": "npm run typecheck && npm run lint && npm run test",
     "stryker": "stryker run",
     "stryker:debug": "stryker run --logLevel debug",
+    "stryker:self": "stryker run -c stryker-self.config.mjs",
     "docs": "typedoc --out docs/typedoc src/index.ts",
     "docs:watch": "typedoc --watch --out docs/typedoc src/index.ts",
     "prepare": "npm run build"
