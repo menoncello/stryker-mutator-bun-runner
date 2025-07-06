@@ -9,36 +9,25 @@ import {
   TestStatus,
   MutantRunStatus,
   CompleteDryRunResult,
-  ErrorDryRunResult,
-  TimeoutDryRunResult,
-  KilledMutantRunResult,
   SurvivedMutantRunResult,
-  TimeoutMutantRunResult,
   TestResult,
   FailedTestResult,
   SkippedTestResult,
   SuccessTestResult
 } from '@stryker-mutator/api/dist/src/test-runner';
-import { StrykerOptions } from '@stryker-mutator/api/dist/src/core';
+import { StrykerOptions, MutantCoverage } from '@stryker-mutator/api/dist/src/core';
 import { Logger } from '@stryker-mutator/api/dist/src/logging';
 import { tokens, commonTokens } from '@stryker-mutator/api/dist/src/plugin';
 import { execa } from 'execa';
 import * as semver from 'semver';
-import { BunTestRunnerOptions, BunRunOptions, StrykerBunOptions } from './BunTestRunnerOptions';
+import { BunTestRunnerOptions, BunRunOptions, StrykerBunOptions, BunTestResult } from './BunTestRunnerOptions';
 import { BunTestAdapter } from './BunTestAdapter';
 import { TestFilter } from './coverage';
-import { MutantCoverage } from '@stryker-mutator/api/dist/src/core';
 
 class Timer {
   private startTime: number = 0;
-  
-  reset(): void {
-    this.startTime = Date.now();
-  }
-  
-  elapsedMs(): number {
-    return Date.now() - this.startTime;
-  }
+  reset(): void { this.startTime = Date.now(); }
+  elapsedMs(): number { return Date.now() - this.startTime; }
 }
 
 export class BunTestRunner implements TestRunner {
@@ -79,58 +68,16 @@ export class BunTestRunner implements TestRunner {
       };
 
       const result = await this.bunAdapter.runTests([], runOptions);
-      
-      const tests: TestResult[] = result.tests.map((test, index) => {
-        const baseProps = {
-          id: test.id || index.toString(),
-          name: test.name,
-          timeSpentMs: test.duration || 0
-        };
-        
-        switch (test.status) {
-          case 'passed':
-            return { ...baseProps, status: TestStatus.Success } as SuccessTestResult;
-          case 'failed':
-            return { ...baseProps, status: TestStatus.Failed, failureMessage: test.error || 'Test failed' } as FailedTestResult;
-          case 'skipped':
-            return { ...baseProps, status: TestStatus.Skipped } as SkippedTestResult;
-          default:
-            return { ...baseProps, status: TestStatus.Failed, failureMessage: 'Unknown test status' } as FailedTestResult;
-        }
-      });
-
-      const completedResult: CompleteDryRunResult = {
-        status: DryRunStatus.Complete,
-        tests
-      };
+      const tests = this.mapTestResults(result.tests);
+      const completedResult = this.createCompleteResult(tests);
 
       if (options.coverageAnalysis !== 'off' && result.coverage) {
-        this.log.debug('Processing coverage data');
-        const mutantCoverage = this.bunAdapter.getCoverageCollector()
-          .toMutantCoverage(result.coverage.coverage);
-        
-        completedResult.mutantCoverage = mutantCoverage;
-        this.mutantCoverage = mutantCoverage; // Store for use in mutantRun
-        this.log.info(`Collected coverage for ${Object.keys(mutantCoverage.perTest).length} tests`);
+        this.processCoverageData(result.coverage.coverage, completedResult);
       }
 
       return completedResult;
     } catch (error: unknown) {
-      this.log.error('Dry run failed', error);
-      
-      if (error && typeof error === 'object' && 'timedOut' in error && error.timedOut) {
-        const timeoutResult: TimeoutDryRunResult = {
-          status: DryRunStatus.Timeout,
-          reason: `Dry run timed out after ${options.timeout}ms`
-        };
-        return timeoutResult;
-      }
-
-      const errorResult: ErrorDryRunResult = {
-        status: DryRunStatus.Error,
-        errorMessage: (error as { message?: string }).message || 'Unknown error during dry run'
-      };
-      return errorResult;
+      return this.handleDryRunError(error, options);
     }
   }
 
@@ -139,87 +86,132 @@ export class BunTestRunner implements TestRunner {
     this.timer.reset();
 
     try {
-      const runOptions: BunRunOptions = {
-        timeout: options.timeout,
-        bail: true,
-        activeMutant: parseInt(options.activeMutant.id, 10),
-        env: {
-          __STRYKER_ACTIVE_MUTANT__: options.activeMutant.id.toString()
-        }
-      };
-
-      // Check if we should filter tests based on coverage
-      const testFilesToRun: string[] = [];
-      let testNamePattern: string | undefined;
-
-      if (this.mutantCoverage && options.testFilter) {
-        // Use provided test filter from Stryker
-        testNamePattern = TestFilter.createTestNamePattern(options.testFilter);
-        this.log.debug(`Using test filter for ${options.testFilter.length} tests`);
-      } else if (this.mutantCoverage) {
-        // Use our own filtering based on coverage
-        const coveringTests = TestFilter.getTestsForMutant(options.activeMutant, this.mutantCoverage);
-        
-        if (coveringTests.length > 0) {
-          testNamePattern = TestFilter.createTestNamePattern(coveringTests);
-          this.log.debug(`Mutant ${options.activeMutant.id} is covered by ${coveringTests.length} tests`);
-        } else if (!TestFilter.shouldRunAllTests(options.activeMutant, this.mutantCoverage)) {
-          // Mutant is not covered by any test
-          this.log.debug(`Mutant ${options.activeMutant.id} is not covered by any test`);
-          const survivedResult: SurvivedMutantRunResult = {
-            status: MutantRunStatus.Survived,
-            nrOfTests: 0
-          };
-          return survivedResult;
-        }
-      }
-
-      if (testNamePattern) {
-        runOptions.testNamePattern = testNamePattern;
-      }
-
-      const result = await this.bunAdapter.runTests(testFilesToRun, runOptions);
-
-      if (result.failed > 0) {
-        const killedResult: KilledMutantRunResult = {
-          status: MutantRunStatus.Killed,
-          failureMessage: result.failedTests?.[0]?.error || 'Test failed',
-          killedBy: result.failedTests?.map(t => t.id || t.name) || [],
-          nrOfTests: result.total
-        };
-        return killedResult;
-      }
-
-      const survivedResult: SurvivedMutantRunResult = {
-        status: MutantRunStatus.Survived,
-        nrOfTests: result.total
-      };
-      return survivedResult;
-    } catch (error: unknown) {
-      this.log.debug('Mutant run failed', error);
+      const runOptions = this.createMutantRunOptions(options);
+      const filteredTests = this.getFilteredTests(options);
       
-      if (error && typeof error === 'object' && 'timedOut' in error && error.timedOut) {
-        const timeoutResult: TimeoutMutantRunResult = {
-          status: MutantRunStatus.Timeout,
-          reason: `Mutant run timed out after ${options.timeout}ms`
-        };
-        return timeoutResult;
+      if (filteredTests.shouldSkip) {
+        return this.createSurvivedResult(0);
       }
 
-      // Re-throw other errors
-      throw error;
+      if (filteredTests.testNamePattern) {
+        runOptions.testNamePattern = filteredTests.testNamePattern;
+      }
+
+      const result = await this.bunAdapter.runTests([], runOptions);
+      return this.processMutantResult(result);
+    } catch (error: unknown) {
+      return this.handleMutantRunError(error, options);
     }
   }
 
-  public async dispose(): Promise<void> {
-    this.log.debug('Disposing Bun test runner');
-    await this.bunAdapter.dispose();
+  public async dispose(): Promise<void> { await this.bunAdapter.dispose(); }
+  public capabilities(): TestRunnerCapabilities { return { reloadEnvironment: true }; }
+
+  private mapTestResults(tests: TestResult[]): TestResult[] {
+    return tests.map((test, index) => {
+      const baseProps = {
+        id: test.id || index.toString(),
+        name: test.name,
+        timeSpentMs: test.duration || 0
+      };
+      
+      switch (test.status) {
+        case 'passed':
+          return { ...baseProps, status: TestStatus.Success } as SuccessTestResult;
+        case 'failed':
+          return { ...baseProps, status: TestStatus.Failed, failureMessage: test.error || 'Test failed' } as FailedTestResult;
+        case 'skipped':
+          return { ...baseProps, status: TestStatus.Skipped } as SkippedTestResult;
+        default:
+          return { ...baseProps, status: TestStatus.Failed, failureMessage: 'Unknown test status' } as FailedTestResult;
+      }
+    });
   }
 
-  public capabilities(): TestRunnerCapabilities {
-    return {
-      reloadEnvironment: true
+  private createCompleteResult(tests: TestResult[]): CompleteDryRunResult {
+    return { status: DryRunStatus.Complete, tests };
+  }
+
+  private processCoverageData(coverage: unknown, result: CompleteDryRunResult): void {
+    this.log.debug('Processing coverage data');
+    const mutantCoverage = this.bunAdapter.getCoverageCollector().toMutantCoverage(coverage);
+    
+    result.mutantCoverage = mutantCoverage;
+    this.mutantCoverage = mutantCoverage;
+    this.log.info(`Collected coverage for ${Object.keys(mutantCoverage.perTest).length} tests`);
+  }
+
+  private handleDryRunError(error: unknown, options: DryRunOptions): DryRunResult {
+    this.log.error('Dry run failed', error);
+    if (error && typeof error === 'object' && 'timedOut' in error && error.timedOut) {
+      return { status: DryRunStatus.Timeout, reason: `Dry run timed out after ${options.timeout}ms` };
+    }
+    return { status: DryRunStatus.Error, errorMessage: (error as { message?: string }).message || 'Unknown error during dry run' };
+  }
+
+  private createMutantRunOptions(options: MutantRunOptions): BunRunOptions {
+    return { 
+      timeout: options.timeout, 
+      bail: true, 
+      activeMutant: parseInt(options.activeMutant.id, 10), 
+      env: { __STRYKER_ACTIVE_MUTANT__: options.activeMutant.id.toString() } 
     };
+  }
+
+  private getFilteredTests(options: MutantRunOptions) {
+    if (this.mutantCoverage && options.testFilter) {
+      const testNamePattern = TestFilter.createTestNamePattern(options.testFilter);
+      this.log.debug(`Using test filter for ${options.testFilter.length} tests`);
+      return { testNamePattern };
+    }
+    
+    if (this.mutantCoverage) {
+      return this.filterTestsByCoverage(options);
+    }
+    
+    return {};
+  }
+
+  private filterTestsByCoverage(options: MutantRunOptions) {
+    const coveringTests = TestFilter.getTestsForMutant(options.activeMutant, this.mutantCoverage!);
+    
+    if (coveringTests.length > 0) {
+      const testNamePattern = TestFilter.createTestNamePattern(coveringTests);
+      this.log.debug(`Mutant ${options.activeMutant.id} is covered by ${coveringTests.length} tests`);
+      return { testNamePattern };
+    }
+    
+    if (!TestFilter.shouldRunAllTests(options.activeMutant, this.mutantCoverage!)) {
+      this.log.debug(`Mutant ${options.activeMutant.id} is not covered by any test`);
+      return { shouldSkip: true };
+    }
+    
+    return {};
+  }
+
+  private processMutantResult(result: BunTestResult): MutantRunResult {
+    if (result.failed > 0) {
+      return {
+        status: MutantRunStatus.Killed,
+        failureMessage: result.failedTests?.[0]?.error || 'Test failed',
+        killedBy: result.failedTests?.map((t) => t.id || t.name) || [],
+        nrOfTests: result.total
+      };
+    }
+
+    return this.createSurvivedResult(result.total);
+  }
+
+  private createSurvivedResult(nrOfTests: number): SurvivedMutantRunResult {
+    return { status: MutantRunStatus.Survived, nrOfTests };
+  }
+
+  private handleMutantRunError(error: unknown, options: MutantRunOptions): MutantRunResult {
+    this.log.debug('Mutant run failed', error);
+    if (error && typeof error === 'object' && 'timedOut' in error && error.timedOut) {
+      return { status: MutantRunStatus.Timeout, reason: `Mutant run timed out after ${options.timeout}ms` };
+    }
+    throw error;
   }
 
   private async validateBunInstallation(): Promise<void> {
@@ -238,5 +230,4 @@ export class BunTestRunner implements TestRunner {
       throw error;
     }
   }
-
 }
