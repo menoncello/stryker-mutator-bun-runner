@@ -22,7 +22,7 @@ import { execa } from 'execa';
 import * as semver from 'semver';
 import { BunTestRunnerOptions, BunRunOptions, StrykerBunOptions, BunTestResult, BunTestResultData } from './BunTestRunnerOptions';
 import { BunTestAdapter } from './BunTestAdapter';
-import { TestFilter } from './coverage';
+import { TestFilter, CoverageResult } from './coverage';
 
 class Timer {
   private startTime: number = 0;
@@ -72,7 +72,7 @@ export class BunTestRunner implements TestRunner {
       const completedResult = this.createCompleteResult(tests);
 
       if (options.coverageAnalysis !== 'off' && result.coverage) {
-        this.processCoverageData(result.coverage.coverage, completedResult);
+        this.processCoverageData(result.coverage, completedResult);
       }
 
       return completedResult;

@@ -166,11 +166,10 @@ describe('BunTestRunner Logging Tests', () => {
         total: 1,
         coverage: {
           coverage: {
-            coverage: {
-              perTest: { 'test1': { '123': 1 }, 'test2': { '456': 1 } },
-              static: { '123': 1, '456': 1 }
-            }
-          }
+            perTest: { 'test1': { '123': 1 }, 'test2': { '456': 1 } },
+            static: { '123': 1, '456': 1 }
+          },
+          elapsedMs: 10
         }
       });
 
@@ -190,11 +189,10 @@ describe('BunTestRunner Logging Tests', () => {
         total: 1,
         coverage: {
           coverage: {
-            coverage: {
-              perTest: {},
-              static: {}
-            }
-          }
+            perTest: {},
+            static: {}
+          },
+          elapsedMs: 10
         }
       });
 
@@ -278,11 +276,10 @@ describe('BunTestRunner Logging Tests', () => {
         total: 1,
         coverage: {
           coverage: {
-            coverage: {
-              perTest: { 'test1': { '123': 1 } },
-              static: { '123': 1 }
-            }
-          }
+            perTest: { 'test1': { '123': 1 } },
+            static: { '123': 1 }
+          },
+          elapsedMs: 10
         }
       });
 
