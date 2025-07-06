@@ -1,68 +1,113 @@
-# Development files
-test/
-example/
+# Source TypeScript files (only ship compiled JS and declarations)
 src/
 *.ts
 !*.d.ts
 
-# Configuration files
-tsconfig.json
+# Test files
+test/
+tests/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+coverage/
+.nyc_output/
+
+# Development files
+.github/
+.vscode/
+.idea/
+*.log
+.DS_Store
+.env
+.env.local
+stryker.log
+
+# Build configuration
 .eslintrc*
 .prettierrc*
+jest.config.*
+tsconfig.json
+tsconfig.*.json
+webpack.config.*
+rollup.config.*
+.babelrc*
+eslint.config.js
+
+# Documentation source files (but include generated docs)
+docs/
+!docs/API.md
+!docs/GUIDE.md
+typedoc.json
+jsdoc.json
+
+# Example project
+example/
+
+# Stryker files
+.stryker-tmp/
+reports/
 stryker.config.*
+stryker-*.config.*
+.stryker-incremental.json
+
+# Git files
+.git/
+.gitignore
+.gitattributes
 
 # CI/CD
 .github/
 .travis.yml
 .circleci/
+appveyor.yml
+.gitlab-ci.yml
 
-# Build artifacts
-*.tsbuildinfo
-.stryker-tmp/
+# Package manager files (except package-lock.json)
+yarn.lock
+pnpm-lock.yaml
+.pnpm-debug.log
+bun.lockb
 
-# IDE
-.vscode/
-.idea/
+# Editor files
 *.swp
 *.swo
-.DS_Store
+*~
+.*.swp
+.*.swo
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# OS files
+Thumbs.db
+Desktop.ini
 
-# Test coverage
-coverage/
-.nyc_output/
-reports/
-
-# Documentation source
-docs/
-*.md
-!README.md
-!LICENSE
-
-# Development dependencies
-node_modules/
-.npm/
+# Development scripts
+scripts/
 
 # Temporary files
 tmp/
 temp/
 *.tmp
 *.temp
+*.tsbuildinfo
 
-# OS files
-Thumbs.db
-
-# Git
-.git/
-.gitignore
-.gitattributes
-
-# Other
-.editorconfig
+# Config files
+bunfig.toml
 .npmrc
-bun.lockb
+.yarnrc
+.editorconfig
+
+# Development documentation
+CONTRIBUTING.md
+STRYKER_BUN_RUNNER.md
+CLAUDE.md
+TODO.md
+NOTES.md
+CHANGELOG.md
+
+# Keep these files
+!README.md
+!LICENSE
+!package.json
+!package-lock.json
+!dist/
+!schema/

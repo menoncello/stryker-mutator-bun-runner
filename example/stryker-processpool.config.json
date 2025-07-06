@@ -1,0 +1,27 @@
+{
+  "$schema": "../node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "bun",
+  "plugins": ["@stryker-mutator/bun-runner"],
+  "mutate": [
+    "src/**/*.ts"
+  ],
+  "logLevel": "info",
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 50
+  },
+  "coverageAnalysis": "off",
+  "tempDirName": ".stryker-tmp",
+  "cleanTempDir": true,
+  "reporters": ["html", "clear-text", "progress"],
+  "bun": {
+    "testFiles": ["tests/**/*.test.ts"],
+    "timeout": 30000,
+    "processPool": true,
+    "maxWorkers": 8,
+    "env": {
+      "NODE_ENV": "test"
+    }
+  }
+}

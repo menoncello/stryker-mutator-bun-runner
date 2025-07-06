@@ -61,6 +61,16 @@
           "type": "number",
           "minimum": 1,
           "default": 4
+        },
+        "watchMode": {
+          "description": "Enable watch mode for continuous testing during development. Defaults to false",
+          "type": "boolean",
+          "default": false
+        },
+        "updateSnapshots": {
+          "description": "Update snapshots during test runs. Defaults to false",
+          "type": "boolean",
+          "default": false
         }
       },
       "additionalProperties": false

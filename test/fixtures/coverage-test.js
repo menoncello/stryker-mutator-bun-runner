@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // Simple test to check if coverage hook is working
 console.log('=== Coverage Test ===');
 console.log('globalThis.__stryker__:', globalThis.__stryker__);

@@ -1,0 +1,164 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  test:
+    name: Test before release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Lint
+        run: npm run lint
+      
+      - name: Test
+        run: npm test
+      
+      - name: Check package
+        run: npm pack --dry-run
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Generate TypeDoc
+        run: npm run docs
+        continue-on-error: true
+      
+      - name: Get version
+        id: get_version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION=${GITHUB_REF#refs/tags/v}
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Releasing version: $VERSION"
+      
+      - name: Update package version
+        run: |
+          npm version ${{ steps.get_version.outputs.VERSION }} --no-git-tag-version
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add package.json package-lock.json
+          git commit -m "chore: release v${{ steps.get_version.outputs.VERSION }}"
+          git tag -a "v${{ steps.get_version.outputs.VERSION }}" -m "Release v${{ steps.get_version.outputs.VERSION }}"
+        if: github.event_name == 'workflow_dispatch'
+      
+      - name: Extract release notes
+        id: extract_notes
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          # Extract the section for this version from CHANGELOG.md
+          NOTES=$(awk "/## \[$VERSION\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md | sed '/^$/d')
+          
+          # If no notes found, use a default message
+          if [ -z "$NOTES" ]; then
+            NOTES="Release v$VERSION"
+          fi
+          
+          # Write to file to handle multi-line content
+          echo "$NOTES" > release_notes.md
+          echo "Release notes written to release_notes.md"
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          name: v${{ steps.get_version.outputs.VERSION }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          files: |
+            stryker-mutator-bun-runner-*.tgz
+      
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: typedoc
+          path: docs/typedoc
+
+  post-release:
+    name: Post Release Tasks
+    runs-on: ubuntu-latest
+    needs: release
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Update Stryker Dashboard
+        run: |
+          echo "Updating Stryker Dashboard with new version..."
+          # Add Stryker dashboard update logic here
+        env:
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
+      
+      - name: Notify Slack
+        if: success()
+        run: |
+          VERSION=${{ needs.release.outputs.VERSION }}
+          echo "Notifying Slack about release v$VERSION"
+          # Add Slack notification logic here
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

@@ -51,13 +51,16 @@ export class MutantCoverageCollector implements ICoverageCollector {
     const global = globalThis as Record<string, unknown>;
     const strykerGlobal = global.__stryker__ as Record<string, unknown>;
     
-    let coverage: BunCoverageData = {
+    const coverage: BunCoverageData = {
       perTest: {},
       executedLines: {}
     };
     
-    if (strykerGlobal && strykerGlobal.mutantCoverage) {
-      const mutantCoverage = strykerGlobal.mutantCoverage as { static: Record<string, number>; perTest: Record<string, Record<string, number>> };
+    if (strykerGlobal?.mutantCoverage) {
+      const mutantCoverage = strykerGlobal.mutantCoverage as {
+        static: Record<string, number>;
+        perTest: Record<string, Record<string, number>>
+      };
       
       // Convert from Stryker's format to our format
       coverage.perTest = {};
@@ -126,50 +129,6 @@ export class MutantCoverageCollector implements ICoverageCollector {
     // This function sets up the global hooks that will be injected into the test environment
     // The actual implementation will be injected via test runner configuration
     this.log.debug('Setting up global coverage hooks');
-    
-    // Note: The actual hook is created in BunTestAdapter.createCoverageHookFile()
-    // This is just documentation of what the hook does:
-    /*
-    const coverageHook = `
-      // Hook to track test execution and mutant coverage
-      if (typeof globalThis.__stryker__ !== 'undefined' && globalThis.__stryker__.mutantCoverage) {
-        const originalTest = globalThis.test || globalThis.it;
-        if (originalTest) {
-          const wrappedTest = function(name, fn) {
-            return originalTest(name, async function(...args) {
-              const testId = name; // Use test name as ID for simplicity
-              globalThis.__stryker__.currentTestId = testId;
-              
-              // Initialize coverage set for this test if not exists
-              if (!globalThis.__stryker__.mutantCoverage.perTest[testId]) {
-                globalThis.__stryker__.mutantCoverage.perTest[testId] = new Set();
-              }
-              
-              try {
-                // Run the actual test
-                const result = await fn.apply(this, args);
-                return result;
-              } finally {
-                globalThis.__stryker__.currentTestId = null;
-              }
-            });
-          };
-          
-          // Copy properties from original test
-          Object.setPrototypeOf(wrappedTest, originalTest);
-          Object.getOwnPropertyNames(originalTest).forEach(prop => {
-            if (prop !== 'length' && prop !== 'name' && prop !== 'prototype') {
-              wrappedTest[prop] = originalTest[prop];
-            }
-          });
-          
-          // Replace global test function
-          if (globalThis.test) globalThis.test = wrappedTest;
-          if (globalThis.it) globalThis.it = wrappedTest;
-        }
-      }
-    `;
-    */
   }
 
   /**
@@ -178,9 +137,8 @@ export class MutantCoverageCollector implements ICoverageCollector {
   public static trackMutant(mutantId: string): void {
     const global = globalThis as Record<string, unknown>;
     const strykerGlobal = global.__stryker__ as Record<string, unknown>;
-    if (strykerGlobal && 
-        strykerGlobal.mutantCoverage &&
-        strykerGlobal.currentTestId) {
+    if (strykerGlobal?.mutantCoverage &&
+        strykerGlobal?.currentTestId) {
       const testId = strykerGlobal.currentTestId as string;
       const coverage = strykerGlobal.mutantCoverage as BunCoverageData;
       

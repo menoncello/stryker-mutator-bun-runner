@@ -6,6 +6,8 @@
 - [BunTestAdapter](#buntestadapter)
 - [BunResultParser](#bunresultparser)
 - [Coverage System](#coverage-system)
+- [Process Pool System](#process-pool-system)
+- [Source Map Support](#source-map-support)
 - [Configuration Options](#configuration-options)
 - [Types and Interfaces](#types-and-interfaces)
 
@@ -184,6 +186,14 @@ parse(output: string): BunTestResult
 **Returns:**
 - Parsed test results with individual test status and counts
 
+##### `extractFailedTestDetails(output)`
+
+Extracts detailed error information from failed tests.
+
+```typescript
+extractFailedTestDetails(output: string): BunTestResultData[]
+```
+
 ## Coverage System
 
 ### MutantCoverageCollector
@@ -191,7 +201,7 @@ parse(output: string): BunTestResult
 Collects and manages coverage data during test runs.
 
 ```typescript
-class MutantCoverageCollector
+class MutantCoverageCollector implements ICoverageCollector
 ```
 
 #### Methods
@@ -225,7 +235,51 @@ stopCoverage(): CoverageResult
 Converts raw coverage data to StrykerJS MutantCoverage format.
 
 ```typescript
-toMutantCoverage(coverage: RawCoverageData): MutantCoverage
+toMutantCoverage(coverage: BunCoverageData): MutantCoverage
+```
+
+##### `dispose()`
+
+Cleans up coverage collection resources.
+
+```typescript
+async dispose(): Promise<void>
+```
+
+### CoverageHookGenerator
+
+Generates JavaScript hooks for coverage collection.
+
+```typescript
+class CoverageHookGenerator
+```
+
+#### Methods
+
+##### `createHookFile()`
+
+Creates a temporary hook file for coverage collection.
+
+```typescript
+async createHookFile(): Promise<string>
+```
+
+**Returns:** Path to the created hook file
+
+##### `cleanup()`
+
+Removes the temporary hook file.
+
+```typescript
+async cleanup(): Promise<void>
+```
+
+##### `generateHookContent()`
+
+Generates the JavaScript content for the coverage hook.
+
+```typescript
+generateHookContent(): string
 ```
 
 ### TestFilter
@@ -262,11 +316,138 @@ Creates a regex pattern for filtering tests by ID.
 static createTestNamePattern(testIds: string[]): string | undefined
 ```
 
+##### `filterTests(allTests, testIdsToRun)`
+
+Filters a list of tests to only include specified IDs.
+
+```typescript
+static filterTests(allTests: TestResult[], testIdsToRun: string[]): TestResult[]
+```
+
+## Process Pool System
+
+### BunProcessPool
+
+Manages a pool of Bun worker processes for improved performance.
+
+```typescript
+class BunProcessPool
+```
+
+#### Constructor
+
+```typescript
+constructor(logger: Logger, options: ProcessPoolOptions)
+```
+
+**Parameters:**
+- `logger`: Logger instance
+- `options`: Pool configuration options
+
+#### Methods
+
+##### `runTests(args, runOptions)`
+
+Executes tests using an available worker from the pool.
+
+```typescript
+async runTests(args: string[], runOptions: BunRunOptions): Promise<BunTestResult>
+```
+
+##### `dispose()`
+
+Terminates all worker processes and cleans up resources.
+
+```typescript
+async dispose(): Promise<void>
+```
+
+### WorkerManager
+
+Manages individual worker processes within the pool.
+
+```typescript
+class WorkerManager extends EventEmitter
+```
+
+#### Methods
+
+##### `createWorker()`
+
+Creates a new Bun worker process.
+
+```typescript
+async createWorker(): Promise<PooledProcess>
+```
+
+##### `terminateProcess(pooled)`
+
+Gracefully terminates a worker process.
+
+```typescript
+async terminateProcess(pooled: PooledProcess): Promise<void>
+```
+
+##### `getProcesses()`
+
+Returns the current map of active processes.
+
+```typescript
+getProcesses(): Map<string, PooledProcess>
+```
+
+### BunWorker
+
+Worker script that runs in child processes.
+
+```typescript
+// Entry point for worker processes
+process.on('message', (message: WorkerMessage) => {
+  // Handle test execution requests
+});
+```
+
+## Source Map Support
+
+### SourceMapHandler
+
+Handles source map resolution for accurate error reporting.
+
+```typescript
+class SourceMapHandler
+```
+
+#### Methods
+
+##### `resolveSourceMap(fileName)`
+
+Resolves source map for a given file.
+
+```typescript
+async resolveSourceMap(fileName: string): Promise<SourceMapConsumer | null>
+```
+
+##### `mapStackTrace(stackTrace)`
+
+Maps a stack trace using available source maps.
+
+```typescript
+async mapStackTrace(stackTrace: string): Promise<string>
+```
+
+##### `extractStackFrames(stackTrace)`
+
+Extracts individual stack frames from a trace.
+
+```typescript
+extractStackFrames(stackTrace: string): StackFrame[]
+```
+
 ## Configuration Options
 
 ### BunTestRunnerOptions
 
-Configuration options for the Bun test runner.
+Complete configuration options for the Bun test runner.
 
 ```typescript
 interface BunTestRunnerOptions {
@@ -278,7 +459,7 @@ interface BunTestRunnerOptions {
 
   /**
    * Timeout per test in milliseconds
-   * @default 5000
+   * @default 10000
    */
   timeout?: number;
 
@@ -307,6 +488,56 @@ interface BunTestRunnerOptions {
    * Coverage analysis setting
    */
   coverageAnalysis?: 'off' | 'all' | 'perTest';
+
+  /**
+   * Enable process pooling for improved performance
+   * @default true
+   */
+  processPool?: boolean;
+
+  /**
+   * Maximum number of worker processes
+   * @default 4
+   */
+  maxWorkers?: number;
+
+  /**
+   * Enable watch mode for continuous testing
+   * @default false
+   */
+  watchMode?: boolean;
+
+  /**
+   * Update snapshots during test runs
+   * @default false
+   */
+  updateSnapshots?: boolean;
+}
+```
+
+### ProcessPoolOptions
+
+Options for configuring the process pool.
+
+```typescript
+interface ProcessPoolOptions {
+  /**
+   * Maximum number of worker processes
+   * @default 4
+   */
+  maxWorkers?: number;
+
+  /**
+   * Timeout for worker operations in milliseconds
+   * @default 30000
+   */
+  timeout?: number;
+
+  /**
+   * Time before idle workers are terminated in milliseconds
+   * @default 5000
+   */
+  idleTimeout?: number;
 }
 ```
 
@@ -355,6 +586,70 @@ interface BunRunOptions {
   coverage?: boolean;
   testNamePattern?: string;
   testFilter?: string[];
+  updateSnapshots?: boolean;
+}
+```
+
+### CoverageResult
+
+Coverage collection result.
+
+```typescript
+interface CoverageResult {
+  coverage: BunCoverageData;
+  elapsedMs: number;
+}
+```
+
+### BunCoverageData
+
+Raw coverage data structure.
+
+```typescript
+interface BunCoverageData {
+  perTest: Record<string, Set<string>>;
+  executedLines: Record<string, number[]>;
+}
+```
+
+### PooledProcess
+
+Represents a worker process in the pool.
+
+```typescript
+interface PooledProcess {
+  id: string;
+  process: ChildProcess;
+  busy: boolean;
+  lastUsed: number;
+}
+```
+
+### WorkerMessage
+
+Message structure for worker communication.
+
+```typescript
+interface WorkerMessage {
+  id?: string;
+  type: 'run' | 'ready' | 'result' | 'error';
+  args?: string[];
+  options?: BunRunOptions;
+  result?: BunTestResult;
+  error?: string;
+}
+```
+
+### StackFrame
+
+Represents a single frame in a stack trace.
+
+```typescript
+interface StackFrame {
+  functionName?: string;
+  fileName: string;
+  lineNumber: number;
+  columnNumber: number;
 }
 ```
 
@@ -373,7 +668,7 @@ interface BunRunOptions {
 }
 ```
 
-### Advanced Configuration
+### Advanced Configuration with Process Pool
 
 ```json
 {
@@ -381,14 +676,44 @@ interface BunRunOptions {
   "plugins": ["@stryker-mutator/bun-runner"],
   "coverageAnalysis": "perTest",
   "bun": {
-    "testFiles": ["src/**/*.test.ts", "!src/**/*.integration.test.ts"],
+    "testFiles": ["src/**/*.test.ts"],
     "timeout": 60000,
     "bail": true,
+    "processPool": true,
+    "maxWorkers": 8,
     "nodeArgs": ["--max-old-space-size=4096"],
     "env": {
       "NODE_ENV": "test",
       "DEBUG": "stryker:*"
     }
+  }
+}
+```
+
+### Watch Mode Configuration
+
+```json
+{
+  "testRunner": "bun",
+  "plugins": ["@stryker-mutator/bun-runner"],
+  "bun": {
+    "watchMode": true,
+    "processPool": true,
+    "maxWorkers": 2,
+    "testFiles": ["**/*.test.ts"]
+  }
+}
+```
+
+### Snapshot Testing Configuration
+
+```json
+{
+  "testRunner": "bun",
+  "plugins": ["@stryker-mutator/bun-runner"],
+  "bun": {
+    "updateSnapshots": false,
+    "testFiles": ["**/*.snapshot.test.ts"]
   }
 }
 ```
@@ -403,4 +728,36 @@ interface BunRunOptions {
     "command": "bun test --coverage --reporter json"
   }
 }
+```
+
+## Error Handling
+
+The test runner provides comprehensive error handling:
+
+- **Timeout Errors**: Automatically detected and reported as `TimeoutDryRunResult` or `TimeoutMutantRunResult`
+- **Process Errors**: Worker process crashes are caught and reported with details
+- **Source Map Errors**: Gracefully falls back to original stack traces if source maps fail
+- **Coverage Errors**: Coverage collection failures don't fail the test run
+
+## Performance Considerations
+
+1. **Process Pool**: Enable `processPool` for significant performance improvements
+2. **Coverage Analysis**: Use `perTest` coverage to reduce test execution by 80-90%
+3. **Worker Count**: Adjust `maxWorkers` based on your CPU cores and test characteristics
+4. **Timeout Configuration**: Set appropriate timeouts to avoid false positives
+5. **Test Filtering**: Use specific file patterns to avoid running unnecessary tests
+
+## Debugging
+
+Enable debug logging with:
+
+```json
+{
+  "logLevel": "debug"
+}
+```
+
+Or via environment variable:
+```bash
+DEBUG=stryker:* npx stryker run
 ```
