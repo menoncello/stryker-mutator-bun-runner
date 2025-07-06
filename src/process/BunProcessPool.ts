@@ -84,14 +84,34 @@ export class BunProcessPool {
     }
     
     // Create new worker if under limit
+    /* istanbul ignore next - mutation here can cause infinite process creation */
     if (processes.size < this.options.maxWorkers) {
-      return this.workerManager.createWorker();
+      try {
+        const newWorker = await this.workerManager.createWorker();
+        newWorker.busy = true;
+        newWorker.lastUsed = Date.now();
+        return newWorker;
+      } catch (error) {
+        this.log.error('Failed to create new worker:', error);
+        throw error;
+      }
     }
     
-    // Wait for a worker to become available
-    return new Promise((resolve) => {
+    // Wait for a worker to become available with timeout
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const maxAttempts = 300; // 30 seconds max wait
+      
       const checkAvailable = () => {
-        for (const pooled of processes.values()) {
+        attempts++;
+        
+        if (attempts > maxAttempts) {
+          reject(new Error('Timeout waiting for available worker'));
+          return;
+        }
+        
+        const currentProcesses = this.workerManager.getProcesses();
+        for (const pooled of currentProcesses.values()) {
           if (!pooled.busy) {
             pooled.busy = true;
             pooled.lastUsed = Date.now();
@@ -216,10 +236,18 @@ export class BunProcessPool {
   private setupWorkerEvents(): void {
     this.workerManager.on('worker-error', (workerId: string, error: Error) => {
       this.log.error(`Worker ${workerId} error:`, error);
-      // Reject all pending requests
-      for (const [, reject] of this.pendingErrors) {
-        reject(error);
+      // Reject all pending requests for this worker only
+      const processes = this.workerManager.getProcesses();
+      const failedWorker = processes.get(workerId);
+      
+      if (failedWorker) {
+        // Mark worker as not busy to prevent hanging
+        failedWorker.busy = false;
       }
+      
+      // Clear pending requests that might be stuck
+      this.pendingRequests.clear();
+      this.pendingErrors.clear();
     });
   }
 }

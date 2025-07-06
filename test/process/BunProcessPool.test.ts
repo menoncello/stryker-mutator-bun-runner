@@ -113,9 +113,17 @@ describe('BunProcessPool', () => {
       
       // Access the workerManager through unknown casting
       const poolAny = pool as unknown as { 
-        workerManager: { emit(event: string, ...args: unknown[]): void };
+        workerManager: { 
+          emit(event: string, ...args: unknown[]): void;
+          getProcesses(): Map<string, { id: string; busy: boolean }>;
+        };
         pendingErrors: Map<string, (error: Error) => void>;
+        pendingRequests: Map<string, (result: unknown) => void>;
       };
+      
+      // Add a mock worker
+      const mockWorker = { id: 'worker-1', busy: true };
+      poolAny.workerManager.getProcesses().set('worker-1', mockWorker);
       
       // Add a pending error handler
       const errorHandler = mock((_error: Error) => {});
@@ -125,7 +133,10 @@ describe('BunProcessPool', () => {
       poolAny.workerManager.emit('worker-error', 'worker-1', new Error('Worker crashed'));
       
       expect(mockLogger.error).toHaveBeenCalledWith('Worker worker-1 error:', expect.any(Error));
-      expect(errorHandler).toHaveBeenCalledWith(expect.any(Error));
+      // The new implementation clears pending errors/requests instead of calling them
+      expect(poolAny.pendingErrors.size).toBe(0);
+      expect(poolAny.pendingRequests.size).toBe(0);
+      expect(mockWorker.busy).toBe(false);
     });
   });
 

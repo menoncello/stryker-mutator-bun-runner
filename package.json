@@ -18,9 +18,14 @@
     "stryker": "stryker run",
     "stryker:debug": "stryker run --logLevel debug",
     "stryker:self": "stryker run -c stryker-self.config.mjs",
+    "stryker:safe": "stryker run -c stryker-safe.config.mjs",
+    "stryker:pool": "node scripts/test-process-pool.cjs",
     "docs": "typedoc --out docs/typedoc src/index.ts",
     "docs:watch": "typedoc --watch --out docs/typedoc src/index.ts",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "diagnose": "node scripts/diagnose-process-explosion.cjs",
+    "diagnose:files": "node scripts/test-individual-files.cjs",
+    "diagnose:tests": "node scripts/test-individual-tests.cjs"
   },
   "keywords": [
     "stryker",
