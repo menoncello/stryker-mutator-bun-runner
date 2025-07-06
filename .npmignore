@@ -1,0 +1,68 @@
+# Development files
+test/
+example/
+src/
+*.ts
+!*.d.ts
+
+# Configuration files
+tsconfig.json
+.eslintrc*
+.prettierrc*
+stryker.config.*
+
+# CI/CD
+.github/
+.travis.yml
+.circleci/
+
+# Build artifacts
+*.tsbuildinfo
+.stryker-tmp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+coverage/
+.nyc_output/
+reports/
+
+# Documentation source
+docs/
+*.md
+!README.md
+!LICENSE
+
+# Development dependencies
+node_modules/
+.npm/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# OS files
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Other
+.editorconfig
+.npmrc
+bun.lockb

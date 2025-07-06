@@ -1,0 +1,11 @@
+{
+  "name": "stryker-bun-example",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "bun test",
+    "stryker": "stryker run"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "^8.0.0"
+  }
+}

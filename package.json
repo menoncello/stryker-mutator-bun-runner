@@ -1,0 +1,61 @@
+{
+  "name": "@stryker-mutator/bun-runner",
+  "version": "0.2.0",
+  "description": "A test runner plugin to use Bun with StrykerJS, the JavaScript mutation testing framework",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "lint": "eslint src test --ext .ts",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "stryker",
+    "stryker-plugin",
+    "stryker-test-runner",
+    "bun",
+    "mutation-testing"
+  ],
+  "author": "Stryker Bun Runner Contributors",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stryker-mutator/stryker-bun.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stryker-mutator/stryker-bun/issues"
+  },
+  "homepage": "https://github.com/stryker-mutator/stryker-bun#readme",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "@stryker-mutator/core": "^9.0.0",
+    "bun": ">=1.0.0"
+  },
+  "dependencies": {
+    "@stryker-mutator/api": "^9.0.1",
+    "@stryker-mutator/util": "^9.0.1",
+    "execa": "^9.6.0",
+    "semver": "^7.5.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.1",
+    "@stryker-mutator/core": "^9.0.1",
+    "@types/node": "^22.0.0",
+    "@types/semver": "^7.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.0.0"
+  }
+}
