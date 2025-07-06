@@ -1,9 +1,11 @@
-import { describe, test, expect, beforeEach, mock, spyOn } from 'bun:test';
+import { describe, test, expect, beforeEach, mock } from 'bun:test';
 import { BunTestRunner } from '../src/BunTestRunner';
+import { MockLogger, MockBunAdapter, TestableClass } from './types/mocks';
+import { BunRunOptions } from '../src/BunTestRunnerOptions';
 
 describe('BunTestRunner Mocked Tests - Async Methods', () => {
-  let mockLogger: any;
-  let mockBunAdapter: any;
+  let mockLogger: MockLogger;
+  let mockBunAdapter: MockBunAdapter;
   let runner: BunTestRunner;
 
   beforeEach(() => {
@@ -24,16 +26,19 @@ describe('BunTestRunner Mocked Tests - Async Methods', () => {
 
     // Mock BunTestAdapter with detailed behavior
     const mockCoverageCollector = {
-      toMutantCoverage: mock((data: any) => ({
-        perTest: data?.perTest || {},
-        static: data?.static || {}
-      }))
+      toMutantCoverage: mock((data: unknown) => {
+        const coverage = data as { perTest?: Record<string, unknown>; static?: Record<string, unknown> } | null;
+        return {
+          perTest: coverage?.perTest || {},
+          static: coverage?.static || {}
+        };
+      })
     };
 
     mockBunAdapter = {
       init: mock(async () => {}),
       dispose: mock(async () => {}),
-      runTests: mock(async (tests: any[], options: any) => ({
+      runTests: mock(async (tests: string[], options: BunRunOptions) => ({
         tests: [
           { id: '1', name: 'test1', status: 'passed', duration: 10 },
           { id: '2', name: 'test2', status: 'failed', error: 'Test failed', duration: 5 }
@@ -55,10 +60,10 @@ describe('BunTestRunner Mocked Tests - Async Methods', () => {
 
     runner = new BunTestRunner(mockLogger, {});
     // Replace the bunAdapter with our mock
-    (runner as any).bunAdapter = mockBunAdapter;
+    (runner as TestableClass<BunTestRunner>).bunAdapter = mockBunAdapter;
     
     // Mock validateBunInstallation to avoid real bun validation
-    (runner as any).validateBunInstallation = mock(async () => {});
+    (runner as TestableClass<BunTestRunner>).validateBunInstallation = mock(async () => {});
   });
 
   describe('dryRun method', () => {
@@ -261,7 +266,7 @@ describe('BunTestRunner Mocked Tests - Async Methods', () => {
 
     test('should handle mutant run with test filter', async () => {
       // First set up mutant coverage
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: { 'test1': { '42': 1 } },
         static: { '42': 1 }
       };
@@ -281,7 +286,7 @@ describe('BunTestRunner Mocked Tests - Async Methods', () => {
 
     test('should skip mutant when no coverage and shouldRunAllTests is false', async () => {
       // Set up mutant coverage that will result in skipping
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: {},
         static: {} // Empty static coverage, mutant will not be covered
       };
@@ -353,8 +358,8 @@ describe('BunTestRunner Mocked Tests - Async Methods', () => {
       try {
         await runner.init();
         expect(false).toBe(true); // Should not reach here
-      } catch (error: any) {
-        expect(error.message).toBe('Adapter init failed');
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('Adapter init failed');
       }
     });
   });

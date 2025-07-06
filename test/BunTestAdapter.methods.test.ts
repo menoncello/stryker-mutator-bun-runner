@@ -3,6 +3,7 @@ import { BunTestAdapter } from '../src/BunTestAdapter';
 import { BunTestRunnerOptions } from '../src/BunTestRunnerOptions';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { MockLogger, MockBunResultParser, TestableClass } from './types/mocks';
 
 // Mock execa module
 const mockExeca = mock();
@@ -11,10 +12,9 @@ mock.module('execa', () => ({
 }));
 
 describe('BunTestAdapter Method Tests', () => {
-  let mockLogger: any;
+  let mockLogger: MockLogger;
   let adapter: BunTestAdapter;
-  let mockParser: any;
-  let mockCoverageCollector: any;
+  let mockParser: MockBunResultParser;
 
   beforeEach(() => {
     mockLogger = {
@@ -82,7 +82,7 @@ describe('BunTestAdapter Method Tests', () => {
       spyOn(collector, 'init').mockResolvedValue(undefined);
       
       // Mock fs to throw error
-      const mkdirSpy = spyOn(fs, 'mkdir').mockRejectedValue(new Error('Permission denied'));
+      spyOn(fs, 'mkdir').mockRejectedValue(new Error('Permission denied'));
 
       await expect(adapter.init()).rejects.toThrow('Permission denied');
     });
@@ -104,7 +104,7 @@ describe('BunTestAdapter Method Tests', () => {
           total: 1
         }))
       };
-      (adapter as any).parser = mockParser;
+      (adapter as TestableClass<BunTestAdapter>).parser = mockParser;
     });
 
     test('should run tests successfully without coverage', async () => {
@@ -137,8 +137,8 @@ describe('BunTestAdapter Method Tests', () => {
     test('should run tests with coverage enabled', async () => {
       const options: BunTestRunnerOptions = {};
       adapter = new BunTestAdapter(mockLogger, options);
-      (adapter as any).parser = mockParser;
-      (adapter as any).coverageHookPath = '/tmp/coverage-hook.js';
+      (adapter as TestableClass<BunTestAdapter>).parser = mockParser;
+      (adapter as TestableClass<BunTestAdapter>).coverageHookPath = '/tmp/coverage-hook.js';
 
       // Mock coverage collector
       const collector = adapter.getCoverageCollector();
@@ -179,7 +179,7 @@ describe('BunTestAdapter Method Tests', () => {
     });
 
     test('should handle timeout error', async () => {
-      const timeoutError = new Error('Command timed out') as any;
+      const timeoutError = new Error('Command timed out') as Error & { timedOut: boolean };
       timeoutError.timedOut = true;
       mockExeca.mockRejectedValueOnce(timeoutError);
 
@@ -242,7 +242,7 @@ describe('BunTestAdapter Method Tests', () => {
         command: 'bun test --coverage'
       };
       adapter = new BunTestAdapter(mockLogger, options);
-      (adapter as any).parser = mockParser;
+      (adapter as TestableClass<BunTestAdapter>).parser = mockParser;
 
       mockExeca.mockResolvedValueOnce({
         stdout: 'test output',
@@ -259,7 +259,7 @@ describe('BunTestAdapter Method Tests', () => {
         command: 'custom-test'
       };
       adapter = new BunTestAdapter(mockLogger, options);
-      (adapter as any).parser = mockParser;
+      (adapter as TestableClass<BunTestAdapter>).parser = mockParser;
 
       mockExeca.mockResolvedValueOnce({
         stdout: 'test output',
@@ -283,7 +283,7 @@ describe('BunTestAdapter Method Tests', () => {
         testFiles: ['default.test.ts']
       };
       adapter = new BunTestAdapter(mockLogger, options);
-      (adapter as any).parser = mockParser;
+      (adapter as TestableClass<BunTestAdapter>).parser = mockParser;
 
       mockExeca.mockResolvedValueOnce({
         stdout: 'test output',
@@ -312,7 +312,7 @@ describe('BunTestAdapter Method Tests', () => {
     test('should clean up coverage hook file', async () => {
       const options: BunTestRunnerOptions = {};
       adapter = new BunTestAdapter(mockLogger, options);
-      (adapter as any).coverageHookPath = '/tmp/coverage-hook.js';
+      (adapter as TestableClass<BunTestAdapter>).coverageHookPath = '/tmp/coverage-hook.js';
 
       const collector = adapter.getCoverageCollector();
       spyOn(collector, 'dispose').mockResolvedValue(undefined);
@@ -328,7 +328,7 @@ describe('BunTestAdapter Method Tests', () => {
     test('should handle file cleanup error gracefully', async () => {
       const options: BunTestRunnerOptions = {};
       adapter = new BunTestAdapter(mockLogger, options);
-      (adapter as any).coverageHookPath = '/tmp/coverage-hook.js';
+      (adapter as TestableClass<BunTestAdapter>).coverageHookPath = '/tmp/coverage-hook.js';
 
       const collector = adapter.getCoverageCollector();
       spyOn(collector, 'dispose').mockResolvedValue(undefined);
@@ -367,7 +367,7 @@ describe('BunTestAdapter Method Tests', () => {
       const mkdirSpy = spyOn(fs, 'mkdir').mockResolvedValue(undefined);
       const writeFileSpy = spyOn(fs, 'writeFile').mockResolvedValue(undefined);
 
-      await (adapter as any).createCoverageHookFile();
+      await (adapter as TestableClass<BunTestAdapter>).createCoverageHookFile();
 
       expect(mkdirSpy).toHaveBeenCalledWith(
         path.join(process.cwd(), '.stryker-tmp'),
@@ -385,19 +385,19 @@ describe('BunTestAdapter Method Tests', () => {
       expect(writtenContent).toContain('trackMutant');
       expect(writtenContent).toContain('originalTest');
 
-      expect((adapter as any).coverageHookPath).toBeDefined();
-      expect((adapter as any).coverageHookPath).toContain('.stryker-tmp');
-      expect((adapter as any).coverageHookPath).toContain('coverage-hook.js');
+      expect((adapter as TestableClass<BunTestAdapter>).coverageHookPath).toBeDefined();
+      expect((adapter as TestableClass<BunTestAdapter>).coverageHookPath).toContain('.stryker-tmp');
+      expect((adapter as TestableClass<BunTestAdapter>).coverageHookPath).toContain('coverage-hook.js');
     });
 
     test('should handle writeFile error', async () => {
       const options: BunTestRunnerOptions = {};
       adapter = new BunTestAdapter(mockLogger, options);
 
-      const mkdirSpy = spyOn(fs, 'mkdir').mockResolvedValue(undefined);
-      const writeFileSpy = spyOn(fs, 'writeFile').mockRejectedValue(new Error('Disk full'));
+      spyOn(fs, 'mkdir').mockResolvedValue(undefined);
+      spyOn(fs, 'writeFile').mockRejectedValue(new Error('Disk full'));
 
-      await expect((adapter as any).createCoverageHookFile()).rejects.toThrow('Disk full');
+      await expect((adapter as TestableClass<BunTestAdapter>).createCoverageHookFile()).rejects.toThrow('Disk full');
     });
   });
 
@@ -408,19 +408,19 @@ describe('BunTestAdapter Method Tests', () => {
 
       // Test without hook path
       const args1: string[] = [];
-      (adapter as any).addCoverageArgs(args1, { coverage: true });
+      (adapter as TestableClass<BunTestAdapter>).addCoverageArgs(args1, { coverage: true });
       expect(args1).toHaveLength(0);
 
       // Test with hook path
-      (adapter as any).coverageHookPath = '/tmp/hook.js';
+      (adapter as TestableClass<BunTestAdapter>).coverageHookPath = '/tmp/hook.js';
       const args2: string[] = [];
-      (adapter as any).addCoverageArgs(args2, { coverage: true });
+      (adapter as TestableClass<BunTestAdapter>).addCoverageArgs(args2, { coverage: true });
       expect(args2).toContain('--preload');
       expect(args2).toContain('/tmp/hook.js');
 
       // Test without coverage
       const args3: string[] = [];
-      (adapter as any).addCoverageArgs(args3, { coverage: false });
+      (adapter as TestableClass<BunTestAdapter>).addCoverageArgs(args3, { coverage: false });
       expect(args3).toHaveLength(0);
     });
 
@@ -430,12 +430,12 @@ describe('BunTestAdapter Method Tests', () => {
 
       // Test with timeout = 0 (which is falsy, so won't be added)
       const args1: string[] = [];
-      (adapter as any).addTestOptions(args1, { timeout: 0 });
+      (adapter as TestableClass<BunTestAdapter>).addTestOptions(args1, { timeout: 0 });
       expect(args1).toHaveLength(0);
 
       // Test with positive timeout
       const args2: string[] = [];
-      (adapter as any).addTestOptions(args2, { timeout: 5000 });
+      (adapter as TestableClass<BunTestAdapter>).addTestOptions(args2, { timeout: 5000 });
       expect(args2).toContain('--timeout');
       expect(args2).toContain('5000');
     });
@@ -446,7 +446,7 @@ describe('BunTestAdapter Method Tests', () => {
       };
       adapter = new BunTestAdapter(mockLogger, options);
 
-      const env = (adapter as any).buildEnvironment({
+      const env = (adapter as TestableClass<BunTestAdapter>).buildEnvironment({
         env: { VAR1: 'run', VAR3: 'run' }
       });
 

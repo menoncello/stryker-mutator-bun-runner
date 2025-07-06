@@ -1,9 +1,10 @@
 import { describe, test, expect, beforeEach, mock } from 'bun:test';
 import { BunTestRunner } from '../src/BunTestRunner';
+import { MockLogger, MockBunAdapter, TestableClass } from './types/mocks';
 
 describe('BunTestRunner Logging Tests', () => {
-  let mockLogger: any;
-  let mockBunAdapter: any;
+  let mockLogger: MockLogger;
+  let mockBunAdapter: MockBunAdapter;
   let runner: BunTestRunner;
 
   beforeEach(() => {
@@ -28,16 +29,19 @@ describe('BunTestRunner Logging Tests', () => {
         total: 1
       })),
       getCoverageCollector: mock(() => ({
-        toMutantCoverage: mock((data: any) => ({
-          perTest: data?.perTest || {},
-          static: data?.static || {}
-        }))
+        toMutantCoverage: mock((data: unknown) => {
+          const coverage = data as { perTest?: Record<string, unknown>; static?: Record<string, unknown> } | null;
+          return {
+            perTest: coverage?.perTest || {},
+            static: coverage?.static || {}
+          };
+        })
       }))
     };
 
     runner = new BunTestRunner(mockLogger, {});
-    (runner as any).bunAdapter = mockBunAdapter;
-    (runner as any).validateBunInstallation = mock(async () => {});
+    (runner as TestableClass<BunTestRunner>).bunAdapter = mockBunAdapter;
+    (runner as TestableClass<BunTestRunner>).validateBunInstallation = mock(async () => {});
   });
 
   describe('debug logging', () => {
@@ -62,7 +66,7 @@ describe('BunTestRunner Logging Tests', () => {
 
     test('should log debug messages with test filter information', async () => {
       // Set up coverage to trigger test filter logging
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: { 'test1': { '123': 1 } },
         static: { '123': 1 }
       };
@@ -78,7 +82,7 @@ describe('BunTestRunner Logging Tests', () => {
 
     test('should log debug messages with coverage information', async () => {
       // Set up coverage
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: { 'test1': { '123': 1 }, 'test2': { '123': 1 } },
         static: { '123': 1 }
       };
@@ -93,7 +97,7 @@ describe('BunTestRunner Logging Tests', () => {
 
     test('should log debug messages when mutant is not covered', async () => {
       // Set up coverage where mutant is not covered
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: {},
         static: {} // No coverage for mutant 123
       };
@@ -296,7 +300,7 @@ describe('BunTestRunner Logging Tests', () => {
 
     test('should validate logger call counts and parameters', async () => {
       // Set up a complex scenario
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: { 'test1': { '123': 1 } },
         static: { '123': 1 }
       };
@@ -338,7 +342,7 @@ describe('BunTestRunner Logging Tests', () => {
 
     test('should test template literal logging patterns', async () => {
       // Set up scenario to trigger template literal logs
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: { 'test1': { '42': 1 }, 'test2': { '42': 1 } },
         static: { '42': 1 }
       };

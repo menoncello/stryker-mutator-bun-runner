@@ -66,7 +66,14 @@ export class BunResultParser {
     };
   }
 
-  private processLine(line: string, currentTest: Partial<BunTestResultData> | null): { test?: BunTestResultData; updateCounts?: { passed: number; failed: number }; currentTest: Partial<BunTestResultData> | null } {
+  private processLine(
+    line: string,
+    currentTest: Partial<BunTestResultData> | null
+  ): {
+    test?: BunTestResultData;
+    updateCounts?: { passed: number; failed: number };
+    currentTest: Partial<BunTestResultData> | null;
+  } {
     if (line.includes('✓')) {
       return this.handlePassedTest(line);
     }

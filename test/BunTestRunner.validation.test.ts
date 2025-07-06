@@ -1,5 +1,6 @@
-import { describe, test, expect, beforeEach, mock, spyOn } from 'bun:test';
+import { describe, test, expect, beforeEach, mock } from 'bun:test';
 import { BunTestRunner } from '../src/BunTestRunner';
+import { MockLogger, MockBunAdapter, TestableClass, MockError } from './types/mocks';
 
 // Mock execa and semver modules
 const mockExeca = mock();
@@ -15,9 +16,9 @@ mock.module('execa', () => ({
 mock.module('semver', () => mockSemver);
 
 describe('BunTestRunner Validation Tests', () => {
-  let mockLogger: any;
+  let mockLogger: MockLogger;
   let runner: BunTestRunner;
-  let mockBunAdapter: any;
+  let mockBunAdapter: MockBunAdapter;
 
   beforeEach(() => {
     mockLogger = {
@@ -40,7 +41,7 @@ describe('BunTestRunner Validation Tests', () => {
     };
 
     runner = new BunTestRunner(mockLogger, {});
-    (runner as any).bunAdapter = mockBunAdapter;
+    (runner as TestableClass<BunTestRunner>).bunAdapter = mockBunAdapter;
 
     // Reset mocks
     mockExeca.mockReset();
@@ -93,8 +94,8 @@ describe('BunTestRunner Validation Tests', () => {
       try {
         await runner.init();
         expect(false).toBe(true); // Should not reach here
-      } catch (error: any) {
-        expect(error.message).toBe('Bun version 1.0.0 or higher is required');
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('Bun version 1.0.0 or higher is required');
       }
 
       expect(mockSemver.gte).toHaveBeenCalledWith('0.9.0', '1.0.0');
@@ -102,14 +103,14 @@ describe('BunTestRunner Validation Tests', () => {
 
     test('should handle bun not found error (ENOENT)', async () => {
       const enoentError = new Error('Command not found');
-      (enoentError as any).code = 'ENOENT';
+      (enoentError as MockError).code = 'ENOENT';
       mockExeca.mockRejectedValueOnce(enoentError);
 
       try {
         await runner.init();
         expect(false).toBe(true); // Should not reach here
-      } catch (error: any) {
-        expect(error.message).toBe('Bun not found. Please install Bun: https://bun.sh');
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('Bun not found. Please install Bun: https://bun.sh');
       }
     });
 
@@ -120,8 +121,8 @@ describe('BunTestRunner Validation Tests', () => {
       try {
         await runner.init();
         expect(false).toBe(true); // Should not reach here
-      } catch (error: any) {
-        expect(error.message).toBe('Network timeout');
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('Network timeout');
       }
     });
 
@@ -143,21 +144,21 @@ describe('BunTestRunner Validation Tests', () => {
       try {
         await runner.init();
         expect(false).toBe(true); // Should not reach here
-      } catch (error: any) {
+      } catch (error: unknown) {
         expect(error).toBe(genericError);
       }
     });
 
     test('should handle error objects with different code', async () => {
       const permissionError = new Error('Permission denied');
-      (permissionError as any).code = 'EACCES';
+      (permissionError as MockError).code = 'EACCES';
       mockExeca.mockRejectedValueOnce(permissionError);
 
       try {
         await runner.init();
         expect(false).toBe(true); // Should not reach here
-      } catch (error: any) {
-        expect(error.message).toBe('Permission denied');
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('Permission denied');
       }
     });
 
@@ -168,7 +169,7 @@ describe('BunTestRunner Validation Tests', () => {
       try {
         await runner.init();
         expect(false).toBe(true); // Should not reach here
-      } catch (error: any) {
+      } catch (error: unknown) {
         expect(error).toBe('String error');
       }
     });
@@ -195,8 +196,8 @@ describe('BunTestRunner Validation Tests', () => {
       try {
         await runner.init();
         expect(false).toBe(true); // Should not reach here
-      } catch (error: any) {
-        expect(error.message).toBe('Bun version 1.0.0 or higher is required');
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('Bun version 1.0.0 or higher is required');
       }
 
       expect(mockSemver.gte).toHaveBeenCalledWith('', '1.0.0');

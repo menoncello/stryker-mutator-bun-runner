@@ -1,9 +1,10 @@
 import { describe, test, expect, beforeEach, mock } from 'bun:test';
 import { BunTestRunner } from '../src/BunTestRunner';
+import { MockLogger, MockBunAdapter, TestableClass } from './types/mocks';
 
 describe('BunTestRunner Edge Cases Tests', () => {
-  let mockLogger: any;
-  let mockBunAdapter: any;
+  let mockLogger: MockLogger;
+  let mockBunAdapter: MockBunAdapter;
   let runner: BunTestRunner;
 
   beforeEach(() => {
@@ -28,16 +29,19 @@ describe('BunTestRunner Edge Cases Tests', () => {
         total: 1
       })),
       getCoverageCollector: mock(() => ({
-        toMutantCoverage: mock((data: any) => ({
-          perTest: data?.perTest || {},
-          static: data?.static || {}
-        }))
+        toMutantCoverage: mock((data: unknown) => {
+          const coverage = data as { perTest?: Record<string, unknown>; static?: Record<string, unknown> } | null;
+          return {
+            perTest: coverage?.perTest || {},
+            static: coverage?.static || {}
+          };
+        })
       }))
     };
 
     runner = new BunTestRunner(mockLogger, {});
-    (runner as any).bunAdapter = mockBunAdapter;
-    (runner as any).validateBunInstallation = mock(async () => {});
+    (runner as TestableClass<BunTestRunner>).bunAdapter = mockBunAdapter;
+    (runner as TestableClass<BunTestRunner>).validateBunInstallation = mock(async () => {});
   });
 
   describe('coverage analysis edge cases', () => {
@@ -234,7 +238,7 @@ describe('BunTestRunner Edge Cases Tests', () => {
   describe('filtering logic edge cases', () => {
     test('should handle testNamePattern assignment when undefined', async () => {
       // Set up scenario where getFilteredTests returns empty object
-      (runner as any).mutantCoverage = undefined;
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = undefined;
 
       await runner.mutantRun({
         timeout: 5000,
@@ -255,7 +259,7 @@ describe('BunTestRunner Edge Cases Tests', () => {
 
     test('should handle testNamePattern assignment when defined', async () => {
       // Set up scenario where getFilteredTests returns testNamePattern
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: { 'test1': { '123': 1 } },
         static: { '123': 1 }
       };

@@ -1,9 +1,10 @@
-import { describe, test, expect, beforeEach, mock, spyOn } from 'bun:test';
+import { describe, test, expect, beforeEach, mock } from 'bun:test';
 import { BunTestRunner } from '../src/BunTestRunner';
+import { MockLogger, TestableClass } from './types/mocks';
 
 describe('BunTestRunner Integration Tests', () => {
-  let mockLogger: any;
-  let mockOptions: any;
+  let mockLogger: MockLogger;
+  let mockOptions: Record<string, unknown>;
 
   beforeEach(() => {
     mockLogger = {
@@ -157,10 +158,10 @@ describe('BunTestRunner Integration Tests', () => {
     const runner = new BunTestRunner(mockLogger, {});
     
     // Mock the internal validateBunInstallation to avoid actual validation
-    (runner as any).validateBunInstallation = mock(async () => {});
+    (runner as TestableClass<BunTestRunner>).validateBunInstallation = mock(async () => {});
     
     // Mock the bunAdapter to avoid actual initialization
-    (runner as any).bunAdapter = {
+    (runner as TestableClass<BunTestRunner>).bunAdapter = {
       init: mock(async () => {}),
       dispose: mock(async () => {})
     };
@@ -257,7 +258,7 @@ describe('BunTestRunner Integration Tests', () => {
     const runner = new BunTestRunner(mockLogger, {});
     
     // Access the private timer property through any casting
-    const timerProperty = (runner as any).timer;
+    const timerProperty = (runner as TestableClass<BunTestRunner>).timer;
     expect(timerProperty).toBeDefined();
     expect(typeof timerProperty.reset).toBe('function');
     expect(typeof timerProperty.elapsedMs).toBe('function');
@@ -280,7 +281,7 @@ describe('BunTestRunner Integration Tests', () => {
 
   test('should test private methods through any casting', () => {
     const runner = new BunTestRunner(mockLogger, {});
-    const runnerAny = runner as any;
+    const runnerAny = runner as TestableClass<BunTestRunner>;
 
     // Test mapTestResults method
     if (runnerAny.mapTestResults) {
@@ -359,7 +360,7 @@ describe('BunTestRunner Integration Tests', () => {
 
   test('should test processMutantResult method logic', () => {
     const runner = new BunTestRunner(mockLogger, {});
-    const runnerAny = runner as any;
+    const runnerAny = runner as TestableClass<BunTestRunner>;
 
     if (runnerAny.processMutantResult) {
       // Test killed mutant
@@ -406,7 +407,7 @@ describe('BunTestRunner Integration Tests', () => {
 
   test('should test error handling methods', () => {
     const runner = new BunTestRunner(mockLogger, {});
-    const runnerAny = runner as any;
+    const runnerAny = runner as TestableClass<BunTestRunner>;
 
     if (runnerAny.handleDryRunError) {
       const options = { timeout: 5000 };
@@ -455,7 +456,7 @@ describe('BunTestRunner Integration Tests', () => {
 
   test('should test getFilteredTests method', () => {
     const runner = new BunTestRunner(mockLogger, {});
-    const runnerAny = runner as any;
+    const runnerAny = runner as TestableClass<BunTestRunner>;
 
     if (runnerAny.getFilteredTests) {
       // Test with no coverage
@@ -500,7 +501,7 @@ describe('BunTestRunner Integration Tests', () => {
 
     testCases.forEach(({ input, expected }) => {
       const runner = new BunTestRunner(mockLogger, input);
-      const options = (runner as any).options;
+      const options = (runner as TestableClass<BunTestRunner>).options;
       
       expect(options.testFiles).toEqual(expected.testFiles);
       expect(options.timeout).toBe(expected.timeout);
@@ -510,7 +511,7 @@ describe('BunTestRunner Integration Tests', () => {
 
   test('should handle Timer edge cases', () => {
     const runner = new BunTestRunner(mockLogger, {});
-    const timer = (runner as any).timer;
+    const timer = (runner as TestableClass<BunTestRunner>).timer;
     
     // Test multiple resets
     timer.reset();

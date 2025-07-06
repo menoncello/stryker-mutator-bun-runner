@@ -1,9 +1,10 @@
 import { describe, test, expect, beforeEach, mock } from 'bun:test';
 import { BunTestRunner } from '../src/BunTestRunner';
+import { MockLogger, MockBunAdapter, TestableClass } from './types/mocks';
 
 describe('BunTestRunner Coverage Integration Tests', () => {
-  let mockLogger: any;
-  let mockBunAdapter: any;
+  let mockLogger: MockLogger;
+  let mockBunAdapter: MockBunAdapter;
   let runner: BunTestRunner;
 
   beforeEach(() => {
@@ -29,22 +30,25 @@ describe('BunTestRunner Coverage Integration Tests', () => {
         total: 2
       })),
       getCoverageCollector: mock(() => ({
-        toMutantCoverage: mock((data: any) => ({
-          perTest: data?.perTest || {},
-          static: data?.static || {}
-        }))
+        toMutantCoverage: mock((data: unknown) => {
+          const coverage = data as { perTest?: Record<string, unknown>; static?: Record<string, unknown> } | null;
+          return {
+            perTest: coverage?.perTest || {},
+            static: coverage?.static || {}
+          };
+        })
       }))
     };
 
     runner = new BunTestRunner(mockLogger, {});
-    (runner as any).bunAdapter = mockBunAdapter;
-    (runner as any).validateBunInstallation = mock(async () => {});
+    (runner as TestableClass<BunTestRunner>).bunAdapter = mockBunAdapter;
+    (runner as TestableClass<BunTestRunner>).validateBunInstallation = mock(async () => {});
   });
 
   describe('coverage states integration', () => {
     test('should handle mutant with no coverage data', async () => {
       // Set up empty coverage state
-      (runner as any).mutantCoverage = undefined;
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = undefined;
 
       const options = {
         timeout: 5000,
@@ -64,7 +68,7 @@ describe('BunTestRunner Coverage Integration Tests', () => {
 
     test('should handle mutant with empty perTest coverage', async () => {
       // Set up coverage with empty perTest
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: {},
         static: { '123': 1 }
       };
@@ -82,7 +86,7 @@ describe('BunTestRunner Coverage Integration Tests', () => {
 
     test('should handle mutant with specific test coverage', async () => {
       // Set up coverage with specific test covering the mutant
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: {
           'test1': { '123': 1 },
           'test2': { '456': 1 }
@@ -105,7 +109,7 @@ describe('BunTestRunner Coverage Integration Tests', () => {
 
     test('should handle mutant with multiple test coverage', async () => {
       // Set up coverage with multiple tests covering the mutant
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: {
           'test1': { '123': 1 },
           'test2': { '123': 1 },
@@ -129,7 +133,7 @@ describe('BunTestRunner Coverage Integration Tests', () => {
 
     test('should skip mutant not covered by any test when static coverage is empty', async () => {
       // Set up coverage where mutant is not covered
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: {
           'test1': { '456': 1 }
         },
@@ -150,7 +154,7 @@ describe('BunTestRunner Coverage Integration Tests', () => {
 
     test('should handle test filter with existing coverage', async () => {
       // Set up coverage
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: {
           'test1': { '123': 1 },
           'test2': { '123': 1 }
@@ -174,7 +178,7 @@ describe('BunTestRunner Coverage Integration Tests', () => {
 
     test('should handle test names with special regex characters', async () => {
       // Set up coverage with test names containing special characters
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: {
           'test.with.dots': { '123': 1 },
           'test-with-dashes': { '123': 1 },
@@ -260,7 +264,7 @@ describe('BunTestRunner Coverage Integration Tests', () => {
 
     test('should handle edge case with zero coverage count', async () => {
       // Set up coverage with zero count (should be treated as not covered)
-      (runner as any).mutantCoverage = {
+      (runner as TestableClass<BunTestRunner>).mutantCoverage = {
         perTest: {
           'test1': { '123': 0 }, // Zero coverage
           'test2': { '123': 1 }  // Actual coverage
@@ -318,7 +322,7 @@ describe('BunTestRunner Coverage Integration Tests', () => {
 
     test('should handle complex coverage scenarios with logging', async () => {
       const coverageCollector = {
-        toMutantCoverage: mock((data: any) => {
+        toMutantCoverage: mock((data: unknown) => {
           const result = {
             perTest: data?.perTest || {},
             static: data?.static || {}

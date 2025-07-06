@@ -132,7 +132,7 @@ export class BunTestRunner implements TestRunner {
     return { status: DryRunStatus.Complete, tests };
   }
 
-  private processCoverageData(coverage: any, result: CompleteDryRunResult): void {
+  private processCoverageData(coverage: CoverageResult, result: CompleteDryRunResult): void {
     this.log.debug('Processing coverage data');
     const mutantCoverage = this.bunAdapter.getCoverageCollector().toMutantCoverage(coverage.coverage);
     

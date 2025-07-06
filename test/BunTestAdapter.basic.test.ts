@@ -1,9 +1,10 @@
 import { describe, test, expect, beforeEach, mock } from 'bun:test';
 import { BunTestAdapter } from '../src/BunTestAdapter';
 import { BunTestRunnerOptions } from '../src/BunTestRunnerOptions';
+import { MockLogger, TestableClass } from './types/mocks';
 
 describe('BunTestAdapter Basic Tests', () => {
-  let mockLogger: any;
+  let mockLogger: MockLogger;
   let adapter: BunTestAdapter;
 
   beforeEach(() => {
@@ -90,7 +91,7 @@ describe('BunTestAdapter Basic Tests', () => {
     });
 
     test('should generate initialization code', () => {
-      const initCode = (adapter as any).getInitializationCode();
+      const initCode = (adapter as TestableClass<BunTestAdapter>).getInitializationCode();
 
       expect(initCode).toBeDefined();
       expect(typeof initCode).toBe('string');
@@ -101,7 +102,7 @@ describe('BunTestAdapter Basic Tests', () => {
     });
 
     test('should generate test wrapper code', () => {
-      const wrapperCode = (adapter as any).getTestWrapperCode();
+      const wrapperCode = (adapter as TestableClass<BunTestAdapter>).getTestWrapperCode();
 
       expect(wrapperCode).toBeDefined();
       expect(typeof wrapperCode).toBe('string');
@@ -117,7 +118,7 @@ describe('BunTestAdapter Basic Tests', () => {
     });
 
     test('should generate mutant tracking code', () => {
-      const trackingCode = (adapter as any).getMutantTrackingCode();
+      const trackingCode = (adapter as TestableClass<BunTestAdapter>).getMutantTrackingCode();
 
       expect(trackingCode).toBeDefined();
       expect(typeof trackingCode).toBe('string');
@@ -131,7 +132,7 @@ describe('BunTestAdapter Basic Tests', () => {
     });
 
     test('should generate complete hook content', () => {
-      const hookContent = (adapter as any).generateHookContent();
+      const hookContent = (adapter as TestableClass<BunTestAdapter>).generateHookContent();
 
       expect(hookContent).toBeDefined();
       expect(typeof hookContent).toBe('string');
@@ -145,12 +146,12 @@ describe('BunTestAdapter Basic Tests', () => {
     });
 
     test('should validate hook content structure', () => {
-      const hookContent = (adapter as any).generateHookContent();
+      const hookContent = (adapter as TestableClass<BunTestAdapter>).generateHookContent();
       
       // Should contain all three main sections
-      const initCode = (adapter as any).getInitializationCode();
-      const wrapperCode = (adapter as any).getTestWrapperCode();
-      const trackingCode = (adapter as any).getMutantTrackingCode();
+      const initCode = (adapter as TestableClass<BunTestAdapter>).getInitializationCode();
+      const wrapperCode = (adapter as TestableClass<BunTestAdapter>).getTestWrapperCode();
+      const trackingCode = (adapter as TestableClass<BunTestAdapter>).getMutantTrackingCode();
       
       expect(hookContent).toContain(initCode);
       expect(hookContent).toContain(wrapperCode);
@@ -168,7 +169,7 @@ describe('BunTestAdapter Basic Tests', () => {
 
     test('should build environment with basic options', () => {
       const runOptions = { timeout: 5000 };
-      const env = (adapter as any).buildEnvironment(runOptions);
+      const env = (adapter as TestableClass<BunTestAdapter>).buildEnvironment(runOptions);
 
       expect(env).toBeDefined();
       expect(typeof env).toBe('object');
@@ -182,14 +183,14 @@ describe('BunTestAdapter Basic Tests', () => {
         timeout: 5000,
         activeMutant: 42
       };
-      const env = (adapter as any).buildEnvironment(runOptions);
+      const env = (adapter as TestableClass<BunTestAdapter>).buildEnvironment(runOptions);
 
       expect(env.__STRYKER_ACTIVE_MUTANT__).toBe('42');
     });
 
     test('should build environment without active mutant', () => {
       const runOptions = { timeout: 5000 };
-      const env = (adapter as any).buildEnvironment(runOptions);
+      const env = (adapter as TestableClass<BunTestAdapter>).buildEnvironment(runOptions);
 
       expect(env.__STRYKER_ACTIVE_MUTANT__).toBeUndefined();
     });
@@ -199,7 +200,7 @@ describe('BunTestAdapter Basic Tests', () => {
         timeout: 5000,
         env: { RUN_SPECIFIC: 'run-value' }
       };
-      const env = (adapter as any).buildEnvironment(runOptions);
+      const env = (adapter as TestableClass<BunTestAdapter>).buildEnvironment(runOptions);
 
       expect(env.RUN_SPECIFIC).toBe('run-value');
       expect(env.CUSTOM_VAR).toBe('custom-value'); // Should still have adapter env
@@ -213,7 +214,7 @@ describe('BunTestAdapter Basic Tests', () => {
           NEW_VAR: 'new-value' 
         }
       };
-      const env = (adapter as any).buildEnvironment(runOptions);
+      const env = (adapter as TestableClass<BunTestAdapter>).buildEnvironment(runOptions);
 
       expect(env.NODE_ENV).toBe('production'); // Run options should override
       expect(env.NEW_VAR).toBe('new-value');
@@ -225,7 +226,7 @@ describe('BunTestAdapter Basic Tests', () => {
       const runOptions = { 
         activeMutant: undefined
       };
-      const env = (adapter as any).buildEnvironment(runOptions);
+      const env = (adapter as TestableClass<BunTestAdapter>).buildEnvironment(runOptions);
 
       expect(env.__STRYKER_ACTIVE_MUTANT__).toBeUndefined();
     });
@@ -234,7 +235,7 @@ describe('BunTestAdapter Basic Tests', () => {
       const runOptions = { 
         activeMutant: 0
       };
-      const env = (adapter as any).buildEnvironment(runOptions);
+      const env = (adapter as TestableClass<BunTestAdapter>).buildEnvironment(runOptions);
 
       expect(env.__STRYKER_ACTIVE_MUTANT__).toBe('0');
     });
@@ -245,7 +246,7 @@ describe('BunTestAdapter Basic Tests', () => {
       const options: BunTestRunnerOptions = {};
       adapter = new BunTestAdapter(mockLogger, options);
 
-      const args = (adapter as any).buildBunArgs([], {});
+      const args = (adapter as TestableClass<BunTestAdapter>).buildBunArgs([], {});
 
       expect(args).toBeDefined();
       expect(Array.isArray(args)).toBe(true);
@@ -258,7 +259,7 @@ describe('BunTestAdapter Basic Tests', () => {
       };
       adapter = new BunTestAdapter(mockLogger, options);
 
-      const args = (adapter as any).buildBunArgs([], {});
+      const args = (adapter as TestableClass<BunTestAdapter>).buildBunArgs([], {});
 
       expect(args).toContain('custom-test');
       expect(args).toContain('--verbose');
@@ -270,7 +271,7 @@ describe('BunTestAdapter Basic Tests', () => {
       adapter = new BunTestAdapter(mockLogger, options);
 
       const testFiles = ['test1.ts', 'test2.ts'];
-      const args = (adapter as any).buildBunArgs(testFiles, {});
+      const args = (adapter as TestableClass<BunTestAdapter>).buildBunArgs(testFiles, {});
 
       expect(args).toContain('test1.ts');
       expect(args).toContain('test2.ts');
@@ -282,7 +283,7 @@ describe('BunTestAdapter Basic Tests', () => {
       };
       adapter = new BunTestAdapter(mockLogger, options);
 
-      const args = (adapter as any).buildBunArgs([], {});
+      const args = (adapter as TestableClass<BunTestAdapter>).buildBunArgs([], {});
 
       expect(args).toContain('--experimental-modules');
       expect(args).toContain('--max-old-space-size=4096');
@@ -292,7 +293,7 @@ describe('BunTestAdapter Basic Tests', () => {
       const options: BunTestRunnerOptions = {};
       adapter = new BunTestAdapter(mockLogger, options);
 
-      const args = (adapter as any).buildBunArgs([], {});
+      const args = (adapter as TestableClass<BunTestAdapter>).buildBunArgs([], {});
 
       expect(args.filter(arg => arg.startsWith('--experimental'))).toHaveLength(0);
     });
@@ -306,7 +307,7 @@ describe('BunTestAdapter Basic Tests', () => {
 
     test('should add base command correctly', () => {
       const args: string[] = [];
-      (adapter as any).addBaseCommand(args);
+      (adapter as TestableClass<BunTestAdapter>).addBaseCommand(args);
 
       expect(args).toContain('test');
       expect(args).toHaveLength(1);
@@ -319,7 +320,7 @@ describe('BunTestAdapter Basic Tests', () => {
       adapter = new BunTestAdapter(mockLogger, options);
 
       const args: string[] = [];
-      (adapter as any).addBaseCommand(args);
+      (adapter as TestableClass<BunTestAdapter>).addBaseCommand(args);
 
       expect(args).toContain('custom');
       expect(args).toContain('test');
@@ -330,7 +331,7 @@ describe('BunTestAdapter Basic Tests', () => {
     test('should add test files when provided', () => {
       const args: string[] = [];
       const testFiles = ['file1.test.ts', 'file2.test.ts'];
-      (adapter as any).addTestFiles(args, testFiles);
+      (adapter as TestableClass<BunTestAdapter>).addTestFiles(args, testFiles);
 
       expect(args).toContain('file1.test.ts');
       expect(args).toContain('file2.test.ts');
@@ -344,7 +345,7 @@ describe('BunTestAdapter Basic Tests', () => {
       adapter = new BunTestAdapter(mockLogger, options);
 
       const args: string[] = [];
-      (adapter as any).addTestFiles(args, []);
+      (adapter as TestableClass<BunTestAdapter>).addTestFiles(args, []);
 
       expect(args).toContain('default1.test.ts');
       expect(args).toContain('default2.test.ts');
@@ -359,7 +360,7 @@ describe('BunTestAdapter Basic Tests', () => {
       adapter = new BunTestAdapter(mockLogger, options);
 
       const args: string[] = [];
-      (adapter as any).addTestFiles(args, []);
+      (adapter as TestableClass<BunTestAdapter>).addTestFiles(args, []);
 
       expect(args).toHaveLength(0); // Should not add any files
     });
@@ -371,7 +372,7 @@ describe('BunTestAdapter Basic Tests', () => {
       adapter = new BunTestAdapter(mockLogger, options);
 
       const args: string[] = [];
-      (adapter as any).addNodeArgs(args);
+      (adapter as TestableClass<BunTestAdapter>).addNodeArgs(args);
 
       expect(args).toContain('--arg1');
       expect(args).toContain('--arg2');
@@ -380,7 +381,7 @@ describe('BunTestAdapter Basic Tests', () => {
 
     test('should not add node args when not present', () => {
       const args: string[] = [];
-      (adapter as any).addNodeArgs(args);
+      (adapter as TestableClass<BunTestAdapter>).addNodeArgs(args);
 
       expect(args).toHaveLength(0);
     });
