@@ -61,6 +61,10 @@ export default [
       'no-undef': 'off',
       'no-unused-vars': 'off',
 
+      // Import rules - Disabled for ESM compatibility
+      'import/extensions': 'off', // Allow any extension usage
+      'import/no-useless-path-segments': 'off', // Allow /index.js imports
+
       // Core ESLint rules for code quality
       'no-throw-literal': 'error',
       'no-useless-escape': 'error',
@@ -161,7 +165,7 @@ export default [
       'import/no-dynamic-require': 'error',
       'import/no-self-import': 'off',
       'import/no-cycle': 'off',
-      'import/no-useless-path-segments': ['error', { noUselessIndex: true }],
+      'import/no-useless-path-segments': 'off', // Allow /index.js imports
       'import/no-duplicates': 'error',
 
       // Security rules (adjusted for TypeScript)
