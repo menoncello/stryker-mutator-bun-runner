@@ -1,125 +1,128 @@
-# StrykerJS Test Runner para Bun
+# StrykerJS Test Runner for Bun
 
-## Visão Geral
+## Overview
 
-Este documento descreve a arquitetura e implementação de um test runner customizado para integrar o StrykerJS com o Bun, permitindo executar testes de mutação em projetos que utilizam o Bun como runtime JavaScript.
+This document describes the architecture and implementation of a custom test runner to integrate StrykerJS with Bun, enabling mutation testing execution in projects that use Bun as their JavaScript runtime.
 
-## Motivação
+## Motivation
 
-- **Bun** é um runtime JavaScript rápido com test runner integrado
-- **StrykerJS** é uma ferramenta de mutation testing que precisa de um test runner para executar testes
-- Atualmente não existe integração oficial entre StrykerJS e Bun
-- A solução padrão usando `command` test runner tem penalidade de performance
+- **Bun** is a fast JavaScript runtime with integrated test runner
+- **StrykerJS** is a mutation testing tool that needs a test runner to execute tests
+- Currently there is no official integration between StrykerJS and Bun
+- The standard solution using `command` test runner has performance penalty
 
-## Arquitetura Proposta
+## Proposed Architecture
 
-### 1. Estrutura do Plugin
+### 1. Plugin Structure
 
 ```
 stryker-bun-runner/
 ├── src/
-│   ├── BunTestRunner.ts          # Classe principal do test runner
-│   ├── BunTestRunnerOptions.ts   # Tipos e opções de configuração
-│   ├── BunTestAdapter.ts         # Adaptador para comunicação com Bun
-│   ├── BunResultParser.ts        # Parser dos resultados do Bun
-│   └── index.ts                  # Entry point do plugin
+│   ├── BunTestRunner.ts          # Main test runner class
+│   ├── BunTestRunnerOptions.ts   # Types and configuration options
+│   ├── BunTestAdapter.ts         # Adapter for Bun communication
+│   ├── BunResultParser.ts        # Bun results parser
+│   └── index.ts                  # Plugin entry point
 ├── test/
-│   ├── unit/                     # Testes unitários
-│   └── integration/              # Testes de integração
+│   ├── unit/                     # Unit tests
+│   └── integration/              # Integration tests
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
 
-### 2. Interface TestRunner
+### 2. TestRunner Interface
 
-O plugin deve implementar a interface `TestRunner` do StrykerJS:
+The plugin must implement the `TestRunner` interface from StrykerJS:
 
 ```typescript
-import { 
-  TestRunner, 
-  DryRunResult, 
-  DryRunOptions, 
-  MutantRunOptions, 
+import {
+  TestRunner,
+  DryRunResult,
+  DryRunOptions,
+  MutantRunOptions,
   MutantRunResult,
-  TestRunnerCapabilities 
+  TestRunnerCapabilities
 } from '@stryker-mutator/api/test-runner';
 
 export class BunTestRunner implements TestRunner {
   private bunProcess: ChildProcess | null = null;
-  
+
   constructor(private options: BunTestRunnerOptions) {}
-  
+
   public async init(): Promise<void> {
-    // Validar instalação do Bun
-    // Configurar ambiente de teste
+    // Validate Bun installation
+    // Configure test environment
   }
-  
+
   public async dryRun(options: DryRunOptions): Promise<DryRunResult> {
-    // Executar todos os testes sem mutações
-    // Coletar coverage se habilitado
-    // Retornar resultado com lista de testes
+    // Execute all tests without mutations
+    // Collect coverage if enabled
+    // Return result with test list
   }
-  
+
   public async mutantRun(options: MutantRunOptions): Promise<MutantRunResult> {
-    // Ativar mutante específico
-    // Executar apenas testes relevantes
-    // Retornar se mutante foi killed, survived ou timeout
+    // Activate specific mutant
+    // Execute only relevant tests
+    // Return if mutant was killed, survived or timeout
   }
-  
+
   public async dispose(): Promise<void> {
-    // Limpar recursos
-    // Finalizar processos Bun
+    // Clean up resources
+    // Terminate Bun processes
   }
-  
+
   public capabilities(): TestRunnerCapabilities {
     return { reloadEnvironment: true };
   }
 }
 ```
 
-### 3. Integração com Bun
+### 3. Bun Integration
 
-#### 3.1 Execução de Testes
+#### 3.1 Test Execution
 
 ```typescript
 class BunTestAdapter {
-  async runTests(testFiles: string[], options: BunRunOptions): Promise<BunTestResult> {
+  async runTests(
+    testFiles: string[],
+    options: BunRunOptions
+  ): Promise<BunTestResult> {
     const args = ['test'];
-    
-    // Adicionar arquivos específicos
+
+    // Add specific files
     if (testFiles.length > 0) {
       args.push(...testFiles);
     }
-    
-    // Adicionar opções do Bun
+
+    // Add Bun options
     if (options.timeout) {
       args.push('--timeout', options.timeout.toString());
     }
-    
+
     if (options.bail) {
       args.push('--bail');
     }
-    
-    // Executar Bun
+
+    // Execute Bun
     const result = await execa('bun', args, {
       env: {
         ...process.env,
         __STRYKER_ACTIVE_MUTANT__: options.activeMutant?.toString()
       }
     });
-    
+
     return this.parseResult(result);
   }
 }
 ```
 
-#### 3.2 Ativação de Mutantes
+#### 3.2 Mutant Activation
 
-Para ativar mutantes específicos durante os testes:
+To activate specific mutants during tests:
 
 ```typescript
-// No código sendo testado
+// In code being tested
 declare global {
   interface Window {
     __stryker__: {
@@ -128,22 +131,22 @@ declare global {
   }
 }
 
-// Hook para ativar mutante
+// Hook to activate mutant
 if (typeof globalThis.__stryker__ !== 'undefined') {
   const activeMutant = globalThis.__stryker__.activeMutant;
-  // Lógica de ativação do mutante
+  // Mutant activation logic
 }
 ```
 
 ### 4. Coverage Analysis
 
-Para melhor performance, implementar análise de cobertura:
+For better performance, implement coverage analysis:
 
 ```typescript
 interface BunCoverageCollector {
   async collectCoverage(testResult: BunTestResult): Promise<MutantCoverage> {
-    // Extrair informação de cobertura do Bun
-    // Mapear para formato esperado pelo Stryker
+    // Extract coverage information from Bun
+    // Map to format expected by Stryker
     return {
       perTest: {
         [testId]: {
@@ -155,9 +158,9 @@ interface BunCoverageCollector {
 }
 ```
 
-### 5. Configuração
+### 5. Configuration
 
-#### 5.1 Configuração no Stryker
+#### 5.1 Stryker Configuration
 
 ```json
 {
@@ -173,46 +176,46 @@ interface BunCoverageCollector {
 }
 ```
 
-#### 5.2 Opções do Plugin
+#### 5.2 Plugin Options
 
 ```typescript
 interface BunTestRunnerOptions {
-  testFiles?: string[];         // Padrão de arquivos de teste
-  timeout?: number;              // Timeout por teste em ms
-  bail?: boolean;                // Parar na primeira falha
+  testFiles?: string[]; // Test file patterns
+  timeout?: number; // Timeout per test in ms
+  bail?: boolean; // Stop on first failure
   coverageAnalysis?: 'off' | 'all' | 'perTest';
-  nodeArgs?: string[];           // Argumentos adicionais para o Bun
-  env?: Record<string, string>;  // Variáveis de ambiente
+  nodeArgs?: string[]; // Additional arguments for Bun
+  env?: Record<string, string>; // Environment variables
 }
 ```
 
-## Implementação Detalhada
+## Detailed Implementation
 
 ### 1. DryRun Implementation
 
 ```typescript
 public async dryRun(options: DryRunOptions): Promise<DryRunResult> {
   try {
-    // Executar todos os testes
+    // Execute all tests
     const testResult = await this.bunAdapter.runTests([], {
       timeout: options.timeout,
       coverage: options.coverageAnalysis !== 'off'
     });
-    
-    // Processar resultados
+
+    // Process results
     const tests = testResult.tests.map(test => ({
       id: test.id,
       name: test.name,
       timeSpentMs: test.duration,
       status: this.mapTestStatus(test.status)
     }));
-    
-    // Coletar cobertura se habilitado
+
+    // Collect coverage if enabled
     let mutantCoverage = undefined;
     if (options.coverageAnalysis !== 'off') {
       mutantCoverage = await this.coverageCollector.collect(testResult);
     }
-    
+
     return {
       status: DryRunStatus.Complete,
       tests,
@@ -232,20 +235,20 @@ public async dryRun(options: DryRunOptions): Promise<DryRunResult> {
 ```typescript
 public async mutantRun(options: MutantRunOptions): Promise<MutantRunResult> {
   try {
-    // Configurar ambiente com mutante ativo
+    // Configure environment with active mutant
     const env = {
       __STRYKER_ACTIVE_MUTANT__: options.activeMutant.id.toString()
     };
-    
-    // Executar apenas testes relevantes
+
+    // Execute only relevant tests
     const testFiles = options.testFilter || [];
     const testResult = await this.bunAdapter.runTests(testFiles, {
       timeout: options.timeout,
       bail: true,
       env
     });
-    
-    // Determinar resultado do mutante
+
+    // Determine mutant result
     if (testResult.failed > 0) {
       return {
         status: MutantRunStatus.Killed,
@@ -253,7 +256,7 @@ public async mutantRun(options: MutantRunOptions): Promise<MutantRunResult> {
         nrOfTests: testResult.total
       };
     }
-    
+
     return {
       status: MutantRunStatus.Survived,
       nrOfTests: testResult.total
@@ -269,21 +272,21 @@ public async mutantRun(options: MutantRunOptions): Promise<MutantRunResult> {
 }
 ```
 
-### 3. Parser de Resultados
+### 3. Result Parser
 
 ```typescript
 class BunResultParser {
   parse(output: string): BunTestResult {
-    // Parser do output do Bun test
-    // Formato esperado: TAP ou JSON
+    // Parse Bun test output
+    // Expected format: TAP or JSON
     const lines = output.split('\n');
     const tests: TestResult[] = [];
     let passed = 0;
     let failed = 0;
-    
+
     for (const line of lines) {
       if (line.startsWith('✓')) {
-        // Test passou
+        // Test passed
         const match = /✓ (.+) \((\d+)ms\)/.exec(line);
         if (match) {
           tests.push({
@@ -294,7 +297,7 @@ class BunResultParser {
           passed++;
         }
       } else if (line.startsWith('✗')) {
-        // Test falhou
+        // Test failed
         const match = /✗ (.+)/.exec(line);
         if (match) {
           tests.push({
@@ -305,7 +308,7 @@ class BunResultParser {
         }
       }
     }
-    
+
     return {
       tests,
       passed,
@@ -316,16 +319,16 @@ class BunResultParser {
 }
 ```
 
-## Otimizações de Performance
+## Performance Optimizations
 
-### 1. Reuso de Processo
+### 1. Process Reuse
 
-Manter processo Bun vivo entre execuções quando possível:
+Keep Bun process alive between executions when possible:
 
 ```typescript
 class BunProcessPool {
   private processes: Map<string, ChildProcess> = new Map();
-  
+
   async getProcess(workerId: string): Promise<ChildProcess> {
     if (!this.processes.has(workerId)) {
       const process = spawn('bun', ['test', '--watch'], {
@@ -340,41 +343,41 @@ class BunProcessPool {
 
 ### 2. Test Filtering
 
-Executar apenas testes que cobrem o mutante:
+Execute only tests that cover the mutant:
 
 ```typescript
 function filterTestsForMutant(
-  mutant: Mutant, 
+  mutant: Mutant,
   coverage: MutantCoverage
 ): string[] {
   const coveringTests = [];
-  
+
   for (const [testId, mutants] of Object.entries(coverage.perTest)) {
     if (mutants[mutant.id]) {
       coveringTests.push(testId);
     }
   }
-  
+
   return coveringTests;
 }
 ```
 
 ### 3. Parallel Execution
 
-Aproveitar concorrência do StrykerJS:
+Leverage StrykerJS concurrency:
 
 ```typescript
 public capabilities(): TestRunnerCapabilities {
   return {
-    reloadEnvironment: false,  // Reusar ambiente quando possível
-    concurrent: true           // Suporta execução paralela
+    reloadEnvironment: false,  // Reuse environment when possible
+    concurrent: true           // Supports parallel execution
   };
 }
 ```
 
-## Tratamento de Erros
+## Error Handling
 
-### 1. Validação de Ambiente
+### 1. Environment Validation
 
 ```typescript
 async validateBunInstallation(): Promise<void> {
@@ -393,26 +396,26 @@ async validateBunInstallation(): Promise<void> {
 
 ```typescript
 async runWithTimeout<T>(
-  promise: Promise<T>, 
+  promise: Promise<T>,
   timeoutMs: number
 ): Promise<T> {
   const timeout = new Promise<never>((_, reject) => {
     setTimeout(() => reject(new TimeoutError()), timeoutMs);
   });
-  
+
   return Promise.race([promise, timeout]);
 }
 ```
 
-## Exemplo de Uso
+## Usage Example
 
-### 1. Instalação
+### 1. Installation
 
 ```bash
 npm install --save-dev @stryker-mutator/core @stryker-mutator/bun-runner
 ```
 
-### 2. Configuração (stryker.config.json)
+### 2. Configuration (stryker.config.json)
 
 ```json
 {
@@ -434,53 +437,60 @@ npm install --save-dev @stryker-mutator/core @stryker-mutator/bun-runner
 }
 ```
 
-### 3. Execução
+### 3. Execution
 
 ```bash
 npx stryker run
 ```
 
-## Roadmap de Desenvolvimento
+## Development Roadmap
 
-### Fase 1: MVP (2-3 semanas)
-- [ ] Implementar TestRunner básico
-- [ ] Suporte para command runner
-- [ ] Testes básicos funcionando
+### Phase 1: MVP (2-3 weeks)
 
-### Fase 2: Otimizações (2-3 semanas)
+- [ ] Implement basic TestRunner
+- [ ] Support for command runner
+- [ ] Basic tests working
+
+### Phase 2: Optimizations (2-3 weeks)
+
 - [ ] Coverage analysis
 - [ ] Test filtering
-- [ ] Reuso de processo
+- [ ] Process reuse
 
-### Fase 3: Features Avançadas (3-4 semanas)
+### Phase 3: Advanced Features (3-4 weeks)
+
 - [ ] Watch mode
 - [ ] Snapshot testing
 - [ ] Source maps support
-- [ ] Reporter customizado
+- [ ] Custom reporter
 
-### Fase 4: Polish (1-2 semanas)
-- [ ] Documentação completa
-- [ ] Exemplos
+### Phase 4: Polish (1-2 weeks)
+
+- [ ] Complete documentation
+- [ ] Examples
 - [ ] CI/CD
-- [ ] Publicação NPM
+- [ ] NPM publication
 
-## Considerações Técnicas
+## Technical Considerations
 
-### 1. Compatibilidade
+### 1. Compatibility
+
 - Bun >= 1.0.0
 - StrykerJS >= 7.0.0
-- Node.js >= 16 (para StrykerJS)
+- Node.js >= 16 (for StrykerJS)
 
-### 2. Limitações Conhecidas
-- Coverage analysis pode ter overhead inicial
-- Alguns features do Jest podem não ser suportados
-- Mutações em arquivos TypeScript requerem transpilação
+### 2. Known Limitations
 
-### 3. Alternativas Consideradas
-- Usar command runner (simples mas lento)
-- Fork do Jest runner (complexo devido diferenças)
-- Wrapper sobre test runner do Node.js (limitado)
+- Coverage analysis may have initial overhead
+- Some Jest features may not be supported
+- TypeScript file mutations require transpilation
 
-## Conclusão
+### 3. Considered Alternatives
 
-Este design proporciona uma integração eficiente entre StrykerJS e Bun, aproveitando as capacidades de ambas ferramentas. A implementação focada em performance e compatibilidade permitirá que projetos usando Bun possam beneficiar-se de mutation testing sem sacrificar velocidade.
+- Use command runner (simple but slow)
+- Fork Jest runner (complex due to differences)
+- Wrapper over Node.js test runner (limited)
+
+## Conclusion
+
+This design provides an efficient integration between StrykerJS and Bun, leveraging the capabilities of both tools. The implementation focused on performance and compatibility will allow projects using Bun to benefit from mutation testing without sacrificing speed.

@@ -14,7 +14,6 @@ coverage/
 .nyc_output/
 
 # Development files
-.github/
 .vscode/
 .idea/
 *.log
