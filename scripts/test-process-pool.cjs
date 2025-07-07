@@ -6,7 +6,6 @@
 
 const { execSync } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 
 // Colors
 const colors = {
@@ -28,7 +27,7 @@ function getProcessCount() {
       stdio: ['ignore', 'pipe', 'ignore']
     });
     return parseInt(result.trim());
-  } catch (error) {
+  } catch (_error) {
     return 0;
   }
 }
@@ -36,7 +35,7 @@ function getProcessCount() {
 // Monitor processes in real-time
 function startProcessMonitor(interval = 1000) {
   let maxCount = 0;
-  let counts = [];
+  const counts = [];
   
   const monitor = setInterval(() => {
     const count = getProcessCount();
@@ -142,7 +141,7 @@ async function testSpecificMutations() {
       console.log(`${colors.green}✓ Success in ${duration}s${colors.reset}`);
       console.log(`${colors.blue}Max processes: ${stats.maxCount}, Average: ${stats.average.toFixed(1)}${colors.reset}`);
       
-    } catch (error) {
+    } catch (_error) {
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       const stats = monitor.stop();
       

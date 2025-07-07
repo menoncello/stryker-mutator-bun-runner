@@ -45,7 +45,7 @@ function getProcessCount() {
       encoding: 'utf8' 
     });
     return parseInt(result.trim());
-  } catch (error) {
+  } catch (_error) {
     return 0;
   }
 }
@@ -54,7 +54,7 @@ function getProcessCount() {
 function killBunProcesses() {
   try {
     execSync('pkill -f "bun" || true', { stdio: 'ignore' });
-  } catch (error) {
+  } catch (_error) {
     // Ignore errors
   }
 }

@@ -7,11 +7,11 @@ import { TestResult } from '@stryker-mutator/api/test-runner';
 export class TestFilter {
   /**
    * Get the test IDs that cover a specific mutant
+   * @param mutant - The mutant to check coverage for
+   * @param mutantCoverage - Coverage information from dry run
+   * @returns Array of test IDs that cover the mutant
    */
-  public static getTestsForMutant(
-    mutant: Mutant,
-    mutantCoverage: MutantCoverage | undefined
-  ): string[] {
+  public static getTestsForMutant(mutant: Mutant, mutantCoverage: MutantCoverage | undefined): string[] {
     if (!mutantCoverage) {
       // No coverage information available, run all tests
       return [];
@@ -44,11 +44,11 @@ export class TestFilter {
 
   /**
    * Filter test results to only include specific test IDs
+   * @param allTests - All available test results
+   * @param testIdsToRun - Test IDs to include in the filtered results
+   * @returns Filtered array of test results
    */
-  public static filterTests(
-    allTests: TestResult[],
-    testIdsToRun: string[]
-  ): TestResult[] {
+  public static filterTests(allTests: TestResult[], testIdsToRun: string[]): TestResult[] {
     if (testIdsToRun.length === 0) {
       return allTests;
     }
@@ -59,6 +59,8 @@ export class TestFilter {
 
   /**
    * Create a test name pattern for Bun based on test IDs
+   * @param testIds - Array of test IDs to create pattern from
+   * @returns Regex pattern string or undefined if no test IDs
    */
   public static createTestNamePattern(testIds: string[]): string | undefined {
     if (testIds.length === 0) {
@@ -66,9 +68,7 @@ export class TestFilter {
     }
 
     // Escape special regex characters in test names
-    const escapedNames = testIds.map(id => 
-      id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    );
+    const escapedNames = testIds.map(id => id.replace(/[$()*+.?[\\\]^{|}]/g, '\\$&'));
 
     // Create a pattern that matches any of the test names
     return `^(${escapedNames.join('|')})$`;
@@ -76,11 +76,11 @@ export class TestFilter {
 
   /**
    * Check if we should run all tests for a mutant
+   * @param mutant - The mutant to check
+   * @param mutantCoverage - Coverage information from dry run
+   * @returns True if all tests should run, false if we can filter
    */
-  public static shouldRunAllTests(
-    mutant: Mutant,
-    mutantCoverage: MutantCoverage | undefined
-  ): boolean {
+  public static shouldRunAllTests(mutant: Mutant, mutantCoverage: MutantCoverage | undefined): boolean {
     if (!mutantCoverage) {
       return true;
     }

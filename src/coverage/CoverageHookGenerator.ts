@@ -1,15 +1,27 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
+/**
+ * Generates coverage hook files for Bun test instrumentation.
+ * Creates JavaScript hooks that wrap test functions to track coverage.
+ */
 export class CoverageHookGenerator {
   private coverageHookPath?: string;
 
+  /**
+   * Creates a coverage hook file that will be preloaded by Bun.
+   * @returns Promise that resolves to the path of the created hook file
+   */
   public async createHookFile(): Promise<string> {
     const hookContent = this.generateHookContent();
     await this.writeHookFile(hookContent);
     return this.coverageHookPath!;
   }
 
+  /**
+   * Cleans up the generated coverage hook file.
+   * Silently ignores errors if the file doesn't exist.
+   */
   public async cleanup(): Promise<void> {
     if (this.coverageHookPath) {
       try {
@@ -20,6 +32,10 @@ export class CoverageHookGenerator {
     }
   }
 
+  /**
+   * Generates the complete JavaScript content for the coverage hook.
+   * @returns JavaScript code that sets up coverage tracking
+   */
   public generateHookContent(): string {
     return `
 // Stryker Bun Coverage Hook
@@ -31,12 +47,20 @@ ${this.getTestWrapperCode()}
 `;
   }
 
+  /**
+   * Generates initialization code that sets up the global Stryker object.
+   * @returns JavaScript code for initializing coverage tracking
+   */
   public getInitializationCode(): string {
     return `console.log('[COVERAGE HOOK] Loading coverage hook...');
 if (typeof globalThis.__stryker__ === 'undefined') { globalThis.__stryker__ = {}; }
 console.log('[COVERAGE HOOK] __stryker__ object:', globalThis.__stryker__);`;
   }
 
+  /**
+   * Generates code that wraps test functions to track coverage per test.
+   * @returns JavaScript code that wraps global test/it functions
+   */
   public getTestWrapperCode(): string {
     return `const originalTest = globalThis.test || globalThis.it;
 if (originalTest) {
@@ -74,6 +98,10 @@ if (originalTest) {
 }`;
   }
 
+  /**
+   * Generates code for mutant tracking integration.
+   * @returns JavaScript code that enables mutant coverage tracking
+   */
   public getMutantTrackingCode(): string {
     return `// Hook is loaded - Stryker's instrumentation will handle coverage tracking
 // The test wrapper above sets currentTestId which is all Stryker needs`;

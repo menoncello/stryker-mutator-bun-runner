@@ -15,30 +15,16 @@
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
     "check": "npm run typecheck && npm run lint && npm run test",
-    "stryker": "./run-stryker.sh",
-    "stryker:direct": "stryker run",
-    "stryker:debug": "stryker run --logLevel debug",
-    "stryker:bun": "node scripts/cleanup-processes.cjs && stryker run -c stryker-bun.config.json",
-    "stryker:pool": "node scripts/test-process-pool.cjs",
+    "clean": "rm -rf dist coverage .nyc_output .stryker-tmp reports",
+    "clean:temp": "rm -f coverage/*.tmp coverage/.*.tmp",
+    "dev": "npm run build:watch",
+    "ci": "npm run clean && npm run build && npm run check && npm run test:coverage",
     "cleanup": "node scripts/cleanup-processes.cjs",
-    "docs": "typedoc --out docs/typedoc src/index.ts",
-    "docs:watch": "typedoc --watch --out docs/typedoc src/index.ts",
     "prepare": "husky",
     "prepublishOnly": "npm test && npm run lint",
     "version": "npm run lint:fix && git add -A src",
     "postversion": "git push && git push --tags",
-    "diagnose": "node scripts/diagnose-process-explosion.cjs",
-    "diagnose:files": "node scripts/test-individual-files.cjs",
-    "diagnose:tests": "node scripts/test-individual-tests.cjs",
-    "analyze": "npm run analyze:duplication && npm run analyze:complexity && npm run analyze:deps && npm run analyze:size",
-    "analyze:duplication": "jscpd src",
-    "analyze:complexity": "madge --circular --extensions ts src/",
-    "analyze:deps": "madge --image deps.svg --extensions ts src/",
-    "analyze:size": "size-limit",
-    "analyze:lint-all": "eslint src test --max-warnings 0",
-    "precommit": "npm run lint && npm run typecheck && npm test",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\""
+    "diagnose": "node scripts/diagnose-process-explosion.cjs"
   },
   "keywords": [
     "stryker",
@@ -96,6 +82,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsdoc": "^51.3.4",
     "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-regexp": "^2.9.0",
     "eslint-plugin-security": "^3.0.1",
     "eslint-plugin-sonarjs": "^3.0.4",
     "eslint-plugin-unicorn": "^59.0.1",
@@ -108,20 +95,6 @@
     "source-map": "^0.7.4",
     "typescript": "^5.0.0"
   },
-  "size-limit": [
-    {
-      "path": "dist/index.js",
-      "limit": "50 KB"
-    },
-    {
-      "path": "dist/src/BunTestRunner.js",
-      "limit": "15 KB"
-    },
-    {
-      "path": "dist/src/BunTestAdapter.js",
-      "limit": "10 KB"
-    }
-  ],
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix",

@@ -8,3 +8,34 @@ reports/
 *.tsbuildinfo
 .env
 .env.local
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+
+# NYC output
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*~
+.*.swp
+.*.swo
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Additional test artifacts
+test-results/
+test-output/
+
+# Bun specific
+bun.lockb
+
+# Size limit config (generated)
+.size-limit.json

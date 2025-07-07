@@ -20,16 +20,30 @@ import { Logger } from '@stryker-mutator/api/logging';
 import { tokens, commonTokens } from '@stryker-mutator/api/plugin';
 import { execa } from 'execa';
 import * as semver from 'semver';
-import { BunTestRunnerOptions, BunRunOptions, StrykerBunOptions, BunTestResult, BunTestResultData } from './BunTestRunnerOptions.js';
+import {
+  BunTestRunnerOptions,
+  BunRunOptions,
+  StrykerBunOptions,
+  BunTestResult,
+  BunTestResultData
+} from './BunTestRunnerOptions.js';
 import { BunTestAdapter } from './BunTestAdapter.js';
 import { TestFilter, CoverageResult } from './coverage';
 
 class Timer {
   private startTime: number = 0;
-  reset(): void { this.startTime = Date.now(); }
-  elapsedMs(): number { return Date.now() - this.startTime; }
+  reset(): void {
+    this.startTime = Date.now();
+  }
+  elapsedMs(): number {
+    return Date.now() - this.startTime;
+  }
 }
 
+/**
+ * Test runner implementation for Bun that integrates with StrykerJS mutation testing framework.
+ * This runner executes tests using the Bun runtime and provides test results back to Stryker.
+ */
 export class BunTestRunner implements TestRunner {
   private static instanceCount = 0;
   private readonly instanceId: number;
@@ -40,7 +54,7 @@ export class BunTestRunner implements TestRunner {
   private mutantCoverage?: MutantCoverage;
 
   public static readonly inject = tokens(commonTokens.logger, commonTokens.options);
-  
+
   /**
    * Reset the static instance counter - useful for testing and cleanup
    */
@@ -48,10 +62,17 @@ export class BunTestRunner implements TestRunner {
     BunTestRunner.instanceCount = 0;
   }
 
+  /**
+   * Creates an instance of BunTestRunner.
+   * @param logger - StrykerJS logger instance for debug output
+   * @param options - StrykerJS configuration options including Bun-specific settings
+   */
   constructor(logger: Logger, options: StrykerOptions) {
     this.instanceId = ++BunTestRunner.instanceCount;
     this.log = logger;
-    this.log.debug(`BunTestRunner instance ${this.instanceId} created (total instances: ${BunTestRunner.instanceCount})`);
+    this.log.debug(
+      `BunTestRunner instance ${this.instanceId} created (total instances: ${BunTestRunner.instanceCount})`
+    );
     const strykerBunOptions = options as StrykerBunOptions;
     this.options = {
       testFiles: ['**/*.test.{js,ts,jsx,tsx}', '**/*.spec.{js,ts,jsx,tsx}'],
@@ -62,12 +83,22 @@ export class BunTestRunner implements TestRunner {
     this.bunAdapter = new BunTestAdapter(this.log, this.options);
   }
 
+  /**
+   * Initializes the test runner and validates Bun installation.
+   * @returns Promise that resolves when initialization is complete
+   * @throws Error if Bun is not installed or version is incompatible
+   */
   public async init(): Promise<void> {
     this.log.debug('Initializing Bun test runner');
     await this.validateBunInstallation();
     await this.bunAdapter.init();
   }
 
+  /**
+   * Performs a dry run of all tests without mutations to collect test information.
+   * @param options - Dry run options including timeout and coverage analysis settings
+   * @returns Promise with test results and optional coverage information
+   */
   public async dryRun(options: DryRunOptions): Promise<DryRunResult> {
     this.log.debug('Starting dry run');
     this.timer.reset();
@@ -92,6 +123,11 @@ export class BunTestRunner implements TestRunner {
     }
   }
 
+  /**
+   * Runs tests with a specific mutant activated to determine if tests kill the mutant.
+   * @param options - Mutant run options including the active mutant and test filter
+   * @returns Promise with mutant run results (killed, survived, or timeout)
+   */
   public async mutantRun(options: MutantRunOptions): Promise<MutantRunResult> {
     this.log.debug(`Running mutant ${options.activeMutant.id}`);
     this.timer.reset();
@@ -99,7 +135,7 @@ export class BunTestRunner implements TestRunner {
     try {
       const runOptions = this.createMutantRunOptions(options);
       const filteredTests = this.getFilteredTests(options);
-      
+
       if (filteredTests.shouldSkip) {
         return this.createSurvivedResult(0);
       }
@@ -115,11 +151,21 @@ export class BunTestRunner implements TestRunner {
     }
   }
 
-  public async dispose(): Promise<void> { 
+  /**
+   * Disposes of the test runner and cleans up resources.
+   * @returns Promise that resolves when cleanup is complete
+   */
+  public async dispose(): Promise<void> {
     this.log.debug(`BunTestRunner instance ${this.instanceId} disposing`);
-    await this.bunAdapter.dispose(); 
+    await this.bunAdapter.dispose();
   }
-  public capabilities(): TestRunnerCapabilities { return { reloadEnvironment: true }; }
+  /**
+   * Returns the capabilities of this test runner.
+   * @returns Object indicating that this runner requires environment reload between runs
+   */
+  public capabilities(): TestRunnerCapabilities {
+    return { reloadEnvironment: true };
+  }
 
   private mapTestResults(tests: BunTestResultData[]): TestResult[] {
     return tests.map((test, index) => {
@@ -128,12 +174,16 @@ export class BunTestRunner implements TestRunner {
         name: test.name,
         timeSpentMs: test.duration || 0
       };
-      
+
       switch (test.status) {
         case 'passed':
           return { ...baseProps, status: TestStatus.Success } as SuccessTestResult;
         case 'failed':
-          return { ...baseProps, status: TestStatus.Failed, failureMessage: test.error || 'Test failed' } as FailedTestResult;
+          return {
+            ...baseProps,
+            status: TestStatus.Failed,
+            failureMessage: test.error || 'Test failed'
+          } as FailedTestResult;
         case 'skipped':
           return { ...baseProps, status: TestStatus.Skipped } as SkippedTestResult;
         default:
@@ -149,7 +199,7 @@ export class BunTestRunner implements TestRunner {
   private processCoverageData(coverage: CoverageResult, result: CompleteDryRunResult): void {
     this.log.debug('Processing coverage data');
     const mutantCoverage = this.bunAdapter.getCoverageCollector().toMutantCoverage(coverage.coverage);
-    
+
     result.mutantCoverage = mutantCoverage;
     this.mutantCoverage = mutantCoverage;
     this.log.debug(`Collected coverage for ${Object.keys(mutantCoverage.perTest).length} tests`);
@@ -160,15 +210,19 @@ export class BunTestRunner implements TestRunner {
     if (error && typeof error === 'object' && 'timedOut' in error && error.timedOut) {
       return { status: DryRunStatus.Timeout, reason: `Dry run timed out after ${options.timeout}ms` };
     }
-    return { status: DryRunStatus.Error, errorMessage: (error as { message?: string }).message || 'Unknown error during dry run' };
+    const errorMessage =
+      error && typeof error === 'object' && 'message' in error && typeof error.message === 'string'
+        ? error.message
+        : 'Unknown error during dry run';
+    return { status: DryRunStatus.Error, errorMessage };
   }
 
   private createMutantRunOptions(options: MutantRunOptions): BunRunOptions {
-    return { 
-      timeout: options.timeout, 
-      bail: true, 
-      activeMutant: parseInt(options.activeMutant.id, 10), 
-      env: { __STRYKER_ACTIVE_MUTANT__: options.activeMutant.id.toString() } 
+    return {
+      timeout: options.timeout,
+      bail: true,
+      activeMutant: parseInt(options.activeMutant.id, 10),
+      env: { __STRYKER_ACTIVE_MUTANT__: options.activeMutant.id.toString() }
     };
   }
 
@@ -178,28 +232,28 @@ export class BunTestRunner implements TestRunner {
       this.log.debug(`Using test filter for ${options.testFilter.length} tests`);
       return { testNamePattern };
     }
-    
+
     if (this.mutantCoverage) {
       return this.filterTestsByCoverage(options);
     }
-    
+
     return {};
   }
 
   private filterTestsByCoverage(options: MutantRunOptions): { testNamePattern?: string; shouldSkip?: boolean } {
-    const coveringTests = TestFilter.getTestsForMutant(options.activeMutant, this.mutantCoverage!);
-    
+    const coveringTests = TestFilter.getTestsForMutant(options.activeMutant, this.mutantCoverage);
+
     if (coveringTests.length > 0) {
       const testNamePattern = TestFilter.createTestNamePattern(coveringTests);
       this.log.debug(`Mutant ${options.activeMutant.id} is covered by ${coveringTests.length} tests`);
       return { testNamePattern };
     }
-    
-    if (!TestFilter.shouldRunAllTests(options.activeMutant, this.mutantCoverage!)) {
+
+    if (!TestFilter.shouldRunAllTests(options.activeMutant, this.mutantCoverage)) {
       this.log.debug(`Mutant ${options.activeMutant.id} is not covered by any test`);
       return { shouldSkip: true };
     }
-    
+
     return {};
   }
 
@@ -208,7 +262,7 @@ export class BunTestRunner implements TestRunner {
       return {
         status: MutantRunStatus.Killed,
         failureMessage: result.failedTests?.[0]?.error || 'Test failed',
-        killedBy: result.failedTests?.map((t) => t.id || t.name) || [],
+        killedBy: result.failedTests?.map(t => t.id || t.name) || [],
         nrOfTests: result.total
       };
     }
@@ -233,7 +287,7 @@ export class BunTestRunner implements TestRunner {
       const { stdout } = await execa('bun', ['--version']);
       const version = stdout.trim();
       this.log.debug(`Found Bun version: ${version}`);
-      
+
       if (!semver.gte(version.replace('bun ', ''), '1.0.0')) {
         throw new Error('Bun version 1.0.0 or higher is required');
       }

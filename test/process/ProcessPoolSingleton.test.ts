@@ -21,7 +21,7 @@ describe('ProcessPoolSingleton', () => {
       isFatalEnabled: () => true,
       isTraceEnabled: () => true
     };
-    
+
     // Reset singleton state before each test
     ProcessPoolSingleton.reset();
   });
@@ -33,7 +33,7 @@ describe('ProcessPoolSingleton', () => {
 
   test('should create a singleton instance on first call', () => {
     const pool1 = ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
-    
+
     expect(pool1).toBeInstanceOf(BunProcessPool);
     expect(mockLogger.debug).toHaveBeenCalledWith('Creating singleton process pool instance');
     expect(mockLogger.debug).toHaveBeenCalledWith('Process pool reference count: 1');
@@ -42,7 +42,7 @@ describe('ProcessPoolSingleton', () => {
   test('should return the same instance on subsequent calls', () => {
     const pool1 = ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
     const pool2 = ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 8 });
-    
+
     expect(pool1).toBe(pool2);
     expect(mockLogger.debug).toHaveBeenCalledWith('Creating singleton process pool instance');
     expect(mockLogger.debug).toHaveBeenCalledWith('Process pool reference count: 1');
@@ -53,7 +53,7 @@ describe('ProcessPoolSingleton', () => {
     ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
     ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
     ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
-    
+
     expect(mockLogger.debug).toHaveBeenCalledWith('Process pool reference count: 1');
     expect(mockLogger.debug).toHaveBeenCalledWith('Process pool reference count: 2');
     expect(mockLogger.debug).toHaveBeenCalledWith('Process pool reference count: 3');
@@ -62,9 +62,9 @@ describe('ProcessPoolSingleton', () => {
   test('should decrement reference count on release', async () => {
     ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
     ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
-    
+
     await ProcessPoolSingleton.release(mockLogger);
-    
+
     expect(mockLogger.debug).toHaveBeenCalledWith('Process pool reference count after release: 1');
   });
 
@@ -72,9 +72,9 @@ describe('ProcessPoolSingleton', () => {
     const pool = ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
     const disposeSpy = mock(pool.dispose.bind(pool));
     pool.dispose = disposeSpy;
-    
+
     await ProcessPoolSingleton.release(mockLogger);
-    
+
     expect(mockLogger.debug).toHaveBeenCalledWith('Process pool reference count after release: 0');
     expect(mockLogger.debug).toHaveBeenCalledWith('Disposing singleton process pool');
     expect(disposeSpy).toHaveBeenCalled();
@@ -85,9 +85,9 @@ describe('ProcessPoolSingleton', () => {
     ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
     const disposeSpy = mock(pool.dispose.bind(pool));
     pool.dispose = disposeSpy;
-    
+
     await ProcessPoolSingleton.release(mockLogger);
-    
+
     expect(mockLogger.debug).toHaveBeenCalledWith('Process pool reference count after release: 1');
     expect(disposeSpy).not.toHaveBeenCalled();
   });
@@ -96,14 +96,14 @@ describe('ProcessPoolSingleton', () => {
     const pool = ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
     ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
     ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
-    
+
     const disposeSpy = mock(pool.dispose.bind(pool));
     pool.dispose = disposeSpy;
-    
+
     await ProcessPoolSingleton.forceDispose();
-    
+
     expect(disposeSpy).toHaveBeenCalled();
-    
+
     // Should create a new instance after force dispose
     const newPool = ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
     expect(newPool).not.toBe(pool);
@@ -118,46 +118,46 @@ describe('ProcessPoolSingleton', () => {
   test('should reset singleton state', () => {
     const pool1 = ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
     ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
-    
+
     ProcessPoolSingleton.reset();
-    
+
     const pool2 = ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
     expect(pool2).not.toBe(pool1);
     expect(mockLogger.debug).toHaveBeenCalledWith('Process pool reference count: 1');
   });
 
   test('should use default maxWorkers of 8 when not specified', () => {
-    const pool = ProcessPoolSingleton.getInstance(mockLogger, {});
-    
+    const _pool = ProcessPoolSingleton.getInstance(mockLogger, {});
+
     // Access the private instance to check the options
     const privateInstance = (ProcessPoolSingleton as unknown as { instance: BunProcessPool }).instance;
     const options = (privateInstance as unknown as { options: { maxWorkers: number } }).options;
-    
+
     expect(options.maxWorkers).toBe(8);
   });
 
   test('should respect provided maxWorkers option', () => {
-    const pool = ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 12 });
-    
+    const _pool = ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 12 });
+
     // Access the private instance to check the options
     const privateInstance = (ProcessPoolSingleton as unknown as { instance: BunProcessPool }).instance;
     const options = (privateInstance as unknown as { options: { maxWorkers: number } }).options;
-    
+
     expect(options.maxWorkers).toBe(12);
   });
 
   test('should handle concurrent getInstance calls correctly', () => {
-    const promises = Array.from({ length: 5 }, (_, i) => 
+    const promises = Array.from({ length: 5 }, (_, _i) =>
       Promise.resolve(ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 }))
     );
-    
+
     return Promise.all(promises).then(pools => {
       // All should be the same instance
       const firstPool = pools[0];
       pools.forEach(pool => {
         expect(pool).toBe(firstPool);
       });
-      
+
       expect(mockLogger.debug).toHaveBeenCalledWith('Process pool reference count: 5');
     });
   });
@@ -165,7 +165,7 @@ describe('ProcessPoolSingleton', () => {
   test('should handle release after reset correctly', async () => {
     ProcessPoolSingleton.getInstance(mockLogger, { maxWorkers: 4 });
     ProcessPoolSingleton.reset();
-    
+
     // Release should not throw even though instance was reset
     await expect(ProcessPoolSingleton.release(mockLogger)).resolves.toBeUndefined();
     expect(mockLogger.debug).toHaveBeenCalledWith('Process pool reference count after release: -1');

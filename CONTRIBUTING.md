@@ -35,30 +35,52 @@ Pull requests are the best way to propose changes to the codebase. We actively w
 - npm (comes with Node.js)
 - Git
 
+### Optional Dependencies
+
+- **Graphviz** (for dependency visualization):
+
+  ```bash
+  # macOS
+  brew install graphviz
+
+  # Ubuntu/Debian
+  sudo apt-get install graphviz
+
+  # Windows
+  # Download from https://graphviz.org/download/
+  ```
+
+  Required for `npm run analyze:deps` to generate dependency diagrams. Without it, the analysis will still run but skip image generation.
+
 ### Getting Started
 
 1. Clone your fork:
+
 ```bash
 git clone https://github.com/YOUR_USERNAME/stryker-bun.git
 cd stryker-bun
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Build the project:
+
 ```bash
 npm run build
 ```
 
 4. Run tests:
+
 ```bash
 npm test
 ```
 
 5. Test with the example:
+
 ```bash
 cd example
 npm install
@@ -90,6 +112,10 @@ src/
 - **Build**: `npm run build`
 - **Build watch mode**: `npm run build:watch`
 - **Integration tests**: `cd example && npx stryker run`
+- **Code analysis**: `npm run analyze`
+  - Checks for duplicate code with jscpd
+  - Checks for circular dependencies with madge
+  - Skips dependency visualization without Graphviz
 
 ## Code Style
 
@@ -100,6 +126,7 @@ npm run lint
 ```
 
 Key style guidelines:
+
 - Use TypeScript for type safety
 - Follow existing code patterns
 - Add JSDoc comments for public APIs
@@ -124,10 +151,10 @@ describe('Component/Feature', () => {
     test('should behave correctly when...', () => {
       // Arrange
       const input = setupTestData();
-      
+
       // Act
       const result = functionUnderTest(input);
-      
+
       // Assert
       expect(result).toEqual(expectedOutput);
     });
@@ -154,6 +181,7 @@ We use GitHub issues to track public bugs. Report a bug by [opening a new issue]
 We welcome feature requests! Please use the [GitHub issues](https://github.com/stryker-mutator/stryker-bun/issues) to discuss new features.
 
 Include:
+
 - **Use case**: Why do you need this feature?
 - **Description**: What should the feature do?
 - **API design**: How should it work?
@@ -162,6 +190,7 @@ Include:
 ## Versioning
 
 This project follows [Semantic Versioning](https://semver.org/):
+
 - **MAJOR**: Incompatible API changes
 - **MINOR**: Backwards-compatible functionality additions
 - **PATCH**: Backwards-compatible bug fixes

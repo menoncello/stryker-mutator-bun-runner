@@ -8,6 +8,7 @@ import unicorn from 'eslint-plugin-unicorn';
 import jsdoc from 'eslint-plugin-jsdoc';
 import promise from 'eslint-plugin-promise';
 import functional from 'eslint-plugin-functional';
+import regexp from 'eslint-plugin-regexp';
 
 export default [
   js.configs.recommended,
@@ -29,7 +30,8 @@ export default [
       unicorn: unicorn,
       jsdoc: jsdoc,
       promise: promise,
-      functional: functional
+      functional: functional,
+      regexp: regexp
     },
     rules: {
       // TypeScript rules
@@ -52,9 +54,15 @@ export default [
           allowTypedFunctionExpressions: true
         }
       ],
+      '@typescript-eslint/no-deprecated': 'error',
       'prefer-const': 'error',
       'no-undef': 'off',
       'no-unused-vars': 'off',
+
+      // Core ESLint rules for code quality
+      'no-throw-literal': 'error',
+      'no-useless-escape': 'error',
+      'no-empty': ['error', { allowEmptyCatch: false }],
 
       // Size and complexity limits
       'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
@@ -91,6 +99,13 @@ export default [
       'unicorn/filename-case': 'off',
       'unicorn/prevent-abbreviations': 'off',
       'unicorn/prefer-module': 'off',
+
+      // Regexp rules for better regex quality
+      'regexp/no-dupe-characters-character-class': 'error',
+      'regexp/no-empty-character-class': 'error',
+      'regexp/no-useless-character-class': 'error',
+      'regexp/no-useless-escape': 'error',
+      'regexp/no-contradiction-with-assertion': 'error',
 
       // Promise rules
       'promise/always-return': 'error',
@@ -159,12 +174,13 @@ export default [
       parserOptions: {
         ecmaVersion: 2022,
         sourceType: 'module',
-        project: './tsconfig.json'
+        project: './tsconfig.test.json'
       }
     },
     plugins: {
       '@typescript-eslint': tsPlugin,
-      sonarjs: sonarjs
+      sonarjs: sonarjs,
+      regexp: regexp
     },
     rules: {
       // Basic TypeScript rules only for tests
@@ -192,6 +208,38 @@ export default [
       'functional/prefer-readonly-type': 'off',
       'functional/no-let': 'off',
       'functional/immutable-data': 'off'
+    }
+  },
+  {
+    files: ['scripts/**/*.cjs'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'commonjs',
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        setTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        module: 'readonly',
+        require: 'readonly',
+        exports: 'readonly',
+        Buffer: 'readonly'
+      }
+    },
+    rules: {
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_'
+        }
+      ],
+      'prefer-const': 'error',
+      'no-undef': 'error'
     }
   },
   {

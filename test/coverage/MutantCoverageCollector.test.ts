@@ -28,8 +28,8 @@ function createTestCoverage() {
   if (strykerGlobal?.mutantCoverage) {
     // Use Stryker's format: Record<string, Record<string, number>>
     strykerGlobal.mutantCoverage.perTest = {
-      'test1': { 'mutant1': 1, 'mutant2': 1 },
-      'test2': { 'mutant2': 1, 'mutant3': 1 }
+      test1: { mutant1: 1, mutant2: 1 },
+      test2: { mutant2: 1, mutant3: 1 }
     };
   }
 }
@@ -40,7 +40,9 @@ describe('MutantCoverageCollector', () => {
   beforeEach(() => {
     collector = new MutantCoverageCollector(mockLogger);
     const global = globalThis as Record<string, unknown>;
-    if (global.__stryker__) { delete global.__stryker__; }
+    if (global.__stryker__) {
+      delete global.__stryker__;
+    }
   });
 
   test('should initialize collector', async () => {
@@ -67,11 +69,11 @@ describe('MutantCoverageCollector', () => {
 
   test('should convert coverage to MutantCoverage format', () => {
     const bunCoverage = {
-      perTest: { 'test1': new Set(['1', '2']), 'test2': new Set(['2', '3']) },
+      perTest: { test1: new Set(['1', '2']), test2: new Set(['2', '3']) },
       executedLines: {}
     };
     const mutantCoverage = collector.toMutantCoverage(bunCoverage);
-    expect(mutantCoverage.perTest).toEqual({ 'test1': { '1': 1, '2': 1 }, 'test2': { '2': 1, '3': 1 } });
+    expect(mutantCoverage.perTest).toEqual({ test1: { '1': 1, '2': 1 }, test2: { '2': 1, '3': 1 } });
     expect(mutantCoverage.static).toEqual({ '1': 1, '2': 1, '3': 1 });
   });
 
@@ -81,8 +83,8 @@ describe('MutantCoverageCollector', () => {
     strykerGlobal.currentTestId = 'test1';
     MutantCoverageCollector.trackMutant('mutant1');
     MutantCoverageCollector.trackMutant('mutant2');
-    const coverage = strykerGlobal.mutantCoverage as { perTest: Record<string, Set<string>> };
-    expect(coverage.perTest['test1']).toEqual(new Set(['mutant1', 'mutant2']));
+    const coverage = strykerGlobal.mutantCoverage as { perTest: Record<string, Record<string, number>> };
+    expect(coverage.perTest['test1']).toEqual({ mutant1: 1, mutant2: 1 });
   });
 
   test('should dispose collector', async () => {

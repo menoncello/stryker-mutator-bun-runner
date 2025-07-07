@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Common Commands
 
 ### Development Commands
+
 ```bash
 # Build the TypeScript project
 npm run build
@@ -23,9 +24,14 @@ bun test test/BunResultParser.test.ts
 
 # Lint the codebase
 npm run lint
+
+# Run code analysis (duplicate detection, circular dependencies)
+npm run analyze
+# Note: analyze:deps requires Graphviz for dependency diagrams
 ```
 
 ### Testing the Plugin
+
 ```bash
 # Build first (required before testing example)
 npm run build
@@ -34,6 +40,39 @@ npm run build
 cd example
 npm install
 npx stryker run
+```
+
+### Code Analysis Commands
+
+```bash
+# Run all analysis tools
+npm run analyze
+
+# Check for duplicate code
+npm run analyze:duplication
+
+# Check for circular dependencies
+npm run analyze:complexity
+
+# Generate dependency diagram (requires Graphviz)
+npm run analyze:deps
+
+# Check bundle size
+npm run analyze:size
+```
+
+### Installing Optional Dependencies
+
+```bash
+# Install Graphviz for dependency visualization (optional)
+# macOS
+brew install graphviz
+
+# Ubuntu/Debian
+sudo apt-get install graphviz
+
+# Windows
+# Download from https://graphviz.org/download/
 ```
 
 ## Architecture Overview
@@ -70,6 +109,7 @@ This is a StrykerJS test runner plugin that enables Bun as a test runner for mut
 ### Configuration Schema
 
 The plugin accepts configuration through the `bun` property in stryker.config.json:
+
 - `testFiles`: Array of glob patterns for test files
 - `timeout`: Test timeout in milliseconds
 - `bail`: Stop on first failure
@@ -84,6 +124,7 @@ The plugin accepts configuration through the `bun` property in stryker.config.js
 ### Development Roadmap
 
 Current state: Phase 3 (Advanced Features) - Process pooling, watch mode, and snapshot testing completed
+
 - ✅ Phase 1: Basic test execution (completed)
 - ✅ Phase 2: Coverage analysis, test filtering (completed)
 - ✅ Phase 3: Process reuse, watch mode, snapshot testing (completed)
@@ -94,11 +135,13 @@ The detailed roadmap is documented in STRYKER_BUN_RUNNER.md.
 ### Coverage System Architecture
 
 The coverage system consists of:
+
 1. **MutantCoverageCollector**: Manages coverage data collection during test runs
 2. **TestFilter**: Filters tests based on mutant coverage to optimize execution
 3. **Coverage Hook**: JavaScript file injected via --preload to track test execution
 
 Coverage flow:
+
 1. During dry run with coverageAnalysis enabled, a hook file is created
 2. The hook wraps test functions to track which tests are executing
 3. Mutants can call `__stryker__.trackMutant()` to register coverage
@@ -108,11 +151,13 @@ Coverage flow:
 ### Process Pool Architecture (Phase 3)
 
 The process pool system improves performance by reusing Bun worker processes:
+
 1. **BunProcessPool**: Manages a pool of worker processes
 2. **WorkerManager**: Handles worker lifecycle and communication
 3. **BunWorker**: Worker process that executes test commands
 
 Features:
+
 - Configurable pool size with `maxWorkers` option
 - Automatic cleanup of idle workers
 - Support for watch mode with persistent processes
@@ -121,6 +166,7 @@ Features:
 ### Source Map Support (Phase 3)
 
 The plugin now includes automatic source map resolution:
+
 1. **SourceMapHandler**: Resolves TypeScript/JSX stack traces to original source
 2. Automatically detects and loads `.map` files
 3. Caches source map consumers for performance
@@ -130,24 +176,32 @@ The plugin now includes automatic source map resolution:
 
 When writing code, follow these ESLint rules to avoid common errors:
 
-1. **No unused variables**: Prefix unused variables with underscore (_) or remove them
+1. **No unused variables**: Prefix unused variables with underscore (\_) or remove them
 2. **No explicit `any` types**: Use proper type assertions with `unknown` as intermediate:
+
    ```typescript
    // Bad
    const obj = someValue as any;
-   
+
    // Good
    const obj = someValue as unknown as SpecificType;
    ```
+
 3. **Use const for variables that are never reassigned**
-4. **No unused function parameters**: Prefix with underscore (_) if needed:
+4. **No unused function parameters**: Prefix with underscore (\_) if needed:
+
    ```typescript
    // Bad
-   function handler(data, error) { /* only uses data */ }
-   
+   function handler(data, error) {
+     /* only uses data */
+   }
+
    // Good
-   function handler(data, _error) { /* only uses data */ }
+   function handler(data, _error) {
+     /* only uses data */
+   }
    ```
+
 5. **Type assertions for accessing private methods in tests**:
    ```typescript
    // Define interface for private methods

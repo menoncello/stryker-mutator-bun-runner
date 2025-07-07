@@ -16,21 +16,31 @@ export interface MappedStackFrame extends StackFrame {
   originalFunctionName?: string;
 }
 
+/**
+ * Handles source map resolution for stack traces
+ * Maps compiled JavaScript locations back to original TypeScript/JSX source
+ */
 export class SourceMapHandler {
   private readonly log: Logger;
   private readonly sourceMapCache: Map<string, SourceMapConsumer> = new Map();
-  
+
+  /**
+   * Creates a new SourceMapHandler instance
+   * @param logger - Logger instance for debug output
+   */
   constructor(logger: Logger) {
     this.log = logger;
   }
-  
+
   /**
    * Maps a stack trace to original source locations using source maps
+   * @param stackTrace - The stack trace string to map
+   * @returns Promise resolving to the mapped stack trace
    */
   public async mapStackTrace(stackTrace: string): Promise<string> {
     const lines = stackTrace.split('\n');
     const mappedLines: string[] = [];
-    
+
     for (const line of lines) {
       const frame = this.parseStackFrame(line);
       if (frame) {
@@ -40,27 +50,29 @@ export class SourceMapHandler {
         mappedLines.push(line);
       }
     }
-    
+
     return mappedLines.join('\n');
   }
-  
+
   /**
    * Maps a single stack frame to its original source location
+   * @param frame - The stack frame to map
+   * @returns Promise resolving to the mapped stack frame
    */
   public async mapStackFrame(frame: StackFrame): Promise<MappedStackFrame> {
     const sourceMapPath = `${frame.file}.map`;
-    
+
     if (!existsSync(sourceMapPath)) {
       return frame;
     }
-    
+
     try {
       const consumer = await this.getSourceMapConsumer(sourceMapPath);
       const originalPosition = consumer.originalPositionFor({
         line: frame.line,
         column: frame.column
       });
-      
+
       if (originalPosition.source) {
         return {
           ...frame,
@@ -73,24 +85,22 @@ export class SourceMapHandler {
     } catch (error) {
       this.log.debug(`Failed to map stack frame for ${frame.file}:`, error);
     }
-    
+
     return frame;
   }
-  
+
   /**
    * Parses a stack frame from a line of stack trace
+   * @param line - The stack trace line to parse
+   * @returns Parsed stack frame or null if not parseable
    */
   // eslint-disable-next-line complexity
   private parseStackFrame(line: string): StackFrame | null {
     // Common stack trace patterns:
     // at functionName (file:line:column)
     // at file:line:column
-    const patterns = [
-      /at\s+(.+?)\s+\((.+?):(\d+):(\d+)\)/,
-      /at\s+(.+?):(\d+):(\d+)/,
-      /^\s*(.+?):(\d+):(\d+)$/
-    ];
-    
+    const patterns = [/at\s+(.+?)\s+\((.+?):(\d+):(\d+)\)/, /at\s+(.+?):(\d+):(\d+)/, /^\s*(.+?):(\d+):(\d+)$/];
+
     for (const pattern of patterns) {
       const match = line.match(pattern);
       if (match) {
@@ -112,20 +122,23 @@ export class SourceMapHandler {
         }
       }
     }
-    
+
     return null;
   }
-  
+
   /**
    * Formats a mapped stack frame back into a string
+   * @param frame - The mapped stack frame
+   * @param originalLine - The original stack trace line
+   * @returns Formatted stack trace line
    */
   private formatStackFrame(frame: MappedStackFrame, originalLine: string): string {
     if (!frame.originalFile) {
       return originalLine;
     }
-    
+
     const location = `${frame.originalFile}:${frame.originalLine}:${frame.originalColumn}`;
-    
+
     if (frame.originalFunctionName) {
       return `    at ${frame.originalFunctionName} (${location})`;
     } else if (frame.functionName) {
@@ -134,24 +147,27 @@ export class SourceMapHandler {
       return `    at ${location}`;
     }
   }
-  
+
   /**
    * Gets or creates a source map consumer for a given source map file
+   * @param sourceMapPath - Path to the source map file
+   * @returns Promise resolving to the source map consumer
    */
   private async getSourceMapConsumer(sourceMapPath: string): Promise<SourceMapConsumer> {
     if (this.sourceMapCache.has(sourceMapPath)) {
       return this.sourceMapCache.get(sourceMapPath)!;
     }
-    
+
     const sourceMapContent = readFileSync(sourceMapPath, 'utf8');
     const consumer = await new SourceMapConsumer(sourceMapContent);
     this.sourceMapCache.set(sourceMapPath, consumer);
-    
+
     return consumer;
   }
-  
+
   /**
    * Cleans up source map consumers
+   * @returns Promise that resolves when cleanup is complete
    */
   public async dispose(): Promise<void> {
     for (const consumer of this.sourceMapCache.values()) {

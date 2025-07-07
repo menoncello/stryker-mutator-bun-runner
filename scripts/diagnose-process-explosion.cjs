@@ -5,7 +5,7 @@
  * Runs both test files and mutation testing individually
  */
 
-const { execSync, spawn } = require('child_process');
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -39,7 +39,7 @@ class ProcessMonitor {
         if (count > 20) {
           console.log(`${colors.red}⚠️  High process count: ${count} at ${elapsed}s${colors.reset}`);
         }
-      } catch (error) {
+      } catch (_error) {
         // Ignore errors
       }
     }, 1000);
@@ -59,7 +59,7 @@ class ProcessMonitor {
         stdio: ['ignore', 'pipe', 'ignore']
       });
       return parseInt(result.trim());
-    } catch (error) {
+    } catch (_error) {
       return 0;
     }
   }
@@ -88,9 +88,9 @@ async function runWithMonitoring(command, description) {
   
   const monitor = new ProcessMonitor();
   monitor.start();
+  const startTime = Date.now();
   
   try {
-    const startTime = Date.now();
     
     // Run command
     execSync(command, {
@@ -107,14 +107,14 @@ async function runWithMonitoring(command, description) {
       processReport: monitor.getReport()
     };
     
-  } catch (error) {
+  } catch (_error) {
     const duration = ((Date.now() - startTime) / 1000).toFixed(1);
     console.log(`${colors.red}✗ Failed after ${duration}s${colors.reset}`);
     
     return {
       success: false,
       duration,
-      error: error.message,
+      error: _error.message,
       processReport: monitor.getReport()
     };
     
