@@ -119,6 +119,7 @@ export class BunProcessPool {
             return;
           }
         }
+        
         setTimeout(checkAvailable, 100);
       };
       checkAvailable();
@@ -126,6 +127,7 @@ export class BunProcessPool {
   }
 
   private startIdleCheck(): void {
+
     this.idleCheckInterval = setInterval(() => {
       const now = Date.now();
       const processes = this.workerManager.getProcesses();

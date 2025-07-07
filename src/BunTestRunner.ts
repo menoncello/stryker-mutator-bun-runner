@@ -22,7 +22,7 @@ import { execa } from 'execa';
 import * as semver from 'semver';
 import { BunTestRunnerOptions, BunRunOptions, StrykerBunOptions, BunTestResult, BunTestResultData } from './BunTestRunnerOptions.js';
 import { BunTestAdapter } from './BunTestAdapter.js';
-import { TestFilter, CoverageResult } from './coverage/index.js';
+import { TestFilter, CoverageResult } from './coverage';
 
 class Timer {
   private startTime: number = 0;

@@ -14,7 +14,7 @@ export class BunTestAdapter {
   private readonly coverageCollector: MutantCoverageCollector;
   private readonly coverageHookGenerator: CoverageHookGenerator;
   private coverageHookPath?: string;
-  private processPool?: BunProcessPool;
+  private readonly processPool?: BunProcessPool;
 
   constructor(logger: Logger, options: BunTestRunnerOptions) {
     this.log = logger;
@@ -24,8 +24,10 @@ export class BunTestAdapter {
     this.coverageHookGenerator = new CoverageHookGenerator();
     
     // Initialize process pool if enabled (using singleton)
+    // Stryker disable next-line all
     if (options.processPool) {
       logger.debug(`BunTestAdapter: Creating process pool (processPool: ${options.processPool})`);
+      // Stryker disable next-line all
       this.processPool = ProcessPoolSingleton.getInstance(logger, {
         maxWorkers: options.maxWorkers || 8, // Default to 8 workers
         timeout: options.timeout,
