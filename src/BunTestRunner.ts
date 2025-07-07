@@ -28,7 +28,7 @@ import {
   BunTestResultData
 } from './BunTestRunnerOptions.js';
 import { BunTestAdapter } from './BunTestAdapter.js';
-import { TestFilter, CoverageResult } from "./coverage";
+import { TestFilter, CoverageResult } from "./coverage/index.js";
 
 class Timer {
   private startTime: number = 0;

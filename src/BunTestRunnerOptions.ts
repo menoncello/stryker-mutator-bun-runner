@@ -1,5 +1,5 @@
 import { StrykerOptions } from '@stryker-mutator/api/core';
-import { CoverageResult } from "./coverage";
+import { CoverageResult } from "./coverage/index.js";
 
 export interface BunTestRunnerOptions {
   /**
