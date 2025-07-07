@@ -24,7 +24,9 @@
     "prepublishOnly": "npm test && npm run lint",
     "version": "npm run lint:fix && git add -A src",
     "postversion": "git push && git push --tags",
-    "diagnose": "node scripts/diagnose-process-explosion.cjs"
+    "diagnose": "node scripts/diagnose-process-explosion.cjs",
+    "stryker": "stryker run",
+    "check:mutation": "node scripts/check-mutation-score.js"
   },
   "keywords": [
     "stryker",
@@ -102,6 +104,9 @@
     ],
     "*.{js,jsx,ts,tsx,json,md}": [
       "prettier --write"
+    ],
+    "src/**/*.ts": [
+      "bash -c 'npm run check:mutation'"
     ]
   }
 }

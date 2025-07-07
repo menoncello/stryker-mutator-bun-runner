@@ -55,6 +55,8 @@ export default [
         }
       ],
       '@typescript-eslint/no-deprecated': 'error',
+      '@typescript-eslint/no-unnecessary-condition': ['error', { allowConstantLoopConditions: true }],
+      '@typescript-eslint/no-redundant-type-constituents': 'error',
       'prefer-const': 'error',
       'no-undef': 'off',
       'no-unused-vars': 'off',
@@ -81,6 +83,7 @@ export default [
       'sonarjs/no-redundant-jump': 'error',
       'sonarjs/no-unused-collection': 'error',
       'sonarjs/prefer-single-boolean-return': 'error',
+      'sonarjs/no-useless-catch': 'error',
 
       // Unicorn rules for better code
       'unicorn/better-regex': 'error',
@@ -158,7 +161,7 @@ export default [
       'import/no-dynamic-require': 'error',
       'import/no-self-import': 'off',
       'import/no-cycle': 'off',
-      'import/no-useless-path-segments': 'off',
+      'import/no-useless-path-segments': ['error', { noUselessIndex: true }],
       'import/no-duplicates': 'error',
 
       // Security rules (adjusted for TypeScript)

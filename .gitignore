@@ -39,3 +39,7 @@ bun.lockb
 
 # Size limit config (generated)
 .size-limit.json
+
+# Mutation testing baseline
+.mutation-baseline.json
+.stryker-temp.json

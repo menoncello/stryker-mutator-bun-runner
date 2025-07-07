@@ -20,19 +20,22 @@ export class TestFilter {
     const coveringTests: string[] = [];
 
     // Check perTest coverage first (most specific)
-    if (mutantCoverage.perTest) {
-      for (const [testId, mutants] of Object.entries(mutantCoverage.perTest)) {
-        const mutantRecord = mutants as Record<string, number>;
-        const mutantCoverage = mutantRecord[mutant.id];
-        if (mutantCoverage && mutantCoverage > 0) {
-          coveringTests.push(testId);
-        }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!mutantCoverage.perTest) {
+      return [];
+    }
+
+    for (const [testId, mutants] of Object.entries(mutantCoverage.perTest)) {
+      const mutantRecord = mutants as Record<string, number>;
+      const mutantCoverage = mutantRecord[mutant.id];
+      if (mutantCoverage && mutantCoverage > 0) {
+        coveringTests.push(testId);
       }
     }
 
     // If no perTest coverage but static coverage exists, we can't filter
     // (all tests might cover this mutant)
-    if (coveringTests.length === 0 && mutantCoverage.static) {
+    if (coveringTests.length === 0) {
       const staticCoverage = mutantCoverage.static[mutant.id];
       if (staticCoverage) {
         return []; // Return empty to run all tests
@@ -86,20 +89,13 @@ export class TestFilter {
     }
 
     // If mutant is not covered by any test in static analysis
-    if (mutantCoverage.static) {
-      const staticCoverage = mutantCoverage.static[mutant.id];
-      if (!staticCoverage) {
-        return false; // No need to run any test
-      }
+    const staticCoverage = mutantCoverage.static[mutant.id];
+    if (!staticCoverage) {
+      return false; // No need to run any test
     }
 
     // If we have perTest coverage, we can filter
-    if (mutantCoverage.perTest) {
-      const coveringTests = TestFilter.getTestsForMutant(mutant, mutantCoverage);
-      return coveringTests.length === 0;
-    }
-
-    // Default to running all tests
-    return true;
+    const coveringTests = TestFilter.getTestsForMutant(mutant, mutantCoverage);
+    return coveringTests.length === 0;
   }
 }

@@ -170,7 +170,7 @@ export class MutantCoverageCollector implements ICoverageCollector {
   public static trackMutant(mutantId: string): void {
     const global = globalThis as GlobalWithStryker;
     const strykerGlobal = global.__stryker__;
-    if (strykerGlobal?.mutantCoverage && strykerGlobal?.currentTestId) {
+    if (strykerGlobal?.mutantCoverage && strykerGlobal.currentTestId) {
       const testId = strykerGlobal.currentTestId;
       const mutantCoverage = strykerGlobal.mutantCoverage;
 
