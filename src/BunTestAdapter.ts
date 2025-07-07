@@ -3,7 +3,7 @@ import { execa } from 'execa';
 import { glob } from 'glob';
 import { BunTestRunnerOptions, BunRunOptions, BunTestResult } from './BunTestRunnerOptions.js';
 import { BunResultParser } from './BunResultParser.js';
-import { MutantCoverageCollector, CoverageHookGenerator } from './coverage';
+import { MutantCoverageCollector, CoverageHookGenerator } from "./coverage";
 import { BunProcessPool } from './process/BunProcessPool.js';
 import { ProcessPoolSingleton } from './process/ProcessPoolSingleton.js';
 

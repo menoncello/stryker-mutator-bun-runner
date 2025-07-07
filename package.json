@@ -33,18 +33,19 @@
     "stryker-plugin",
     "stryker-test-runner",
     "bun",
+    "test-runner",
     "mutation-testing"
   ],
-  "author": "Stryker Bun Runner Contributors",
+  "author": "Eduardo Menoncello <eduardo.menoncello@gmail.com>",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stryker-mutator/stryker-bun.git"
+    "url": "git+https://github.com/menoncello/stryker-mutator-bun-runner.git"
   },
   "bugs": {
-    "url": "https://github.com/stryker-mutator/stryker-bun/issues"
+    "url": "https://github.com/menoncello/stryker-mutator-bun-runner/issues"
   },
-  "homepage": "https://github.com/stryker-mutator/stryker-bun#readme",
+  "homepage": "https://github.com/menoncello/stryker-mutator-bun-runner#readme",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
