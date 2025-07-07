@@ -1,6 +1,6 @@
 {
   "name": "@stryker-mutator/bun-runner",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A test runner plugin to use Bun with StrykerJS, the JavaScript mutation testing framework",
   "type": "module",
   "main": "dist/index.js",
