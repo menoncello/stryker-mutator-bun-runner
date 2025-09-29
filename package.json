@@ -64,8 +64,8 @@
     "bun": ">=1.0.0"
   },
   "dependencies": {
-    "@stryker-mutator/api": "^9.0.1",
-    "@stryker-mutator/util": "^9.0.1",
+    "@stryker-mutator/api": "^9.1.1",
+    "@stryker-mutator/util": "^9.1.1",
     "execa": "^9.6.0",
     "glob": "^11.0.3",
     "semver": "^7.5.4"
