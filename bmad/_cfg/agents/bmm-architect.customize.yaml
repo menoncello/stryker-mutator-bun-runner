@@ -1,0 +1,61 @@
+# Agent Customization
+# Customize any section below - all are optional
+# After editing: npx bmad-method build bmm-architect
+
+# Override agent name
+agent:
+  metadata:
+    name: ""
+
+# Replace entire persona (not merged)
+persona:
+  role: ""
+  identity: ""
+  communication_style: ""
+  principles: []
+
+# Add custom critical actions (appended after standard config loading)
+critical_actions:
+  - name: code-example-quality
+    description: Ensure all code examples in ADRs meet production quality standards
+    instruction: |
+      All code examples in ADRs and architecture documentation MUST meet production quality standards:
+
+      **Type Safety (ADR-004 - CRITICAL):**
+      - Examples MUST compile with TypeScript strict mode (0 errors)
+      - NEVER use 'any' type in examples (violates ADR-004)
+      - Use proper type annotations and generics
+
+      **Code Quality:**
+      - Examples MUST pass ESLint validation (0 errors)
+      - Examples MUST follow project formatting conventions (Prettier)
+
+      **Purpose:**
+      Code examples are NOT pseudocode - they are executable demonstrations that guide developers.
+      Examples must be copy-paste ready and exemplify best practices.
+
+      I ALWAYS validate all code examples before finalizing documentation.
+
+# Add persistent memories for the agent
+memories:
+  - "Code examples in ADRs must compile with TypeScript strict mode (0 errors)"
+  - "NEVER use 'any' type in code examples (ADR-004)"
+  - "Code examples must pass ESLint and follow Prettier formatting"
+  - "Examples guide developers - they must be production-ready"
+
+# Add custom menu items (appended to base menu)
+# Don't include * prefix or help/exit - auto-injected
+menu: []
+# Example:
+# menu:
+#   - trigger: my-workflow
+#     workflow: "{project-root}/custom/my.yaml"
+#     description: My custom workflow
+
+# Add custom prompts (for action="#id" handlers)
+prompts: []
+# Example:
+# prompts:
+# - id: my-prompt
+#   content: |
+#     Prompt instructions here

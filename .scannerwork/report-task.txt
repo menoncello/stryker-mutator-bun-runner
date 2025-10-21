@@ -1,6 +1,0 @@
-projectKey=stryker-bun-runner
-serverUrl=http://localhost:9000
-serverVersion=25.6.0.109173
-dashboardUrl=http://localhost:9000/dashboard?id=stryker-bun-runner
-ceTaskId=e0d8753d-dadd-455e-a79f-61c85913ab95
-ceTaskUrl=http://localhost:9000/api/ce/task?id=e0d8753d-dadd-455e-a79f-61c85913ab95

@@ -1,0 +1,74 @@
+# Agent Customization
+# Customize any section below - all are optional
+# After editing: npx bmad-method build bmm-dev
+
+# Override agent name
+agent:
+  metadata:
+    name: ""
+
+# Replace entire persona (not merged)
+persona:
+  role: ""
+  identity: ""
+  communication_style: ""
+  principles: []
+
+# Add custom critical actions (appended after standard config loading)
+critical_actions:
+  - name: quality-gates-enforcement
+    description: Enforce zero-tolerance quality gates (TypeScript 0, ESLint 0, Tests 100%, Mutation Testing, NO 'any' types)
+    instruction: |
+      I enforce ZERO-TOLERANCE quality gates before marking any task complete:
+
+      **Type Safety (ADR-004 - CRITICAL):**
+      - TypeScript MUST compile with 0 errors in strict mode: `bun run typecheck` or `tsc --noEmit`
+      - NEVER use 'any' type ANYWHERE - this violates ADR-004 and NFR018
+      - Use 'unknown' for truly unknown types, then narrow with type guards
+      - Use proper generics: <T> instead of any
+      - Use 'Record<string, unknown>' instead of any object
+
+      **Code Quality:**
+      - ESLint MUST pass with 0 errors: `bun run lint` or `eslint .`
+      - Code MUST be properly formatted: `bun run format:check` or `prettier --check .`
+
+      **Testing:**
+      - All tests MUST pass 100%: `bun test`
+      - Test coverage MUST meet ≥80% threshold (NFR009)
+      - Mutation testing with Stryker (dogfooding NFR010)
+
+      **FORBIDDEN PRACTICES:**
+      - NEVER add eslint-disable comments or @ts-ignore/@ts-expect-error
+      - NEVER use 'any' type (ADR-004)
+      - When I encounter linting or type errors, I refactor the code to comply with the rules
+
+      **Architecture Requirements (from docs/architecture.md):**
+      - ALWAYS sanitize logs and errors (FR037)
+      - ALWAYS cleanup resources in try/finally (FR027, FR028, FR038)
+      - ALWAYS validate inputs before processing (FR004, FR034)
+      - ALWAYS provide actionable error messages (NFR025)
+
+# Add persistent memories for the agent
+memories:
+  - "This project uses Bun Test (native) with API: describe, it, expect"
+  - "This project uses Stryker for mutation testing (dogfooding NFR010)"
+  - "TypeScript strict mode: NEVER use 'any' type ANYWHERE (ADR-004, NFR018)"
+  - "Test coverage target: ≥80% (NFR009)"
+  - "Critical architecture rules in docs/architecture.md:216-234"
+  - "Security: sanitize logs (FR037), secure temp files (FR038)"
+  - "Resource cleanup: ALWAYS use try/finally (FR027, FR028)"
+
+# Add custom menu items (appended to base menu)
+menu:
+  - trigger: quality-check
+    description: Run complete quality gates validation
+  - trigger: security-audit
+    description: Perform security analysis (FR037, FR038, NFR021-NFR023)
+
+# Add custom prompts (for action="#id" handlers)
+prompts: []
+# Example:
+# prompts:
+# - id: my-prompt
+#   content: |
+#     Prompt instructions here
