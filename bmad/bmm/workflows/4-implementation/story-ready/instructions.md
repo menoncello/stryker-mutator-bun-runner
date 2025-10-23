@@ -8,86 +8,85 @@
 <workflow>
 
 <critical>This workflow is run by SM agent AFTER user reviews a drafted story and confirms it's ready for development</critical>
-<critical>NO SEARCHING - SM agent reads status file TODO section to know which story was drafted</critical>
-<critical>Simple workflow: Update story file status, move story TODO → IN PROGRESS, move next story BACKLOG → TODO</critical>
+<critical>Simple workflow: Update story file status to Ready</critical>
 
-<step n="1" goal="Get TODO story from status file">
+<step n="1" goal="Find drafted story and mark as ready">
 
-<invoke-workflow path="{project-root}/bmad/bmm/workflows/workflow-status">
-  <param>mode: data</param>
-  <param>data_request: next_story</param>
+<action>If {{story_path}} is provided → use it directly; extract story_key from filename or metadata; GOTO mark_ready</action>
+
+<action>Otherwise query sprint-status for drafted stories:</action>
+
+<invoke-workflow path="{project-root}/bmad/bmm/workflows/helpers/sprint-status">
+  <param>action: list_stories</param>
+  <param>filter_status: drafted</param>
+  <param>limit: 10</param>
 </invoke-workflow>
 
-<check if="status_exists == false OR todo_story_id == ''">
-  <output>❌ No status file or no TODO story found.
+<check if="{{result_count}} == 0">
+  <output>📋 No drafted stories found in sprint-status.yaml
 
-This workflow requires an active status file with a TODO story.
+All stories are either still in backlog or already marked ready/in-progress/done.
 
-Run `workflow-status` to check your project state.</output>
-<action>Exit workflow</action>
-</check>
+**Options:**
 
-<action>Use extracted story information:</action>
+1. Run `create-story` to draft more stories
+2. Run `sprint-planning` to refresh story tracking
+   </output>
+   <action>HALT</action>
+   </check>
 
-- {{todo_story_id}}: Story to mark ready
-- {{todo_story_title}}: Story title
-- {{todo_story_file}}: Story file path
-- {{status_file_path}}: Status file to update
+<action>Display available drafted stories:
 
-</step>
+**Drafted Stories Available ({{result_count}} found):**
 
-<step n="2" goal="Update the story file status">
+{{result_story_list}}
 
-<action>Read the story file: {story_dir}/{todo_story_file}</action>
+</action>
+
+<ask if="{{non_interactive}} == false">Select the drafted story to mark as Ready (enter story key or number):</ask>
+<action if="{{non_interactive}} == true">Auto-select first story from result_stories</action>
+
+<action>Resolve selected story_key from user input or auto-selection</action>
+<action>Find matching story file in {{story_dir}} using story_key pattern</action>
+
+<anchor id="mark_ready" />
+
+<action>Read the story file from resolved path</action>
+<action>Extract story_id and story_title from the file</action>
 
 <action>Find the "Status:" line (usually at the top)</action>
-
-<action>Update story file:</action>
-
-- Change: `Status: Draft`
-- To: `Status: Ready`
-
+<action>Update story file: Change Status to "Ready"</action>
 <action>Save the story file</action>
 
-</step>
-
-<step n="3" goal="Update status file - move story TODO → IN PROGRESS">
-
-<invoke-workflow path="{project-root}/bmad/bmm/workflows/workflow-status">
-  <param>mode: update</param>
-  <param>action: start_story</param>
+<invoke-workflow path="{project-root}/bmad/bmm/workflows/helpers/sprint-status">
+  <param>action: update_story_status</param>
+  <param>story_key: {{story_key}}</param>
+  <param>new_status: ready-for-dev</param>
+  <param>validate: true</param>
 </invoke-workflow>
 
-<check if="success == false">
-  <output>⚠️ Failed to update status: {{error}}</output>
-  <output>Story file was updated, but status file update failed.</output>
-</check>
+<check if="{{result_success}} == false">
+  <output>⚠️ Story file updated, but could not update sprint-status: {{result_error}}
 
-<check if="success == true">
-  <output>Status updated: Story {{in_progress_story}} ready for development.</output>
-  <check if="next_todo != ''">
-    <output>Next TODO: {{next_todo}}</output>
-  </check>
+You may need to run sprint-planning to refresh tracking.
+</output>
 </check>
 
 </step>
 
-<step n="4" goal="Confirm completion to user">
+<step n="2" goal="Confirm completion to user">
 
-<action>Display summary</action>
+<output>**Story Marked Ready for Development, {user_name}!**
 
-**Story Marked Ready for Development, {user_name}!**
+✅ Story file updated: `{{story_file}}` → Status: Ready
+✅ Sprint status updated: {{result_old_status}} → {{result_new_status}}
 
-✅ Story file updated: `{{todo_story_file}}` → Status: Ready
-✅ Status file updated: Story moved TODO → IN PROGRESS
-{{#if next_story}}✅ Next story moved: BACKLOG → TODO ({{next_story_id}}: {{next_story_title}}){{/if}}
-{{#if no_more_stories}}✅ All stories have been drafted - backlog is empty{{/if}}
+**Story Details:**
 
-**Current Story (IN PROGRESS):**
-
-- **ID:** {{todo_story_id}}
-- **Title:** {{todo_story_title}}
-- **File:** `{{todo_story_file}}`
+- **ID:** {{story_id}}
+- **Key:** {{story_key}}
+- **Title:** {{story_title}}
+- **File:** `{{story_file}}`
 - **Status:** Ready for development
 
 **Next Steps:**

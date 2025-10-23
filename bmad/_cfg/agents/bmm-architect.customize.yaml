@@ -5,13 +5,13 @@
 # Override agent name
 agent:
   metadata:
-    name: ""
+    name: ''
 
 # Replace entire persona (not merged)
 persona:
-  role: ""
-  identity: ""
-  communication_style: ""
+  role: ''
+  identity: ''
+  communication_style: ''
   principles: []
 
 # Add custom critical actions (appended after standard config loading)
@@ -38,10 +38,10 @@ critical_actions:
 
 # Add persistent memories for the agent
 memories:
-  - "Code examples in ADRs must compile with TypeScript strict mode (0 errors)"
+  - 'Code examples in ADRs must compile with TypeScript strict mode (0 errors)'
   - "NEVER use 'any' type in code examples (ADR-004)"
-  - "Code examples must pass ESLint and follow Prettier formatting"
-  - "Examples guide developers - they must be production-ready"
+  - 'Code examples must pass ESLint and follow Prettier formatting'
+  - 'Examples guide developers - they must be production-ready'
 
 # Add custom menu items (appended to base menu)
 # Don't include * prefix or help/exit - auto-injected

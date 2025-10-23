@@ -5,13 +5,13 @@
 # Override agent name
 agent:
   metadata:
-    name: ""
+    name: ''
 
 # Replace entire persona (not merged)
 persona:
-  role: ""
-  identity: ""
-  communication_style: ""
+  role: ''
+  identity: ''
+  communication_style: ''
   principles: []
 
 # Add custom critical actions (appended after standard config loading)
@@ -48,11 +48,11 @@ critical_actions:
 
 # Add persistent memories for the agent
 memories:
-  - "Test framework: Bun Test with API (describe, it, expect)"
-  - "Mutation testing: Stryker (dogfooding NFR010)"
-  - "Test coverage target: ≥80% (NFR009)"
+  - 'Test framework: Bun Test with API (describe, it, expect)'
+  - 'Mutation testing: Stryker (dogfooding NFR010)'
+  - 'Test coverage target: ≥80% (NFR009)'
   - "NEVER use 'any' type in test code (ADR-004, NFR018)"
-  - "Test code must pass TypeScript strict mode, ESLint, and Prettier"
+  - 'Test code must pass TypeScript strict mode, ESLint, and Prettier'
 
 # Add custom menu items (appended to base menu)
 # Don't include * prefix or help/exit - auto-injected

@@ -1,0 +1,112 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.1</storyId>
+    <title>Project Setup and Build Configuration</title>
+    <status>Approved</status>
+    <generatedAt>2025-10-21</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/story-1.1.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>plugin developer</asA>
+    <iWant>a properly configured TypeScript project with build tooling</iWant>
+    <soThat>I can develop the plugin with type safety and proper compilation</soThat>
+    <tasks>Task 1: Initialize TypeScript project structure (AC: 1, 6)
+- Create tsconfig.json with strict mode enabled
+- Set up modular src/ directory structure
+- Configure build output directory (dist/)
+Task 2: Configure package.json with dependencies (AC: 2)
+- Add @stryker-mutator/api dependency
+- Add typed-inject dependency for DI framework
+- Configure build scripts and dev scripts
+- Set proper package metadata (name, version, etc.)
+Task 3: Implement build configuration (AC: 3)
+- Configure TypeScript compilation to JavaScript
+- Set up dual ESM/CJS output for Node.js compatibility
+- Generate TypeScript declaration files (.d.ts)
+- Validate build produces working output
+Task 4: Configure code quality tools (AC: 4)
+- Set up ESLint with TypeScript rules
+- Configure Prettier for consistent formatting
+- Add lint and format scripts to package.json
+- Ensure compliance with Stryker ecosystem conventions
+Task 5: Initialize Git repository (AC: 5)
+- Create comprehensive .gitignore file
+- Initialize git repository if not exists
+- Verify proper exclusions (node_modules, dist, coverage, etc.)</tasks>
+  </story>
+
+  <acceptanceCriteria>1. TypeScript project initialized with tsconfig.json in strict mode (NFR018)
+2. Package.json configured with appropriate dependencies (@stryker-mutator/api, typed-inject)
+3. Build script produces compilable JavaScript output
+4. ESLint and Prettier configured following Stryker ecosystem conventions (NFR019)
+5. Git repository initialized with proper .gitignore
+6. Project structure follows modular architecture (NFR020)</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/architecture.md" title="Decision Architecture" section="Project Structure" snippet="Complete project structure with src/ directory layout including modular organization: src/index.ts, BunTestRunner.ts, config/, core/, mutation/, coverage/, reporting/, process/, validation/, security/, utils/"/>
+      <doc path="docs/architecture.md" title="Decision Architecture" section="Technology Stack Details" snippet="Core technologies: Bun 1.3+ (development), Node.js 18+ (production), TypeScript 5.3+ (strict mode), ESLint 8.x + @typescript-eslint, Prettier 3.x, @stryker-mutator/api ^8.0.0, typed-inject ^4.0.0"/>
+      <doc path="docs/architecture.md" title="Decision Architecture" section="Build Tooling" snippet="Build configuration: bun build (ESM + CJS) + tsc (declarations). Dual output for Node.js compatibility with .d.ts generation for IDE support."/>
+      <doc path="docs/architecture.md" title="Decision Architecture" section="CRITICAL RULES FOR ALL AGENTS" snippet="Mandatory rules: 1) Use TypeScript strict mode, 2) NEVER use 'any' type, 3) Sanitize logs and errors, 4) Cleanup resources in try/finally, 5) Use path.join for file paths, 6) Validate inputs, 7) Provide actionable error messages."/>
+      <doc path="docs/PRD.md" title="Product Requirements Document" section="Functional Requirements - Stryker Plugin Integration" snippet="FR001-FR006: Plugin must implement TestRunner interface, register with declareClassPlugin, integrate with typed-inject, validate configuration options, check version compatibility, provide JSON schema."/>
+      <doc path="docs/test-design-epic-1.md" title="Test Design Epic 1" section="Risk Assessment" snippet="High-priority risks: R-001 Stryker API integration failure, R-002 Bun subprocess execution overhead, R-003 Security vulnerabilities in mutation activation."/>
+    </docs>
+    <code>
+      <file path="eslint.config.js" kind="configuration" symbol="ESLintConfiguration" lines="1-206" reason="Existing ESLint configuration provides strict TypeScript rules, no 'any' types, and Stryker ecosystem conventions"/>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="@stryker-mutator/api" version="^8.0.0" purpose="Plugin interface"/>
+        <package name="typed-inject" version="^4.0.0" purpose="Dependency injection framework"/>
+        <package name="source-map" version="^0.7.x" purpose="Source map support (FR022)"/>
+        <package name="typescript" version="^5.3.0" purpose="TypeScript compiler"/>
+        <package name="@types/node" version="^18.0.0" purpose="Node.js type definitions"/>
+        <package name="eslint" version="^8.x" purpose="Linting with TypeScript rules"/>
+        <package name="@typescript-eslint/eslint-plugin" version="latest" purpose="TypeScript ESLint rules"/>
+        <package name="@typescript-eslint/parser" version="latest" purpose="TypeScript parser for ESLint"/>
+        <package name="eslint-plugin-sonarjs" version="latest" purpose="Code quality rules"/>
+        <package name="eslint-plugin-unicorn" version="latest" purpose="Best practices rules"/>
+        <package name="eslint-plugin-import" version="latest" purpose="Module management rules"/>
+        <package name="eslint-plugin-jsdoc" version="latest" purpose="Documentation quality rules"/>
+        <package name="prettier" version="^3.x" purpose="Code formatting"/>
+        <package name="bun" version="^1.3.0" purpose="Development runtime"/>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+      <constraint>CRITICAL: Never use 'any' type anywhere in codebase (NFR018) - use 'unknown' for truly unknown types, then narrow</constraint>
+      <constraint>Use TypeScript strict mode with all strict type checking options enabled</constraint>
+      <constraint>Target ES2020 for Node.js 18+ compatibility with ESNext modules and dual ESM/CJS output</constraint>
+      <constraint>Follow Stryker ecosystem conventions for ESLint and Prettier configuration (NFR019)</constraint>
+      <constraint>Project structure must follow modular architecture with barrel exports for clean imports</constraint>
+      <constraint>Build must produce dual output: ESM (.mjs) and CommonJS (.js) for Node.js compatibility</constraint>
+      <constraint>Generate TypeScript declaration files (.d.ts) for IDE support</constraint>
+      <constraint>Naming conventions: Classes/Interfaces PascalCase, files match class name, functions camelCase verb-first</constraint>
+      <constraint>Module exports: Each module exports single primary class, index files for barrel exports</constraint>
+      <constraint>Required .gitignore entries: node_modules/, dist/, coverage/, *.log, .DS_Store, .vscode/, .idea/, .env, .env.*</constraint>
+    </constraints>
+    <interfaces>
+      <interface name="Stryker TestRunner Interface" kind="REST endpoint" signature="interface TestRunner { init?(): Promise<void>; dryRun(options: DryRunOptions): Promise<DryRunResult>; mutantRun(options: MutantRunOptions): Promise<MutantRunResult>; dispose?(): Promise<void>; }" path="docs/architecture.md"/>
+      <interface name="Plugin Registration" kind="function signature" signature="declareClassPlugin(PluginKind.TestRunner, 'bun', BunTestRunner)" path="docs/architecture.md"/>
+      <interface name="Bun Subprocess Communication" kind="class interface" signature="spawn('bun', ['test', '--coverage', ...args], { cwd: projectRoot, env: mutationEnv, timeout: spawnTimeout })" path="docs/architecture.md"/>
+    </interfaces>
+  <tests>
+    <standards>Testing follows Stryker ecosystem standards with bun test as the native test framework. Tests should be organized by module in test/unit/ directory with mirror structure to src/. Use describe/it patterns with descriptive test names. Integration tests in test/integration/ cover cross-module functionality. Test files should follow *.test.ts naming convention and use relaxed ESLint rules for test files.</standards>
+    <locations>test/unit/ - Unit tests by module, test/integration/ - Integration tests, test/fixtures/ - Test fixtures. Tests use bun test framework with --coverage flag for LCOV output.</locations>
+    <ideas>
+      <test idea="Test TypeScript compilation produces working JavaScript output" acceptanceCriteriaId="3"/>
+      <test idea="Test tsconfig.json strict mode configuration" acceptanceCriteriaId="1"/>
+      <test idea="Test package.json scripts and dependencies installation" acceptanceCriteriaId="2"/>
+      <test idea="Test ESLint configuration enforces no 'any' types" acceptanceCriteriaId="4"/>
+      <test idea="Test Prettier configuration and formatting" acceptanceCriteriaId="4"/>
+      <test idea="Test .gitignore excludes proper directories and files" acceptanceCriteriaId="5"/>
+      <test idea="Test modular project structure matches architecture specification" acceptanceCriteriaId="6"/>
+      <test idea="Test dual ESM/CJS build output works correctly" acceptanceCriteriaId="3"/>
+      <test idea="Test TypeScript declaration files (.d.ts) are generated" acceptanceCriteriaId="3"/>
+    </ideas>
+  </tests>
+</story-context>

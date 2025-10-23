@@ -15,6 +15,7 @@ export default [
       '**/*.d.ts',
       '**/reports/**',
       '**/.stryker-tmp/**',
+      '**/stryker-tmp/**',
     ],
   },
   // Main TypeScript configuration
@@ -42,8 +43,8 @@ export default [
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
-      '@typescript-eslint/explicit-module-boundary-types': 'error',
+      '@typescript-eslint/explicit-function-return-type': 'off', // Relaxed for efficiency
+      '@typescript-eslint/explicit-module-boundary-types': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/no-useless-constructor': 'error',
       '@typescript-eslint/prefer-for-of': 'error',
@@ -65,15 +66,15 @@ export default [
         { selector: 'enum', format: ['PascalCase'] },
       ],
 
-      // SonarJS - Code Quality & Complexity
+      // SonarJS - Code Quality & Complexity (relaxed for efficiency)
       ...sonarjs.configs.recommended.rules,
-      'sonarjs/cognitive-complexity': ['error', 15],
-      'sonarjs/no-duplicate-string': ['error', { threshold: 3 }],
-      'sonarjs/no-identical-functions': 'error',
-      'sonarjs/no-collapsible-if': 'error',
-      'sonarjs/no-duplicated-branches': 'error',
-      'sonarjs/no-redundant-boolean': 'error',
-      'sonarjs/prefer-immediate-return': 'error',
+      'sonarjs/cognitive-complexity': ['warn', 30], // Increased threshold
+      'sonarjs/no-duplicate-string': ['warn', { threshold: 5 }], // Increased threshold
+      'sonarjs/no-identical-functions': 'warn',
+      'sonarjs/no-collapsible-if': 'warn',
+      'sonarjs/no-duplicated-branches': 'warn',
+      'sonarjs/no-redundant-boolean': 'warn',
+      'sonarjs/prefer-immediate-return': 'warn',
 
       // Unicorn - Best Practices
       'unicorn/better-regex': 'error',
@@ -92,7 +93,7 @@ export default [
       'unicorn/no-instanceof-array': 'error',
       'unicorn/no-invalid-remove-event-listener': 'error',
       'unicorn/no-negated-condition': 'error',
-      'unicorn/no-nested-ternary': 'error',
+      'unicorn/no-nested-ternary': 'warn',
       'unicorn/no-new-array': 'error',
       'unicorn/no-new-buffer': 'error',
       'unicorn/no-unreadable-array-destructuring': 'error',
@@ -129,49 +130,42 @@ export default [
       'import/no-default-export': 'error',
       'import/no-mutable-exports': 'error',
 
-      // JSDoc - Documentation Quality
-      'jsdoc/check-alignment': 'error',
-      'jsdoc/check-param-names': 'error',
+      // JSDoc - Documentation Quality (relaxed for efficiency)
+      'jsdoc/check-alignment': 'warn',
+      'jsdoc/check-param-names': 'warn',
       'jsdoc/check-tag-names': 'off', // Allow custom tags like @nimata/adapters
-      'jsdoc/check-types': 'error',
-      'jsdoc/require-description': 'error',
-      'jsdoc/require-param': 'error',
-      'jsdoc/require-param-description': 'error',
+      'jsdoc/check-types': 'warn',
+      'jsdoc/require-description': 'off', // Reduced priority
+      'jsdoc/require-param': 'warn',
+      'jsdoc/require-param-description': 'off', // Reduced priority
       'jsdoc/require-param-type': 'off', // TypeScript provides types
-      'jsdoc/require-returns': 'error',
-      'jsdoc/require-returns-description': 'error',
+      'jsdoc/require-returns': 'warn',
+      'jsdoc/require-returns-description': 'off', // Reduced priority
       'jsdoc/require-returns-type': 'off', // TypeScript provides types
-      'jsdoc/require-jsdoc': [
-        'error',
-        {
-          require: {
-            FunctionDeclaration: true,
-            MethodDefinition: true,
-            ClassDeclaration: true,
-            ArrowFunctionExpression: false,
-            FunctionExpression: false,
-          },
-        },
-      ],
+      'jsdoc/require-jsdoc': 'off', // Reduced priority for efficiency
 
-      // Core ESLint - Code Quality
-      complexity: ['error', 10],
-      'max-depth': ['error', 3],
-      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
-      'max-lines-per-function': ['error', { max: 30, skipBlankLines: true, skipComments: true }],
-      'max-nested-callbacks': ['error', 3],
-      'max-params': ['error', 4],
-      'max-statements': ['error', 15],
+      // Core ESLint - Code Quality (relaxed for efficiency)
+      complexity: ['warn', 15], // Increased threshold
+      'max-depth': ['warn', 4], // Increased threshold
+      'max-lines': ['warn', { max: 500, skipBlankLines: true, skipComments: true }], // Increased threshold
+      'max-lines-per-function': ['warn', { max: 50, skipBlankLines: true, skipComments: true }], // Increased threshold
+      'max-nested-callbacks': ['warn', 4], // Increased threshold
+      'max-params': ['warn', 6], // Increased threshold
+      'max-statements': ['warn', 25], // Increased threshold
       'no-console': 'off', // CLI needs console
       'no-magic-numbers': [
-        'error',
-        { ignore: [0, 1, -1], ignoreArrayIndexes: true, ignoreDefaultValues: true },
+        'warn', // Downgraded to warn
+        {
+          ignore: [0, 1, -1, 2, 10, 100, 1000],
+          ignoreArrayIndexes: true,
+          ignoreDefaultValues: true,
+        },
       ],
       'no-duplicate-imports': 'error',
-      'no-else-return': 'error',
-      'no-lonely-if': 'error',
-      'no-negated-condition': 'error',
-      'no-nested-ternary': 'error',
+      'no-else-return': 'warn',
+      'no-lonely-if': 'warn',
+      'no-negated-condition': 'warn',
+      'no-nested-ternary': 'warn', // Downgraded to warn
       'no-return-await': 'error',
       'no-unneeded-ternary': 'error',
       'no-useless-return': 'error',

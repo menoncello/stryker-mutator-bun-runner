@@ -1,29 +1,66 @@
 # Mutation Testing with Stryker
 
-## Overview
-This project uses **Stryker** for mutation testing (dogfooding NFR010).
+## Configuration
 
-## Running Mutation Tests
-```bash
-bun run test:mutate        # Run Stryker mutation testing
-npx stryker run           # Alternative
+```json
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "bun",
+  "coverageAnalysis": "off",
+  "mutate": [
+    "src/**/*.ts",
+    "!src/**/*.d.ts",
+    "!src/**/*.spec.ts",
+    "!src/**/*.test.ts"
+  ],
+  "thresholds": {
+    "high": 80,
+    "low": 60
+  },
+  "reporters": ["html", "clear-text", "progress"]
+}
 ```
 
-## Thresholds
-- Coverage target: ≥80% (NFR009)
-- Mutation score: Project-specific (check stryker.config.json)
+## Running Tests
 
-## Critical Rules
-- ❌ NEVER lower mutation testing thresholds to make tests pass
-- ✅ ALWAYS add more tests to kill surviving mutants
-- ✅ ALWAYS improve test quality to cover edge cases
+```bash
+# Run mutation testing
+bun run test:mutate
 
-## Exception
-Only adjust thresholds when mutants are legitimately untestable:
-- Stub code awaiting implementation
-- Logging strings with no behavioral impact
+# Output: reports/mutation/mutation-report.html
+```
 
-**Document all threshold adjustments with clear justification.**
+## Quality Gates
 
-## References
-- [Stryker Documentation](https://stryker-mutator.io/)
+- **High threshold**: 80% (must achieve)
+- **Low threshold**: 60% (warning)
+- **Break threshold**: Not set (project uses low as break)
+
+## Test Quality Requirements
+
+- Tests must kill mutants (not just pass)
+- Use boundary values and edge cases
+- Test error paths and null checks
+- Structure tests for maximum mutation killing
+
+## Mutation Testing Best Practices
+
+1. **NEVER lower thresholds** to make tests pass
+2. **Add more tests** to kill surviving mutants
+3. **Focus on critical code paths** first
+4. **Test error conditions** and edge cases
+5. **Use proper TypeScript types** in test data
+
+## Dogfooding (NFR010)
+
+This project uses Stryker for mutation testing as part of dogfooding strategy:
+- Validates our own mutation testing capabilities
+- Ensures high test quality
+- Targets 80%+ mutation score
+
+## Integration with Bun Test
+
+- Test Runner: Bun (native)
+- Coverage Collection: Custom per-test implementation
+- LCOV format for integration
+- 13x faster execution than Jest/Vitest

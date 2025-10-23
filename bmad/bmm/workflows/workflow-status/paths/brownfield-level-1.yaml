@@ -48,6 +48,13 @@ phases:
   - phase: 4
     name: "Implementation"
     required: true
+    phase_initialization:
+      - id: "sprint-planning"
+        required: true
+        agent: "sm"
+        command: "sprint-planning"
+        note: "Initialize sprint tracking - run once when entering Phase 4"
+    story_loop: "for_each_story"
     workflows:
       - id: "create-story"
         required: true
@@ -66,10 +73,10 @@ phases:
         optional: true
         agent: "dev"
         command: "review-story"
-      - id: "story-approved"
+      - id: "story-done"
         required: true
         agent: "dev"
-        command: "story-approved"
+        command: "story-done"
 
 story_naming: "story-<short-title>.md"
 story_example: "story-add-auth.md, story-update-dashboard.md"

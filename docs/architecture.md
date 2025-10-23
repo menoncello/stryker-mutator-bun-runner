@@ -1,17 +1,20 @@
 # Decision Architecture - stryker-mutator-bun-runner
 
-**Author:** Eduardo Menoncello
-**Date:** 2025-01-21
-**Project Level:** 3 (Comprehensive Product)
-**Total Stories:** 52 across 5 epics
+**Author:** Eduardo Menoncello **Date:** 2025-01-21 **Project Level:** 3
+(Comprehensive Product) **Total Stories:** 52 across 5 epics
 
 ---
 
 ## Executive Summary
 
-This architecture defines a **Stryker TestRunner plugin** for native Bun test execution, delivering 2-3x performance improvements over Node.js-based runners through intelligent per-test coverage analysis. The plugin is developed **using Bun** (dogfooding NFR010) while maintaining Node.js compatibility for Stryker integration.
+This architecture defines a **Stryker TestRunner plugin** for native Bun test
+execution, delivering 2-3x performance improvements over Node.js-based runners
+through intelligent per-test coverage analysis. The plugin is developed **using
+Bun** (dogfooding NFR010) while maintaining Node.js compatibility for Stryker
+integration.
 
 **Key Architectural Decisions:**
+
 - **Bun-native development** with Node.js runtime compatibility
 - **Custom per-test coverage** implementation using LCOV parsing
 - **Single repository** structure (no monorepo complexity)
@@ -22,25 +25,25 @@ This architecture defines a **Stryker TestRunner plugin** for native Bun test ex
 
 ## Decision Summary
 
-| Category | Decision | Version/Details | Affects Epics | Rationale |
-| -------- | -------- | --------------- | ------------- | --------- |
-| **Development Runtime** | Bun | 1.3+ | All | Dogfooding (NFR010), 13x faster tests, native TypeScript |
-| **Production Runtime** | Node.js | 18+ | All | Stryker compatibility requirement |
-| **Build Tooling** | bun build + tsc | Bun 1.3 + TS 5.3 | Epic 1 | Fast dual ESM/CJS output + .d.ts generation |
-| **Testing Framework** | bun test | Native | All | Dogfooding, 13x faster than Jest, Vitest-compatible API |
-| **Linting/Formatting** | ESLint + Prettier | Latest | All | Stryker ecosystem conventions (NFR019) |
-| **Package Structure** | Single Repository | No monorepo | All | Simplicity for Level 3 project |
-| **Subprocess Execution** | child_process.spawn | Node.js stdlib | Epic 1, 2 | Stryker plugin runs in Node, spawns Bun |
-| **JSON Parsing** | Bun.file().json() | Native | Epic 1, 2 | Fast, zero dependencies |
-| **Coverage Collection** | Custom per-test | LCOV + isolation | Epic 3 | 40-60% performance gain (NFR003) |
-| **Source Maps** | Node.js source-map | 0.7.x | Epic 2 | FR022 TypeScript stack traces |
-| **Error Handling** | Structured hierarchy | Custom | All | FR024 actionable errors |
-| **Logging** | Sanitized structured | Custom | All | FR025, FR037 security |
-| **Timeout Strategy** | 3-level hierarchy | spawn > test > kill | Epic 2, 4 | FR026, FR031 robustness |
-| **Worker Isolation** | Temp dir per worker | fs + crypto | Epic 2, 4 | FR029, FR035 thread safety |
-| **Config Schema** | TypeScript → JSON | typescript-json-schema | Epic 1 | FR006 IDE autocomplete |
-| **Documentation** | JSDoc/TSDoc | Native | Epic 5 | NFR013 IDE integration |
-| **CI/CD** | GitHub Actions | Latest | Epic 5 | Standard, npm publish automation |
+| Category                 | Decision             | Version/Details        | Affects Epics | Rationale                                                |
+| ------------------------ | -------------------- | ---------------------- | ------------- | -------------------------------------------------------- |
+| **Development Runtime**  | Bun                  | 1.3+                   | All           | Dogfooding (NFR010), 13x faster tests, native TypeScript |
+| **Production Runtime**   | Node.js              | 18+                    | All           | Stryker compatibility requirement                        |
+| **Build Tooling**        | bun build + tsc      | Bun 1.3 + TS 5.3       | Epic 1        | Fast dual ESM/CJS output + .d.ts generation              |
+| **Testing Framework**    | bun test             | Native                 | All           | Dogfooding, 13x faster than Jest, Vitest-compatible API  |
+| **Linting/Formatting**   | ESLint + Prettier    | Latest                 | All           | Stryker ecosystem conventions (NFR019)                   |
+| **Package Structure**    | Single Repository    | No monorepo            | All           | Simplicity for Level 3 project                           |
+| **Subprocess Execution** | child_process.spawn  | Node.js stdlib         | Epic 1, 2     | Stryker plugin runs in Node, spawns Bun                  |
+| **JSON Parsing**         | Bun.file().json()    | Native                 | Epic 1, 2     | Fast, zero dependencies                                  |
+| **Coverage Collection**  | Custom per-test      | LCOV + isolation       | Epic 3        | 40-60% performance gain (NFR003)                         |
+| **Source Maps**          | Node.js source-map   | 0.7.x                  | Epic 2        | FR022 TypeScript stack traces                            |
+| **Error Handling**       | Structured hierarchy | Custom                 | All           | FR024 actionable errors                                  |
+| **Logging**              | Sanitized structured | Custom                 | All           | FR025, FR037 security                                    |
+| **Timeout Strategy**     | 3-level hierarchy    | spawn > test > kill    | Epic 2, 4     | FR026, FR031 robustness                                  |
+| **Worker Isolation**     | Temp dir per worker  | fs + crypto            | Epic 2, 4     | FR029, FR035 thread safety                               |
+| **Config Schema**        | TypeScript → JSON    | typescript-json-schema | Epic 1        | FR006 IDE autocomplete                                   |
+| **Documentation**        | JSDoc/TSDoc          | Native                 | Epic 5        | NFR013 IDE integration                                   |
+| **CI/CD**                | GitHub Actions       | Latest                 | Epic 5        | Standard, npm publish automation                         |
 
 ---
 
@@ -140,13 +143,13 @@ stryker-mutator-bun-runner/
 
 ## Epic to Architecture Mapping
 
-| Epic | Primary Modules | Key Components | Stories |
-|------|-----------------|----------------|---------|
-| **Epic 1: Foundation & Core Plugin Integration** | `config/`, `core/`, `validation/` | BunTestRunner, BunProcessExecutor, JsonOutputParser, BunInstallValidator | 1.1-1.10 |
-| **Epic 2: Mutation Testing & Result Reporting** | `mutation/`, `reporting/`, `process/` | MutationActivator, MutantRunner, ResultMapper, SourceMapHandler, TimeoutManager | 2.1-2.10 |
-| **Epic 3: Coverage Analysis & Performance** | `coverage/` | CoverageCollector, LcovParser, TestFilter, CoverageFallback | 3.1-3.12 |
-| **Epic 4: Robustness, Security & Production Readiness** | `security/`, `process/`, `validation/` | SanitizedLogger, SecureTempFiles, WorkerStateManager | 4.1-4.10 |
-| **Epic 5: Documentation, Examples & Release** | `docs/`, `examples/`, `.github/` | Documentation, example projects, CI/CD workflows | 5.1-5.10 |
+| Epic                                                    | Primary Modules                        | Key Components                                                                  | Stories  |
+| ------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------- | -------- |
+| **Epic 1: Foundation & Core Plugin Integration**        | `config/`, `core/`, `validation/`      | BunTestRunner, BunProcessExecutor, JsonOutputParser, BunInstallValidator        | 1.1-1.10 |
+| **Epic 2: Mutation Testing & Result Reporting**         | `mutation/`, `reporting/`, `process/`  | MutationActivator, MutantRunner, ResultMapper, SourceMapHandler, TimeoutManager | 2.1-2.10 |
+| **Epic 3: Coverage Analysis & Performance**             | `coverage/`                            | CoverageCollector, LcovParser, TestFilter, CoverageFallback                     | 3.1-3.12 |
+| **Epic 4: Robustness, Security & Production Readiness** | `security/`, `process/`, `validation/` | SanitizedLogger, SecureTempFiles, WorkerStateManager                            | 4.1-4.10 |
+| **Epic 5: Documentation, Examples & Release**           | `docs/`, `examples/`, `.github/`       | Documentation, example projects, CI/CD workflows                                | 5.1-5.10 |
 
 ---
 
@@ -155,12 +158,14 @@ stryker-mutator-bun-runner/
 ### Core Technologies
 
 **Development Environment:**
+
 - **Runtime:** Bun 1.3+ (development), Node.js 18+ (production)
 - **Language:** TypeScript 5.3+ (strict mode, NO 'any' types)
 - **Package Manager:** bun (3x faster than npm)
 - **Build Tool:** bun build (ESM + CJS) + tsc (declarations)
 
 **Testing & Quality:**
+
 - **Test Framework:** bun test (native, 13x faster than Jest)
 - **Coverage:** Bun --coverage (LCOV format)
 - **Linting:** ESLint 8.x + @typescript-eslint
@@ -168,6 +173,7 @@ stryker-mutator-bun-runner/
 - **Mutation Testing:** Stryker (dogfooding - NFR010)
 
 **Dependencies:**
+
 - **@stryker-mutator/api:** ^8.0.0 (Plugin interface)
 - **typed-inject:** ^4.0.0 (DI framework)
 - **source-map:** ^0.7.x (FR022 stack traces)
@@ -175,18 +181,16 @@ stryker-mutator-bun-runner/
 ### Integration Points
 
 **Stryker Core Integration:**
+
 ```typescript
 // Plugin loaded by Stryker in Node.js process
 import { declareClassPlugin, PluginKind } from '@stryker-mutator/api/plugin';
 
-declareClassPlugin(
-  PluginKind.TestRunner,
-  'bun',
-  BunTestRunner
-);
+declareClassPlugin(PluginKind.TestRunner, 'bun', BunTestRunner);
 ```
 
 **Bun Subprocess Execution:**
+
 ```typescript
 // Plugin spawns Bun as child process
 import { spawn } from 'child_process';
@@ -194,11 +198,12 @@ import { spawn } from 'child_process';
 const bunProcess = spawn('bun', ['test', '--coverage', ...args], {
   cwd: projectRoot,
   env: mutationEnv,
-  timeout: spawnTimeout
+  timeout: spawnTimeout,
 });
 ```
 
 **Coverage Data Flow:**
+
 ```
 1. BunProcessExecutor → spawn('bun', ['test', '--coverage'])
 2. Bun generates → coverage/lcov.info
@@ -236,39 +241,43 @@ const bunProcess = spawn('bun', ['test', '--coverage', ...args], {
 ### Naming Conventions
 
 **Files & Classes:**
+
 - Classes/Interfaces: `PascalCase` (BunTestRunner, MutationActivator)
 - Files: Match class name (BunTestRunner.ts)
 - Utilities: `camelCase` (logger.ts, errorFactory.ts)
 - Test files: `ClassName.test.ts` (mirror source structure)
 
 **Functions & Variables:**
+
 - Functions: `camelCase`, verb-first (executeBunTest, parseLcovOutput)
 - Booleans: `is/has/can/should` prefix (isMutationActivated)
 - Constants: `UPPER_SNAKE_CASE` (DEFAULT_TIMEOUT, MAX_RETRIES)
 - Variables: `camelCase`, descriptive (mutantExecutionTimeout)
 
 **Enums & Types:**
+
 ```typescript
 enum CoverageMode {
   Off = 'off',
   All = 'all',
-  PerTest = 'perTest'
+  PerTest = 'perTest',
 }
 
 enum ErrorType {
   BUN_NOT_FOUND = 'BUN_NOT_FOUND',
-  SUBPROCESS_CRASH = 'SUBPROCESS_CRASH'
+  SUBPROCESS_CRASH = 'SUBPROCESS_CRASH',
 }
 ```
 
 ### Code Organization
 
 **Module Exports:**
+
 ```typescript
 // Each module exports single primary class
 // src/core/BunProcessExecutor.ts
-export class BunProcessExecutor { }
-export type BunProcessResult = { };
+export class BunProcessExecutor {}
+export type BunProcessResult = {};
 
 // Index files for barrel exports
 // src/coverage/index.ts
@@ -278,6 +287,7 @@ export type { CoverageData } from './types';
 ```
 
 **Test Organization:**
+
 ```typescript
 describe('BunProcessExecutor', () => {
   describe('executeBunTest', () => {
@@ -294,13 +304,14 @@ describe('BunProcessExecutor', () => {
 ### Error Handling (FR024, NFR025)
 
 **Structured Error Hierarchy:**
+
 ```typescript
 class BunRunnerError extends Error {
   constructor(
-    public code: string,              // "ERR_BUN_001"
-    public type: ErrorType,           // Enum
-    message: string,                  // Human-readable
-    public troubleshooting: string,   // Actionable guidance
+    public code: string, // "ERR_BUN_001"
+    public type: ErrorType, // Enum
+    message: string, // Human-readable
+    public troubleshooting: string, // Actionable guidance
     public context?: Record<string, unknown>
   ) {
     super(message);
@@ -320,13 +331,14 @@ throw new BunRunnerError(
 ### Logging Strategy (FR025, FR037)
 
 **Sanitized Structured Logging:**
+
 ```typescript
 enum LogLevel {
   ERROR = 0,
   WARN = 1,
   INFO = 2,
   DEBUG = 3,
-  TRACE = 4  // Structured JSON
+  TRACE = 4, // Structured JSON
 }
 
 class SanitizedLogger {
@@ -346,18 +358,19 @@ class SanitizedLogger {
 ### Date/Time Handling
 
 **ISO 8601 Everywhere:**
+
 ```typescript
-const timestamp = new Date().toISOString();  // "2025-01-21T10:30:00.000Z"
+const timestamp = new Date().toISOString(); // "2025-01-21T10:30:00.000Z"
 
 interface TestResult {
-  startTime: Date;    // Internal storage
+  startTime: Date; // Internal storage
   endTime: Date;
 }
 
 function toJSON() {
   return {
-    startTime: this.startTime.toISOString(),  // Serialized
-    endTime: this.endTime.toISOString()
+    startTime: this.startTime.toISOString(), // Serialized
+    endTime: this.endTime.toISOString(),
   };
 }
 ```
@@ -365,11 +378,12 @@ function toJSON() {
 ### Timeout Hierarchy (FR026, FR031, FR027)
 
 **Three-Level System:**
+
 ```typescript
 interface TimeoutConfig {
-  spawnTimeout: number;   // Level 1: Prevent hangs (dryRunTime × 3)
-  testTimeout: number;    // Level 2: Test execution (dryRunTime × 2.0)
-  killTimeout: number;    // Level 3: SIGTERM → SIGKILL grace (5000ms)
+  spawnTimeout: number; // Level 1: Prevent hangs (dryRunTime × 3)
+  testTimeout: number; // Level 2: Test execution (dryRunTime × 2.0)
+  killTimeout: number; // Level 3: SIGTERM → SIGKILL grace (5000ms)
 }
 
 // Hierarchy: spawnTimeout > testTimeout > killTimeout
@@ -378,17 +392,18 @@ interface TimeoutConfig {
 ### Resource Cleanup (FR027, FR028, FR038)
 
 **Always Use try/finally:**
+
 ```typescript
 class BunTestRunner {
   async mutantRun(mutant: Mutant): Promise<MutantRunResult> {
-    const tempDir = await this.createSecureTempDir();  // FR038: 0o700
+    const tempDir = await this.createSecureTempDir(); // FR038: 0o700
 
     try {
       const process = this.spawnBunProcess(mutant);
       return await this.waitForResult(process);
     } finally {
-      await this.killProcess(process);       // FR027
-      await this.cleanupTempDir(tempDir);    // FR038
+      await this.killProcess(process); // FR027
+      await this.cleanupTempDir(tempDir); // FR038
     }
   }
 
@@ -410,7 +425,7 @@ class BunTestRunner {
 ```typescript
 interface CoverageData {
   file: string;
-  lines: Map<number, number>;      // line number → hit count
+  lines: Map<number, number>; // line number → hit count
   functions: FunctionCoverage[];
 }
 
@@ -463,11 +478,13 @@ interface TestRunner {
 ### Bun Subprocess Communication
 
 **Input (CLI Args):**
+
 ```bash
 bun test --coverage --coverage-reporter=lcov --test-name-pattern="testName" file.test.ts
 ```
 
 **Output (JSON):**
+
 ```json
 {
   "tests": [
@@ -481,6 +498,7 @@ bun test --coverage --coverage-reporter=lcov --test-name-pattern="testName" file
 ```
 
 **Coverage Output (LCOV):**
+
 ```
 SF:src/example.ts
 DA:1,1
@@ -495,12 +513,14 @@ end_of_record
 ### Sensitive Data Sanitization (FR037)
 
 **What Gets Sanitized:**
+
 - Absolute file paths → Relative paths only
 - Environment variables → Removed from logs
 - Secrets (API keys, tokens) → Pattern-based detection
 - User data → Removed from error messages
 
 **What Stays:**
+
 - Relative paths (src/, test/)
 - Public test identifiers
 - Exit codes, error types
@@ -510,12 +530,9 @@ end_of_record
 
 ```typescript
 // Worker-isolated temp directories
-const tempDir = path.join(
-  os.tmpdir(),
-  `stryker-bun-${workerId}-${randomId}`
-);
+const tempDir = path.join(os.tmpdir(), `stryker-bun-${workerId}-${randomId}`);
 
-fs.mkdirSync(tempDir, { mode: 0o700 });  // Owner-only permissions
+fs.mkdirSync(tempDir, { mode: 0o700 }); // Owner-only permissions
 
 // Always cleanup
 try {
@@ -531,16 +548,17 @@ try {
 
 ### Target Performance (NFR001-NFR005)
 
-| Metric | Target | Strategy |
-|--------|--------|----------|
+| Metric                     | Target                       | Strategy                           |
+| -------------------------- | ---------------------------- | ---------------------------------- |
 | **Mutation testing speed** | 2-3x faster than Jest/Vitest | Bun subprocess + perTest filtering |
-| **PerTest coverage gain** | 40-60% improvement | Intelligent test selection (FR019) |
-| **Dry run overhead** | <10% vs native bun test | Minimal instrumentation |
-| **Large suite stability** | 1000+ mutations | Memory management (NFR007) |
+| **PerTest coverage gain**  | 40-60% improvement           | Intelligent test selection (FR019) |
+| **Dry run overhead**       | <10% vs native bun test      | Minimal instrumentation            |
+| **Large suite stability**  | 1000+ mutations              | Memory management (NFR007)         |
 
 ### Coverage Collection Strategy (Epic 3)
 
 **Custom Per-Test Implementation:**
+
 ```typescript
 // For 100 tests, 500 mutants:
 // Traditional: 500 × 100 = 50,000 executions
@@ -549,6 +567,7 @@ try {
 ```
 
 **Optimization Techniques:**
+
 - Parallel test execution during dry run
 - LCOV parsing cache
 - Conservative filtering (FR033: include when uncertain)
@@ -562,17 +581,20 @@ try {
 **Package Name:** `@stryker-mutator/bun-runner`
 
 **Outputs:**
+
 - `dist/index.js` (CommonJS)
 - `dist/index.mjs` (ESM)
 - `dist/index.d.ts` (TypeScript declarations)
 - `dist/schema.json` (Config schema)
 
 **Installation:**
+
 ```bash
 npm install --save-dev @stryker-mutator/core @stryker-mutator/bun-runner
 ```
 
 **Stryker Configuration:**
+
 ```json
 {
   "testRunner": "bun",
@@ -642,16 +664,17 @@ bun run test:mutation
 
 ### ADR-001: Use Bun for Development Runtime
 
-**Status:** Accepted
-**Context:** Need to develop Stryker plugin for Bun test runner
-**Decision:** Use Bun as development runtime while targeting Node.js for production
-**Rationale:**
+**Status:** Accepted **Context:** Need to develop Stryker plugin for Bun test
+runner **Decision:** Use Bun as development runtime while targeting Node.js for
+production **Rationale:**
+
 - Dogfooding (NFR010) - validates Bun capabilities
 - 13x faster test execution during development
 - Native TypeScript support (no transpile step)
 - Node.js compatibility via ESM/CJS dual output
 
 **Consequences:**
+
 - Positive: Fast dev cycle, validates Bun ecosystem
 - Negative: Must maintain Node.js compatibility
 
@@ -659,16 +682,17 @@ bun run test:mutation
 
 ### ADR-002: Custom Per-Test Coverage Implementation
 
-**Status:** Accepted
-**Context:** Bun lacks native per-test coverage support
-**Decision:** Implement custom per-test coverage via isolated test execution + LCOV parsing
-**Rationale:**
+**Status:** Accepted **Context:** Bun lacks native per-test coverage support
+**Decision:** Implement custom per-test coverage via isolated test execution +
+LCOV parsing **Rationale:**
+
 - Achieves 40-60% performance gain (NFR003)
 - Bun provides `--coverage` and LCOV output
 - Line-level precision via LCOV format (FR018)
 - Fallback to 'all' mode ensures robustness (FR020)
 
 **Consequences:**
+
 - Positive: Major performance differentiator, FR017-FR020 compliance
 - Negative: Complex implementation (Epic 3 high-risk)
 
@@ -676,16 +700,17 @@ bun run test:mutation
 
 ### ADR-003: Single Repository (No Monorepo)
 
-**Status:** Accepted
-**Context:** Level 3 project (52 stories) needs structure decision
-**Decision:** Single repository without monorepo tooling (Turbo, Lerna)
+**Status:** Accepted **Context:** Level 3 project (52 stories) needs structure
+decision **Decision:** Single repository without monorepo tooling (Turbo, Lerna)
 **Rationale:**
+
 - Single npm package output
 - Reduced complexity for Level 3 scope
 - Faster setup, simpler CI/CD
 - Examples in subdirectories sufficient
 
 **Consequences:**
+
 - Positive: Simpler architecture, faster builds
 - Negative: Future modularization requires restructure
 
@@ -693,16 +718,16 @@ bun run test:mutation
 
 ### ADR-004: Zero 'any' Types Policy
 
-**Status:** Accepted
-**Context:** TypeScript strict mode (NFR018)
-**Decision:** NEVER use 'any' type anywhere in codebase
-**Rationale:**
+**Status:** Accepted **Context:** TypeScript strict mode (NFR018) **Decision:**
+NEVER use 'any' type anywhere in codebase **Rationale:**
+
 - Prevents type safety erosion
 - Forces proper type design
 - Catches bugs at compile time
 - Ensures AI agents maintain type safety
 
 **Consequences:**
+
 - Positive: Maximum type safety, better IntelliSense
 - Negative: Requires more thoughtful typing (use 'unknown', generics)
 
@@ -710,16 +735,17 @@ bun run test:mutation
 
 ### ADR-005: Three-Level Timeout Hierarchy
 
-**Status:** Accepted
-**Context:** Multiple timeout scenarios (FR026, FR031, FR027)
-**Decision:** Implement spawn > test > kill timeout hierarchy
+**Status:** Accepted **Context:** Multiple timeout scenarios (FR026, FR031,
+FR027) **Decision:** Implement spawn > test > kill timeout hierarchy
 **Rationale:**
+
 - Prevents indefinite hangs (FR031)
 - Allows test-specific timeouts (FR026)
 - Graceful process termination (FR027)
 - Clear timeout semantics for agents
 
 **Consequences:**
+
 - Positive: Robust timeout handling, prevents hangs
 - Negative: Requires careful timeout calculation
 
@@ -740,7 +766,6 @@ bun run test:mutation
 
 ---
 
-_Generated by BMAD Decision Architecture Workflow v1.3.2_
-_Date: 2025-01-21_
-_For: Eduardo Menoncello_
-_Workflow: bmad/bmm/workflows/3-solutioning/architecture_
+_Generated by BMAD Decision Architecture Workflow v1.3.2_ _Date: 2025-01-21_
+_For: Eduardo Menoncello_ _Workflow:
+bmad/bmm/workflows/3-solutioning/architecture_

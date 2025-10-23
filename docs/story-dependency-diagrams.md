@@ -1,15 +1,15 @@
 # Story Dependency Diagrams - stryker-mutator-bun-runner
 
-**Date:** 2025-01-21
-**Author:** Bob (Scrum Master)
-**Project Level:** 3 (Comprehensive Product)
-**Total Stories:** 52 across 5 epics
+**Date:** 2025-01-21 **Author:** Bob (Scrum Master) **Project Level:** 3
+(Comprehensive Product) **Total Stories:** 52 across 5 epics
 
 ---
 
 ## Overview
 
-This document provides visual dependency maps for all stories across the 5 epics, helping teams understand implementation sequencing, parallel execution opportunities, and critical path identification.
+This document provides visual dependency maps for all stories across the 5
+epics, helping teams understand implementation sequencing, parallel execution
+opportunities, and critical path identification.
 
 ---
 
@@ -45,6 +45,7 @@ graph TD
 ```
 
 **Timeline Overview:**
+
 - **Total Duration:** 8 weeks
 - **Sequential Execution:** Epics must complete in order
 - **Parallel Stories:** Within each epic, stories can have parallel execution
@@ -103,6 +104,7 @@ graph TD
 ```
 
 **Epic 1 Analysis:**
+
 - **Critical Path:** 1.1 → 1.2 → 1.3 → 1.6 → 1.7 → 1.8 → 1.10
 - **Parallel Opportunities:**
   - Stories 1.4 (Configuration) and 1.5 (Environment) can run in parallel
@@ -152,8 +154,10 @@ graph TD
 ```
 
 **Epic 2 Analysis:**
+
 - **Critical Path:** 2.1 → 2.2 → 2.3 → 2.4 → 2.9 → 2.10
-- **Major Parallel Opportunity:** Stories 2.5, 2.6, 2.7, 2.8 can run concurrently after 2.3
+- **Major Parallel Opportunity:** Stories 2.5, 2.6, 2.7, 2.8 can run
+  concurrently after 2.3
 - **Key Dependencies:**
   - Story 2.3 (MutantRun) enables 4 parallel stories
   - Story 2.7 (Source Maps) required for 2.9 (Error Classification)
@@ -240,9 +244,12 @@ graph TD
 ```
 
 **Epic 3 Analysis:**
-- **Critical Path:** Linear progression through all 12 stories (most complex epic)
+
+- **Critical Path:** Linear progression through all 12 stories (most complex
+  epic)
 - **High Risk Area:** Stories 3.3-3.5 (PerTest coverage implementation)
-- **Key Innovation Point:** Stories 3.4-3.6 deliver the 40-60% performance improvement
+- **Key Innovation Point:** Stories 3.4-3.6 deliver the 40-60% performance
+  improvement
 - **Fallback Strategy:** Story 3.7 ensures robustness if coverage fails
 - **Estimated Duration:** 2-3 weeks (longest epic)
 - **Prerequisite:** Epic 2 complete
@@ -335,7 +342,9 @@ graph TD
 ```
 
 **Epic 4 Analysis:**
-- **Three Development Streams:** Security, Compatibility, and Quality can run in parallel
+
+- **Three Development Streams:** Security, Compatibility, and Quality can run in
+  parallel
 - **Critical Path:** Security stream (4.1 → 4.2 → 4.3 → 4.4 → 4.8 → 4.10)
 - **Parallel Opportunities:**
   - Compatibility stream (4.5 → 4.6 → 4.7) can run parallel to security
@@ -400,6 +409,7 @@ graph TD
 ```
 
 **Epic 5 Analysis:**
+
 - **Three Parallel Streams:** Documentation, Examples, and Release preparation
 - **Critical Path:** Release stream (5.5 → 5.7 → 5.8 → 5.9 → 5.10)
 - **Parallel Opportunities:**
@@ -462,6 +472,7 @@ gantt
 ```
 
 **Critical Path Summary:**
+
 - **Total Duration:** 8 weeks (40 working days)
 - **Key Milestones:**
   - Week 1: Basic plugin functionality
@@ -529,6 +540,7 @@ graph LR
 ```
 
 **Parallel Development Strategy:**
+
 - **Week 1:** 2 parallel stories (20% parallelization)
 - **Week 2-3:** 4 parallel stories (44% parallelization)
 - **Week 4-5:** 2 parallel stories (25% parallelization)
@@ -536,7 +548,9 @@ graph LR
 - **Week 8:** 2 parallel stories (29% parallelization)
 
 **Resource Allocation:**
-- **Solo Developer:** Focus on critical path, use parallel stories for context switching
+
+- **Solo Developer:** Focus on critical path, use parallel stories for context
+  switching
 - **2-Person Team:** Divide critical path and parallel streams
 - **3+ Person Team:** Full parallel execution possible
 
@@ -600,11 +614,13 @@ graph TD
 ## Implementation Recommendations
 
 ### For Solo Developer
+
 1. **Focus on Critical Path:** Complete stories sequentially
 2. **Use Parallel Stories:** For context switching when blocked
 3. **Buffer Time:** Add 20% extra time for high-risk stories
 
 ### For 2-Person Team
+
 1. **Divide and Conquer:**
    - Developer 1: Critical path stories
    - Developer 2: Parallel stream stories
@@ -612,6 +628,7 @@ graph TD
 3. **Cross-Training:** Rotate between streams for knowledge sharing
 
 ### For 3+ Person Team
+
 1. **Full Parallel Execution:** Assign dedicated streams
 2. **Specialization:**
    - Security specialist: Stories 4.1-4.4
@@ -624,7 +641,8 @@ graph TD
 ## Dependency Management Best Practices
 
 1. **Start with Infrastructure:** Story 1.1 is universal blocker
-2. **Validate Each Epic:** Don't start next epic until previous epic completion criteria met
+2. **Validate Each Epic:** Don't start next epic until previous epic completion
+   criteria met
 3. **Monitor Critical Path:** Track progress on critical path stories
 4. **Buffer for Risk:** Add time buffers around high-risk dependencies
 5. **Regular Integration:** Test integration points between dependent stories
@@ -632,6 +650,5 @@ graph TD
 
 ---
 
-*Document generated by Bob (Scrum Master)*
-*Last updated: 2025-01-21*
-*Next review: After each epic completion*
+_Document generated by Bob (Scrum Master)_ _Last updated: 2025-01-21_ _Next
+review: After each epic completion_

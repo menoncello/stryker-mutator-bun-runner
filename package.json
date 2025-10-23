@@ -1,0 +1,84 @@
+{
+  "name": "@stryker-mutator/bun-runner",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Stryker test runner plugin for Bun",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.mjs",
+    "dist/**/*.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "build:tsc": "tsc",
+    "build:bundle": "bun build src/index.ts --outdir dist --target node --format esm --outfile index.mjs",
+    "build:esm": "tsc --project tsconfig.esm.json",
+    "build:cjs": "tsc --project tsconfig.cjs.json",
+    "clean": "rm -rf dist",
+    "test": "bun test",
+    "test:unit": "bun test test/unit",
+    "test:integration": "bun test test/integration",
+    "test:coverage": "bun test --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test:mutate": "stryker run",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^18.19.130",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-jsdoc": "^48.0.0",
+    "eslint-plugin-sonarjs": "^0.25.0",
+    "eslint-plugin-unicorn": "^51.0.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@stryker-mutator/api": "^8.0.0",
+    "typed-inject": "^4.0.0"
+  },
+  "peerDependencies": {
+    "@stryker-mutator/core": "^8.0.0"
+  },
+  "keywords": [
+    "stryker",
+    "mutation-testing",
+    "bun",
+    "test-runner",
+    "mutation",
+    "testing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stryker-mutator/stryker-js.git",
+    "directory": "packages/bun-runner"
+  },
+  "author": "Stryker Mutator Team <hello@stryker-mutator.io>",
+  "license": "Apache-2.0",
+  "homepage": "https://stryker-mutator.io",
+  "bugs": {
+    "url": "https://github.com/stryker-mutator/stryker-js/issues"
+  }
+}

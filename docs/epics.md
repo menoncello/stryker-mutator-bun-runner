@@ -1,15 +1,15 @@
 # stryker-mutator-bun-runner - Epic Breakdown
 
-**Author:** Eduardo Menoncello
-**Date:** 2025-10-21
-**Project Level:** 3
+**Author:** Eduardo Menoncello **Date:** 2025-10-21 **Project Level:** 3
 **Target Scale:** Level 3 (Comprehensive Product, 15-40 stories, 2-5 epics)
 
 ---
 
 ## Overview
 
-This document provides the detailed epic breakdown for stryker-mutator-bun-runner, expanding on the high-level epic list in the [PRD](./PRD.md).
+This document provides the detailed epic breakdown for
+stryker-mutator-bun-runner, expanding on the high-level epic list in the
+[PRD](./PRD.md).
 
 Each epic includes:
 
@@ -21,7 +21,8 @@ Each epic includes:
 **Epic Sequencing Principles:**
 
 - Epic 1 establishes foundational infrastructure and initial functionality
-- Subsequent epics build progressively, each delivering significant end-to-end value
+- Subsequent epics build progressively, each delivering significant end-to-end
+  value
 - Stories within epics are vertically sliced and sequentially ordered
 - No forward dependencies - each story builds only on previous work
 
@@ -41,11 +42,18 @@ Each epic includes:
 
 **Expanded Goal:**
 
-Establish the foundational project infrastructure and implement the Stryker TestRunner interface with basic Bun test execution capability. This epic delivers a minimal but functional plugin that can execute Bun tests via subprocess and report results back to Stryker, providing the critical foundation upon which all subsequent features build.
+Establish the foundational project infrastructure and implement the Stryker
+TestRunner interface with basic Bun test execution capability. This epic
+delivers a minimal but functional plugin that can execute Bun tests via
+subprocess and report results back to Stryker, providing the critical foundation
+upon which all subsequent features build.
 
 **Value Delivery:**
 
-By the end of this epic, developers can install the plugin and see their Bun tests executed through Stryker (without mutations or coverage yet). This proves the core integration pattern works and provides immediate validation of the technical approach.
+By the end of this epic, developers can install the plugin and see their Bun
+tests executed through Stryker (without mutations or coverage yet). This proves
+the core integration pattern works and provides immediate validation of the
+technical approach.
 
 **Story Breakdown:**
 
@@ -53,15 +61,18 @@ By the end of this epic, developers can install the plugin and see their Bun tes
 
 **Story 1.1: Project Setup and Build Configuration**
 
-As a plugin developer,
-I want a properly configured TypeScript project with build tooling,
-So that I can develop the plugin with type safety and proper compilation.
+As a plugin developer, I want a properly configured TypeScript project with
+build tooling, So that I can develop the plugin with type safety and proper
+compilation.
 
 **Acceptance Criteria:**
+
 1. TypeScript project initialized with tsconfig.json in strict mode (NFR018)
-2. Package.json configured with appropriate dependencies (@stryker-mutator/api, typed-inject)
+2. Package.json configured with appropriate dependencies (@stryker-mutator/api,
+   typed-inject)
 3. Build script produces compilable JavaScript output
-4. ESLint and Prettier configured following Stryker ecosystem conventions (NFR019)
+4. ESLint and Prettier configured following Stryker ecosystem conventions
+   (NFR019)
 5. Git repository initialized with proper .gitignore
 6. Project structure follows modular architecture (NFR020)
 
@@ -71,11 +82,11 @@ So that I can develop the plugin with type safety and proper compilation.
 
 **Story 1.2: Stryker Plugin Declaration and Registration**
 
-As a Stryker user,
-I want the Bun runner plugin to be discoverable and loadable by Stryker,
-So that I can use it in my Stryker configuration.
+As a Stryker user, I want the Bun runner plugin to be discoverable and loadable
+by Stryker, So that I can use it in my Stryker configuration.
 
 **Acceptance Criteria:**
+
 1. Plugin declared using `declareClassPlugin` with PluginKind.TestRunner (FR002)
 2. Plugin exports follow Stryker plugin conventions
 3. Package.json includes proper Stryker plugin metadata
@@ -88,12 +99,13 @@ So that I can use it in my Stryker configuration.
 
 **Story 1.3: TestRunner Interface Implementation Skeleton**
 
-As a plugin developer,
-I want to implement the TestRunner interface methods,
-So that Stryker can communicate with the plugin.
+As a plugin developer, I want to implement the TestRunner interface methods, So
+that Stryker can communicate with the plugin.
 
 **Acceptance Criteria:**
-1. BunTestRunner class implements all required methods: init, dryRun, mutantRun, dispose (FR001)
+
+1. BunTestRunner class implements all required methods: init, dryRun, mutantRun,
+   dispose (FR001)
 2. Each method has proper TypeScript signatures matching Stryker API
 3. Dependency injection integration using typed-inject framework (FR003)
 4. Methods return appropriate stub/placeholder responses initially
@@ -105,11 +117,11 @@ So that Stryker can communicate with the plugin.
 
 **Story 1.4: Configuration Schema and Validation**
 
-As a Bun developer,
-I want to define runner-specific configuration options,
-So that I can customize the plugin behavior for my project.
+As a Bun developer, I want to define runner-specific configuration options, So
+that I can customize the plugin behavior for my project.
 
 **Acceptance Criteria:**
+
 1. Configuration interface defined for Bun runner options (FR004)
 2. JSON schema generated from TypeScript types for IDE autocomplete (FR006)
 3. Configuration validation logic with clear error messages (FR004)
@@ -122,14 +134,16 @@ So that I can customize the plugin behavior for my project.
 
 **Story 1.5: Bun Installation Detection and Validation**
 
-As a plugin user,
-I want clear feedback if Bun is not installed or accessible,
+As a plugin user, I want clear feedback if Bun is not installed or accessible,
 So that I can fix my environment before attempting to run tests.
 
 **Acceptance Criteria:**
+
 1. Plugin checks for Bun in PATH during initialization (FR030)
-2. Bun version detected and validated against minimum supported version (Bun 1.0+) (FR005)
-3. Clear error message with installation guidance if Bun not found (FR030, NFR025)
+2. Bun version detected and validated against minimum supported version (Bun
+   1.0+) (FR005)
+3. Clear error message with installation guidance if Bun not found (FR030,
+   NFR025)
 4. Validation occurs in init() method before any test execution
 5. Version compatibility matrix reference provided in error message (FR040)
 
@@ -139,11 +153,11 @@ So that I can fix my environment before attempting to run tests.
 
 **Story 1.6: Basic Bun Test Execution via Subprocess**
 
-As a plugin developer,
-I want to spawn Bun CLI process to execute tests,
-So that I can run user's test suite.
+As a plugin developer, I want to spawn Bun CLI process to execute tests, So that
+I can run user's test suite.
 
 **Acceptance Criteria:**
+
 1. Bun.spawn() used to execute `bun test` command (FR007)
 2. TypeScript and JSX support enabled in spawn configuration (FR007)
 3. JSON output format requested via CLI flags (FR008)
@@ -158,11 +172,11 @@ So that I can run user's test suite.
 
 **Story 1.7: JSON Output Parsing and Error Handling**
 
-As a plugin developer,
-I want to parse Bun's JSON test output into structured data,
-So that I can map results to Stryker's expected format.
+As a plugin developer, I want to parse Bun's JSON test output into structured
+data, So that I can map results to Stryker's expected format.
 
 **Acceptance Criteria:**
+
 1. JSON output parsed from Bun CLI stdout (FR008)
 2. Handles valid JSON test results successfully
 3. Validates JSON completeness before parsing (FR034)
@@ -177,11 +191,11 @@ So that I can map results to Stryker's expected format.
 
 **Story 1.8: DryRun Result Mapping**
 
-As a Stryker user,
-I want the plugin to report test results in Stryker's expected format,
-So that Stryker can understand my test suite structure.
+As a Stryker user, I want the plugin to report test results in Stryker's
+expected format, So that Stryker can understand my test suite structure.
 
 **Acceptance Criteria:**
+
 1. Bun test results mapped to DryRunResult structure (FR008, FR021)
 2. Test names, status (passed/failed), and duration included (FR021)
 3. Test failure messages and stack traces captured (FR022)
@@ -195,13 +209,14 @@ So that Stryker can understand my test suite structure.
 
 **Story 1.9: Basic Error Reporting and Logging**
 
-As a plugin user,
-I want clear error messages when test execution fails,
-So that I can diagnose and fix issues quickly.
+As a plugin user, I want clear error messages when test execution fails, So that
+I can diagnose and fix issues quickly.
 
 **Acceptance Criteria:**
+
 1. Subprocess failures communicated with detailed errors (FR024)
-2. Error messages include: exit code, stderr output, error classification (FR024)
+2. Error messages include: exit code, stderr output, error classification
+   (FR024)
 3. Basic logging infrastructure in place for future debug mode (FR025)
 4. Actionable troubleshooting guidance provided in errors (NFR025)
 5. Sensitive information sanitized from error output (FR037)
@@ -212,12 +227,13 @@ So that I can diagnose and fix issues quickly.
 
 **Story 1.10: Async Test Handling**
 
-As a Bun developer with async tests,
-I want the plugin to wait for all async tests to complete,
-So that I get accurate test results.
+As a Bun developer with async tests, I want the plugin to wait for all async
+tests to complete, So that I get accurate test results.
 
 **Acceptance Criteria:**
-1. Plugin waits for Bun subprocess to fully complete before processing results (FR012)
+
+1. Plugin waits for Bun subprocess to fully complete before processing results
+   (FR012)
 2. Async tests (promises, async/await) handled correctly
 3. Test completion detection works for both sync and async tests
 4. Timeout applies to entire test suite execution (FR026)
@@ -228,6 +244,7 @@ So that I get accurate test results.
 ---
 
 **Epic 1 Completion Criteria:**
+
 - ✅ Plugin can be installed and loaded by Stryker
 - ✅ Dry run executes Bun tests and returns results successfully
 - ✅ All tests from Bun suite visible in Stryker output
@@ -242,11 +259,16 @@ So that I get accurate test results.
 
 **Expanded Goal:**
 
-Implement the core mutation testing capability by adding mutation activation, test execution with active mutations, and comprehensive result reporting. This epic transforms the plugin from a simple test runner into a full-featured mutation testing tool.
+Implement the core mutation testing capability by adding mutation activation,
+test execution with active mutations, and comprehensive result reporting. This
+epic transforms the plugin from a simple test runner into a full-featured
+mutation testing tool.
 
 **Value Delivery:**
 
-By the end of this epic, developers can run complete mutation tests on their Bun projects, see which mutations are killed or survived, and understand their test suite's effectiveness. This delivers the core value proposition of the plugin.
+By the end of this epic, developers can run complete mutation tests on their Bun
+projects, see which mutations are killed or survived, and understand their test
+suite's effectiveness. This delivers the core value proposition of the plugin.
 
 **Story Breakdown:**
 
@@ -254,11 +276,11 @@ By the end of this epic, developers can run complete mutation tests on their Bun
 
 **Story 2.1: Mutation Activation via Environment Variables**
 
-As a plugin developer,
-I want to activate mutations in source code using Stryker's mutation switching protocol,
-So that tests run against mutated code.
+As a plugin developer, I want to activate mutations in source code using
+Stryker's mutation switching protocol, So that tests run against mutated code.
 
 **Acceptance Criteria:**
+
 1. Environment variable-based mutation activation implemented (FR014)
 2. Mutation ID passed to Bun subprocess via environment variables
 3. Mutation activation verified in spawned process (FR032)
@@ -271,11 +293,12 @@ So that tests run against mutated code.
 
 **Story 2.2: File-Based Mutation Activation Support**
 
-As a plugin developer,
-I want to support file-based mutation activation as an alternative,
-So that the plugin works with different Stryker mutation strategies.
+As a plugin developer, I want to support file-based mutation activation as an
+alternative, So that the plugin works with different Stryker mutation
+strategies.
 
 **Acceptance Criteria:**
+
 1. File-based mutation activation implemented (FR014)
 2. File modification timestamp verification (FR032)
 3. Both environment variable and file-based methods supported
@@ -288,11 +311,11 @@ So that the plugin works with different Stryker mutation strategies.
 
 **Story 2.3: MutantRun Implementation**
 
-As a Stryker user,
-I want the plugin to execute tests with mutations activated,
+As a Stryker user, I want the plugin to execute tests with mutations activated,
 So that I can see which mutations are killed by my tests.
 
 **Acceptance Criteria:**
+
 1. mutantRun() method fully implemented (FR010)
 2. Fresh Bun process spawned for each mutant (FR011)
 3. Mutation activated before test execution (Story 2.1/2.2)
@@ -306,11 +329,12 @@ So that I can see which mutations are killed by my tests.
 
 **Story 2.4: Mutation Status Detection and Reporting**
 
-As a Stryker user,
-I want accurate mutation status reported (Killed, Survived, Timeout, Error, NoCoverage),
-So that I understand which mutations my tests caught.
+As a Stryker user, I want accurate mutation status reported (Killed, Survived,
+Timeout, Error, NoCoverage), So that I understand which mutations my tests
+caught.
 
 **Acceptance Criteria:**
+
 1. Killed status: Test fails with mutation active (FR015)
 2. Survived status: All tests pass with mutation active (FR015)
 3. Timeout status: Tests exceed timeout threshold (FR015, FR016)
@@ -325,11 +349,11 @@ So that I understand which mutations my tests caught.
 
 **Story 2.5: Timeout Management and Multipliers**
 
-As a plugin user,
-I want configurable timeout handling to prevent false timeouts,
-So that slow tests don't incorrectly report Timeout status.
+As a plugin user, I want configurable timeout handling to prevent false
+timeouts, So that slow tests don't incorrectly report Timeout status.
 
 **Acceptance Criteria:**
+
 1. Timeout multipliers applied based on dry run performance (FR016, FR026)
 2. Default timeout values calculated from dry run duration
 3. User-configurable timeout overrides supported (FR026)
@@ -343,11 +367,11 @@ So that slow tests don't incorrectly report Timeout status.
 
 **Story 2.6: Test Filtering by Pattern**
 
-As a Bun developer,
-I want to run specific tests using test name patterns,
-So that I can test mutations more efficiently.
+As a Bun developer, I want to run specific tests using test name patterns, So
+that I can test mutations more efficiently.
 
 **Acceptance Criteria:**
+
 1. Test filtering using Bun's `--test-name-pattern` flag (FR009)
 2. Test file path filtering supported (FR009)
 3. Multiple filter patterns handled correctly
@@ -360,11 +384,11 @@ So that I can test mutations more efficiently.
 
 **Story 2.7: Source Map Support for Stack Traces**
 
-As a TypeScript developer,
-I want stack traces to reference original TypeScript source locations,
-So that I can quickly locate failing tests in my code.
+As a TypeScript developer, I want stack traces to reference original TypeScript
+source locations, So that I can quickly locate failing tests in my code.
 
 **Acceptance Criteria:**
+
 1. Source map support for TypeScript implemented (FR022)
 2. JSX and TSX source maps also supported (FR022)
 3. Stack traces show original file locations, not compiled JavaScript
@@ -377,11 +401,11 @@ So that I can quickly locate failing tests in my code.
 
 **Story 2.8: Performance Metrics Collection**
 
-As a plugin user,
-I want accurate execution time metrics for mutation testing,
+As a plugin user, I want accurate execution time metrics for mutation testing,
 So that I can understand performance characteristics.
 
 **Acceptance Criteria:**
+
 1. Test execution time tracked per mutation (FR023)
 2. Dry run execution time recorded as baseline (FR023)
 3. Metrics suitable for CI/CD regression testing (NFR004)
@@ -394,12 +418,13 @@ So that I can understand performance characteristics.
 
 **Story 2.9: Enhanced Error Classification and Reporting**
 
-As a plugin user,
-I want detailed error information when mutations fail unexpectedly,
-So that I can debug issues in my test setup.
+As a plugin user, I want detailed error information when mutations fail
+unexpectedly, So that I can debug issues in my test setup.
 
 **Acceptance Criteria:**
-1. Error types classified: subprocess crash, invalid output, timeout, etc. (FR024)
+
+1. Error types classified: subprocess crash, invalid output, timeout, etc.
+   (FR024)
 2. Stdout and stderr captured and included in error reports (FR024)
 3. Exit codes interpreted and explained (FR024)
 4. Actionable troubleshooting guidance provided (FR024, NFR025)
@@ -411,11 +436,12 @@ So that I can debug issues in my test setup.
 
 **Story 2.10: Worker Isolation and Thread Safety**
 
-As a plugin developer,
-I want the plugin to work correctly in Stryker's concurrent worker pool,
-So that multiple mutations can be tested in parallel safely.
+As a plugin developer, I want the plugin to work correctly in Stryker's
+concurrent worker pool, So that multiple mutations can be tested in parallel
+safely.
 
 **Acceptance Criteria:**
+
 1. Worker-isolated state management (FR029)
 2. Worker-specific temporary directories created (FR035)
 3. No shared mutable state between workers
@@ -428,6 +454,7 @@ So that multiple mutations can be tested in parallel safely.
 ---
 
 **Epic 2 Completion Criteria:**
+
 - ✅ Mutations activated and tests execute with mutated code
 - ✅ All mutation statuses reported accurately
 - ✅ Performance metrics tracked
@@ -442,15 +469,21 @@ So that multiple mutations can be tested in parallel safely.
 
 **Expanded Goal:**
 
-Implement perTest coverage collection and intelligent test filtering to achieve 40-60% performance improvement. This epic delivers the key performance differentiator that makes mutation testing practical for large codebases.
+Implement perTest coverage collection and intelligent test filtering to achieve
+40-60% performance improvement. This epic delivers the key performance
+differentiator that makes mutation testing practical for large codebases.
 
 **Value Delivery:**
 
-By the end of this epic, the plugin achieves its 2-3x performance advantage over Jest/Vitest runners through intelligent test selection. Large test suites become feasible for mutation testing in CI/CD pipelines.
+By the end of this epic, the plugin achieves its 2-3x performance advantage over
+Jest/Vitest runners through intelligent test selection. Large test suites become
+feasible for mutation testing in CI/CD pipelines.
 
 **High Risk/High Value Notice:**
 
-This epic involves complex coverage instrumentation and is marked as a risk hotspot in the PRD. Stories include validation checkpoints and fallback mechanisms.
+This epic involves complex coverage instrumentation and is marked as a risk
+hotspot in the PRD. Stories include validation checkpoints and fallback
+mechanisms.
 
 **Story Breakdown:**
 
@@ -458,11 +491,11 @@ This epic involves complex coverage instrumentation and is marked as a risk hots
 
 **Story 3.1: Coverage Analysis Mode Configuration**
 
-As a plugin user,
-I want to configure coverage analysis mode (off, all, perTest),
-So that I can choose the right trade-off between speed and simplicity.
+As a plugin user, I want to configure coverage analysis mode (off, all,
+perTest), So that I can choose the right trade-off between speed and simplicity.
 
 **Acceptance Criteria:**
+
 1. Coverage mode configuration option added to schema (FR020)
 2. Three modes supported: off, all, perTest (FR020)
 3. Default mode auto-selects based on Bun version support (FR036)
@@ -475,11 +508,11 @@ So that I can choose the right trade-off between speed and simplicity.
 
 **Story 3.2: Native Bun Coverage Instrumentation**
 
-As a plugin developer,
-I want to leverage Bun's native coverage capabilities,
-So that I can collect coverage data efficiently.
+As a plugin developer, I want to leverage Bun's native coverage capabilities, So
+that I can collect coverage data efficiently.
 
 **Acceptance Criteria:**
+
 1. Bun CLI coverage flags integrated (`--coverage`) (FR017)
 2. Coverage data collected during dry run execution (FR017)
 3. Line and function coverage captured (Bun's current capability)
@@ -492,11 +525,11 @@ So that I can collect coverage data efficiently.
 
 **Story 3.3: PerTest Coverage Collection**
 
-As a plugin developer,
-I want to collect coverage on a per-test basis,
-So that I can map which tests cover which code.
+As a plugin developer, I want to collect coverage on a per-test basis, So that I
+can map which tests cover which code.
 
 **Acceptance Criteria:**
+
 1. Tests executed individually to collect per-test coverage (FR017)
 2. Coverage data associated with specific test identifiers
 3. Coverage results aggregated across all tests
@@ -509,12 +542,13 @@ So that I can map which tests cover which code.
 
 **Story 3.4: Test-to-Mutant Mapping Generation**
 
-As a plugin developer,
-I want to generate mapping between tests and mutants based on coverage,
-So that I can filter tests intelligently.
+As a plugin developer, I want to generate mapping between tests and mutants
+based on coverage, So that I can filter tests intelligently.
 
 **Acceptance Criteria:**
-1. Coverage data analyzed to identify code locations covered by each test (FR018)
+
+1. Coverage data analyzed to identify code locations covered by each test
+   (FR018)
 2. Line-level precision in mapping (FR018)
 3. Mutant locations mapped to covering tests
 4. Mapping data structure optimized for fast lookup
@@ -526,11 +560,11 @@ So that I can filter tests intelligently.
 
 **Story 3.5: Coverage Confidence Scoring**
 
-As a plugin developer,
-I want to assess confidence in coverage mappings,
-So that I can apply conservative filtering strategy.
+As a plugin developer, I want to assess confidence in coverage mappings, So that
+I can apply conservative filtering strategy.
 
 **Acceptance Criteria:**
+
 1. Coverage confidence calculated per test-mutant pair (FR033)
 2. 80% confidence threshold implemented (FR033)
 3. Ambiguous mappings identified and flagged
@@ -543,11 +577,11 @@ So that I can apply conservative filtering strategy.
 
 **Story 3.6: Intelligent Test Filtering**
 
-As a Stryker user,
-I want only relevant tests executed for each mutation,
-So that mutation testing completes faster.
+As a Stryker user, I want only relevant tests executed for each mutation, So
+that mutation testing completes faster.
 
 **Acceptance Criteria:**
+
 1. Tests filtered based on coverage mapping during mutantRun (FR019)
 2. Only tests covering the active mutant executed (FR019)
 3. Conservative filtering applied (Story 3.5)
@@ -561,11 +595,11 @@ So that mutation testing completes faster.
 
 **Story 3.7: Coverage Fallback Handling**
 
-As a plugin user,
-I want the plugin to work even if perTest coverage fails,
-So that I can still run mutation testing.
+As a plugin user, I want the plugin to work even if perTest coverage fails, So
+that I can still run mutation testing.
 
 **Acceptance Criteria:**
+
 1. PerTest collection failures detected automatically (FR020)
 2. Graceful fallback to 'all' mode when perTest fails (FR020)
 3. User notified of fallback with clear explanation
@@ -578,11 +612,11 @@ So that I can still run mutation testing.
 
 **Story 3.8: Performance Benchmarking Framework**
 
-As a plugin developer,
-I want to benchmark performance against Jest/Vitest runners,
-So that I can validate the 2-3x performance claim.
+As a plugin developer, I want to benchmark performance against Jest/Vitest
+runners, So that I can validate the 2-3x performance claim.
 
 **Acceptance Criteria:**
+
 1. Benchmark suite created with representative test projects (NFR002)
 2. Jest runner baseline measurements recorded (NFR002)
 3. Vitest runner baseline measurements recorded (NFR002)
@@ -596,11 +630,11 @@ So that I can validate the 2-3x performance claim.
 
 **Story 3.9: Coverage Performance Validation**
 
-As a plugin developer,
-I want to measure perTest coverage performance improvement,
-So that I can validate the 40-60% gain claim.
+As a plugin developer, I want to measure perTest coverage performance
+improvement, So that I can validate the 40-60% gain claim.
 
 **Acceptance Criteria:**
+
 1. Performance metrics collected for 'all' mode vs 'perTest' mode (NFR003)
 2. 40-60% improvement validated on large test suites (NFR003)
 3. Performance regression tests added (NFR004)
@@ -613,11 +647,11 @@ So that I can validate the 40-60% gain claim.
 
 **Story 3.10: Bun Version Format Detection**
 
-As a plugin user,
-I want the plugin to adapt to Bun output format changes,
-So that updates don't break my mutation testing.
+As a plugin user, I want the plugin to adapt to Bun output format changes, So
+that updates don't break my mutation testing.
 
 **Acceptance Criteria:**
+
 1. Bun CLI output format version detected (FR013)
 2. Parser adapts to detected format version (FR013)
 3. Warning issued if unknown format detected (FR013)
@@ -630,11 +664,11 @@ So that updates don't break my mutation testing.
 
 **Story 3.11: Coverage Mode Performance Optimization**
 
-As a plugin developer,
-I want to optimize coverage collection overhead,
-So that dry run stays within 10% overhead target.
+As a plugin developer, I want to optimize coverage collection overhead, So that
+dry run stays within 10% overhead target.
 
 **Acceptance Criteria:**
+
 1. Coverage collection optimized for minimal overhead
 2. Dry run overhead measured and stays <10% of native bun test (NFR005)
 3. Unnecessary coverage passes eliminated
@@ -647,11 +681,11 @@ So that dry run stays within 10% overhead target.
 
 **Story 3.12: Large Test Suite Stability**
 
-As a plugin user with large codebases,
-I want reliable mutation testing on 1000+ mutations,
-So that I can use the plugin on enterprise projects.
+As a plugin user with large codebases, I want reliable mutation testing on 1000+
+mutations, So that I can use the plugin on enterprise projects.
 
 **Acceptance Criteria:**
+
 1. Plugin tested with 1000+ mutations without failure (NFR007)
 2. Memory usage monitored and stays stable (NFR007)
 3. No memory leaks detected over long runs
@@ -663,6 +697,7 @@ So that I can use the plugin on enterprise projects.
 ---
 
 **Epic 3 Completion Criteria:**
+
 - ✅ PerTest coverage working and validated
 - ✅ 40-60% performance improvement from intelligent filtering
 - ✅ 2-3x faster than Jest/Vitest runners (benchmarked)
@@ -678,11 +713,16 @@ So that I can use the plugin on enterprise projects.
 
 **Expanded Goal:**
 
-Add comprehensive defensive validation, security features, enhanced observability, and production-grade error handling. This epic transforms the plugin from a functional tool into a production-ready, enterprise-grade solution.
+Add comprehensive defensive validation, security features, enhanced
+observability, and production-grade error handling. This epic transforms the
+plugin from a functional tool into a production-ready, enterprise-grade
+solution.
 
 **Value Delivery:**
 
-By the end of this epic, the plugin meets all production readiness criteria for official Stryker team adoption, including security best practices, comprehensive validation, and operational excellence.
+By the end of this epic, the plugin meets all production readiness criteria for
+official Stryker team adoption, including security best practices, comprehensive
+validation, and operational excellence.
 
 **Story Breakdown:**
 
@@ -690,15 +730,16 @@ By the end of this epic, the plugin meets all production readiness criteria for 
 
 **Story 4.1: Debug Logging and Structured Output**
 
-As a plugin user troubleshooting issues,
-I want comprehensive debug logging with structured output,
-So that I can diagnose problems efficiently.
+As a plugin user troubleshooting issues, I want comprehensive debug logging with
+structured output, So that I can diagnose problems efficiently.
 
 **Acceptance Criteria:**
+
 1. Debug logging mode implemented with configurable verbosity levels (FR025)
 2. Structured JSON output option for automated log analysis (FR025)
 3. Logging follows observability implementation order (FR037 → FR024 → FR025)
-4. Debug logs include: test execution details, mutation activation, coverage collection
+4. Debug logs include: test execution details, mutation activation, coverage
+   collection
 5. Performance impact of logging measured and minimized
 6. Log sanitization applied to prevent sensitive info leakage (FR037)
 
@@ -708,11 +749,11 @@ So that I can diagnose problems efficiently.
 
 **Story 4.2: Sensitive Information Sanitization**
 
-As a security-conscious developer,
-I want sensitive information removed from logs and errors,
-So that secrets don't leak in CI/CD logs.
+As a security-conscious developer, I want sensitive information removed from
+logs and errors, So that secrets don't leak in CI/CD logs.
 
 **Acceptance Criteria:**
+
 1. Secrets, environment variables, absolute file paths sanitized (FR037)
 2. Relative paths and public test identifiers preserved for debugging (FR037)
 3. Sanitization applied to all output: logs, errors, stack traces
@@ -725,11 +766,11 @@ So that secrets don't leak in CI/CD logs.
 
 **Story 4.3: Secure Temporary File Management**
 
-As a plugin user running in shared environments,
-I want secure temporary file handling,
-So that my code and data aren't exposed.
+As a plugin user running in shared environments, I want secure temporary file
+handling, So that my code and data aren't exposed.
 
 **Acceptance Criteria:**
+
 1. Temporary files created with 0700 permissions (FR038, NFR022)
 2. Worker-specific temp directories isolated (FR035)
 3. Cleanup on normal exit implemented (FR038)
@@ -743,11 +784,12 @@ So that my code and data aren't exposed.
 
 **Story 4.4: Transient Failure Recovery**
 
-As a plugin user in unreliable CI environments,
-I want the plugin to recover from transient failures,
-So that temporary issues don't fail my entire mutation test run.
+As a plugin user in unreliable CI environments, I want the plugin to recover
+from transient failures, So that temporary issues don't fail my entire mutation
+test run.
 
 **Acceptance Criteria:**
+
 1. Transient failures detected: network issues, temporary FS errors (NFR008)
 2. Retry logic implemented with exponential backoff
 3. Configurable retry attempts and backoff strategy
@@ -761,11 +803,11 @@ So that temporary issues don't fail my entire mutation test run.
 
 **Story 4.5: Configuration Schema Versioning and Migration**
 
-As a plugin user upgrading versions,
-I want configuration migration guidance,
-So that breaking changes don't break my setup.
+As a plugin user upgrading versions, I want configuration migration guidance, So
+that breaking changes don't break my setup.
 
 **Acceptance Criteria:**
+
 1. Configuration schema versioning implemented (FR039)
 2. Schema version tracked in configuration files
 3. Migration guidance provided for breaking changes (FR039)
@@ -779,11 +821,11 @@ So that breaking changes don't break my setup.
 
 **Story 4.6: Stryker Version Compatibility Validation**
 
-As a plugin user,
-I want validation that my Stryker version is compatible,
-So that I don't waste time debugging version mismatches.
+As a plugin user, I want validation that my Stryker version is compatible, So
+that I don't waste time debugging version mismatches.
 
 **Acceptance Criteria:**
+
 1. Stryker version detected at runtime (FR005)
 2. Minimum version (Stryker 7.0+) validated (FR005, NFR015)
 3. Clear error message if version too old (FR005)
@@ -797,11 +839,11 @@ So that I don't waste time debugging version mismatches.
 
 **Story 4.7: Compatibility Matrix Publication**
 
-As a plugin user,
-I want a published compatibility matrix,
-So that I know which Bun and Stryker versions work together.
+As a plugin user, I want a published compatibility matrix, So that I know which
+Bun and Stryker versions work together.
 
 **Acceptance Criteria:**
+
 1. Compatibility matrix document created and published (FR040)
 2. Matrix includes: Bun versions, Stryker versions, plugin versions
 3. Known issues documented for specific version combinations
@@ -815,11 +857,11 @@ So that I know which Bun and Stryker versions work together.
 
 **Story 4.8: Comprehensive Plugin Test Suite**
 
-As a plugin developer,
-I want comprehensive test coverage of the plugin itself,
+As a plugin developer, I want comprehensive test coverage of the plugin itself,
 So that I can confidently maintain and extend it.
 
 **Acceptance Criteria:**
+
 1. Test coverage ≥80% achieved (NFR009)
 2. Unit tests cover all core logic paths
 3. Integration tests validate end-to-end flows (NFR009)
@@ -833,11 +875,11 @@ So that I can confidently maintain and extend it.
 
 **Story 4.9: Cross-Platform Compatibility Testing**
 
-As a plugin user on different operating systems,
-I want the plugin to work reliably across platforms,
-So that my team can use it regardless of OS.
+As a plugin user on different operating systems, I want the plugin to work
+reliably across platforms, So that my team can use it regardless of OS.
 
 **Acceptance Criteria:**
+
 1. Plugin tested on macOS, Linux, Windows (NFR017)
 2. Platform-specific issues identified and documented
 3. Primary support for macOS/Linux validated (NFR017)
@@ -851,11 +893,11 @@ So that my team can use it regardless of OS.
 
 **Story 4.10: Resource Disposal and Cleanup**
 
-As a plugin user running long mutation test sessions,
-I want proper resource cleanup,
-So that memory leaks don't accumulate.
+As a plugin user running long mutation test sessions, I want proper resource
+cleanup, So that memory leaks don't accumulate.
 
 **Acceptance Criteria:**
+
 1. dispose() method fully implemented (FR028)
 2. All spawned processes killed on disposal (FR027, FR028)
 3. Temporary files cleaned up (FR038)
@@ -868,6 +910,7 @@ So that memory leaks don't accumulate.
 ---
 
 **Epic 4 Completion Criteria:**
+
 - ✅ Security best practices implemented and validated
 - ✅ Comprehensive error handling and recovery
 - ✅ 80%+ test coverage with dogfooding
@@ -883,11 +926,15 @@ So that memory leaks don't accumulate.
 
 **Expanded Goal:**
 
-Create comprehensive documentation, working example projects, and prepare the plugin for v1.0 release and community adoption. This epic ensures the plugin is discoverable, understandable, and ready for official Stryker team review.
+Create comprehensive documentation, working example projects, and prepare the
+plugin for v1.0 release and community adoption. This epic ensures the plugin is
+discoverable, understandable, and ready for official Stryker team review.
 
 **Value Delivery:**
 
-By the end of this epic, the plugin is fully documented, published to npm, and ready for community adoption with a clear path to official Stryker team integration.
+By the end of this epic, the plugin is fully documented, published to npm, and
+ready for community adoption with a clear path to official Stryker team
+integration.
 
 **Story Breakdown:**
 
@@ -895,11 +942,11 @@ By the end of this epic, the plugin is fully documented, published to npm, and r
 
 **Story 5.1: Installation and Quick-Start Guide**
 
-As a new plugin user,
-I want a clear installation and quick-start guide,
-So that I can get mutation testing running in under 5 minutes.
+As a new plugin user, I want a clear installation and quick-start guide, So that
+I can get mutation testing running in under 5 minutes.
 
 **Acceptance Criteria:**
+
 1. Installation guide covers npm/pnpm/yarn installation methods
 2. Quick-start tutorial achieves setup in <5 minutes (NFR024)
 3. Prerequisites clearly listed (Bun 1.0+, Stryker 7.0+, Node.js 18+)
@@ -913,11 +960,11 @@ So that I can get mutation testing running in under 5 minutes.
 
 **Story 5.2: Configuration Reference Documentation**
 
-As a plugin user customizing behavior,
-I want complete configuration reference documentation,
-So that I know all available options and their effects.
+As a plugin user customizing behavior, I want complete configuration reference
+documentation, So that I know all available options and their effects.
 
 **Acceptance Criteria:**
+
 1. All configuration options documented with descriptions (NFR012)
 2. Default values specified for each option
 3. Examples provided for common configuration scenarios
@@ -931,11 +978,11 @@ So that I know all available options and their effects.
 
 **Story 5.3: Troubleshooting Guide**
 
-As a plugin user encountering issues,
-I want a troubleshooting guide with common problems and solutions,
-So that I can resolve issues without external support.
+As a plugin user encountering issues, I want a troubleshooting guide with common
+problems and solutions, So that I can resolve issues without external support.
 
 **Acceptance Criteria:**
+
 1. Common error scenarios documented with solutions (NFR012)
 2. Debug logging usage explained
 3. Performance troubleshooting section included
@@ -949,11 +996,11 @@ So that I can resolve issues without external support.
 
 **Story 5.4: Working Example Projects**
 
-As a developer learning the plugin,
-I want working example projects,
-So that I can see real-world usage patterns.
+As a developer learning the plugin, I want working example projects, So that I
+can see real-world usage patterns.
 
 **Acceptance Criteria:**
+
 1. At least 3 example projects created (NFR014)
 2. Examples cover: simple project, TypeScript project, monorepo
 3. Each example includes README with explanation
@@ -967,11 +1014,11 @@ So that I can see real-world usage patterns.
 
 **Story 5.5: API Documentation Generation**
 
-As a plugin developer or contributor,
-I want generated API documentation,
-So that I can understand the plugin's internal structure.
+As a plugin developer or contributor, I want generated API documentation, So
+that I can understand the plugin's internal structure.
 
 **Acceptance Criteria:**
+
 1. TypeDoc or similar tool configured for API docs generation
 2. All public APIs documented with JSDoc/TSDoc (NFR013)
 3. API documentation published (GitHub Pages or similar)
@@ -985,11 +1032,11 @@ So that I can understand the plugin's internal structure.
 
 **Story 5.6: Performance Benchmarking Results Publication**
 
-As a potential plugin user,
-I want published performance benchmarks,
-So that I can understand the performance benefits.
+As a potential plugin user, I want published performance benchmarks, So that I
+can understand the performance benefits.
 
 **Acceptance Criteria:**
+
 1. Benchmark results from Epic 3 documented and published
 2. Comparison with Jest/Vitest runners shown (2-3x improvement)
 3. PerTest coverage performance gains documented (40-60%)
@@ -1003,11 +1050,11 @@ So that I can understand the performance benefits.
 
 **Story 5.7: Release Process and Versioning**
 
-As a plugin maintainer,
-I want a defined release process,
-So that releases are consistent and reliable.
+As a plugin maintainer, I want a defined release process, So that releases are
+consistent and reliable.
 
 **Acceptance Criteria:**
+
 1. Semantic versioning strategy documented (NFR016)
 2. Release checklist created
 3. Changelog format established (conventional commits)
@@ -1021,11 +1068,11 @@ So that releases are consistent and reliable.
 
 **Story 5.8: Community Contribution Guidelines**
 
-As a potential contributor,
-I want clear contribution guidelines,
-So that I can contribute effectively.
+As a potential contributor, I want clear contribution guidelines, So that I can
+contribute effectively.
 
 **Acceptance Criteria:**
+
 1. CONTRIBUTING.md created with guidelines
 2. Code of conduct established
 3. PR template and issue templates created
@@ -1039,11 +1086,11 @@ So that I can contribute effectively.
 
 **Story 5.9: Official v1.0 Release Preparation**
 
-As the project lead,
-I want to prepare for v1.0 release,
-So that the plugin is ready for production use.
+As the project lead, I want to prepare for v1.0 release, So that the plugin is
+ready for production use.
 
 **Acceptance Criteria:**
+
 1. All NFRs validated and met
 2. All epic completion criteria achieved
 3. Security audit performed (dependency scanning)
@@ -1058,11 +1105,11 @@ So that the plugin is ready for production use.
 
 **Story 5.10: Stryker Team Engagement and Submission**
 
-As the project lead,
-I want to engage the Stryker team for official adoption,
-So that the plugin becomes part of the official Stryker ecosystem.
+As the project lead, I want to engage the Stryker team for official adoption, So
+that the plugin becomes part of the official Stryker ecosystem.
 
 **Acceptance Criteria:**
+
 1. Stryker team contacted with plugin introduction
 2. Technical research and documentation shared
 3. Feedback from Stryker maintainers incorporated
@@ -1075,6 +1122,7 @@ So that the plugin becomes part of the official Stryker ecosystem.
 ---
 
 **Epic 5 Completion Criteria:**
+
 - ✅ Comprehensive documentation published (NFR012)
 - ✅ Working examples available (NFR014)
 - ✅ v1.0 released to npm
@@ -1117,4 +1165,5 @@ So that [benefit/value].
 
 ---
 
-**For implementation:** Use the `create-story` workflow to generate individual story implementation plans from this epic breakdown.
+**For implementation:** Use the `create-story` workflow to generate individual
+story implementation plans from this epic breakdown.

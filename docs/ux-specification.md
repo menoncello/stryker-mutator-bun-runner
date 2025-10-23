@@ -6,28 +6,42 @@ _Generated on 2025-10-21 by Eduardo Menoncello_
 
 ### Project Overview
 
-**stryker-mutator-bun-runner** is a Stryker TestRunner plugin that enables mutation testing for projects using the Bun runtime. This CLI developer tool integrates seamlessly into Stryker's mutation testing framework, providing native Bun test execution with 2-3x performance improvements over Node.js-based runners.
+**stryker-mutator-bun-runner** is a Stryker TestRunner plugin that enables
+mutation testing for projects using the Bun runtime. This CLI developer tool
+integrates seamlessly into Stryker's mutation testing framework, providing
+native Bun test execution with 2-3x performance improvements over Node.js-based
+runners.
 
-**Platform:** Command-Line Interface (CLI) via Stryker framework
-**Target Users:** TypeScript/JavaScript developers using Bun runtime for testing
-**Project Level:** 3 (Comprehensive Product)
-**UX Complexity:** Technical developer tool with sophisticated configuration and debugging requirements
+**Platform:** Command-Line Interface (CLI) via Stryker framework **Target
+Users:** TypeScript/JavaScript developers using Bun runtime for testing
+**Project Level:** 3 (Comprehensive Product) **UX Complexity:** Technical
+developer tool with sophisticated configuration and debugging requirements
 
 ### UX Context for CLI Developer Tools
 
 Unlike graphical applications, CLI tools require UX design focused on:
-- **Interaction Models:** Terminal-based command execution, configuration files, structured output
-- **Feedback Mechanisms:** Text-based progress indicators, error messages, debug logs
-- **Discoverability:** Documentation, error guidance, IDE integration via schemas
-- **Mental Models:** Convention over configuration, progressive disclosure of advanced features
+
+- **Interaction Models:** Terminal-based command execution, configuration files,
+  structured output
+- **Feedback Mechanisms:** Text-based progress indicators, error messages, debug
+  logs
+- **Discoverability:** Documentation, error guidance, IDE integration via
+  schemas
+- **Mental Models:** Convention over configuration, progressive disclosure of
+  advanced features
 
 ### Key UX Challenges
 
-1. **Zero-Config Simplicity:** 80% of users should succeed without configuration (FR036, NFR026)
-2. **Error Clarity:** Error messages must be actionable with specific resolution steps (FR024, NFR025)
-3. **Performance Transparency:** Users need visibility into where time is spent (dry run, coverage, mutation testing)
-4. **Debug Accessibility:** Advanced troubleshooting must be available but not intrusive to basic usage (FR025)
-5. **IDE Integration:** Configuration editing must have autocomplete support via JSON schema (FR006)
+1. **Zero-Config Simplicity:** 80% of users should succeed without configuration
+   (FR036, NFR026)
+2. **Error Clarity:** Error messages must be actionable with specific resolution
+   steps (FR024, NFR025)
+3. **Performance Transparency:** Users need visibility into where time is spent
+   (dry run, coverage, mutation testing)
+4. **Debug Accessibility:** Advanced troubleshooting must be available but not
+   intrusive to basic usage (FR025)
+5. **IDE Integration:** Configuration editing must have autocomplete support via
+   JSON schema (FR006)
 
 ---
 
@@ -38,50 +52,59 @@ Unlike graphical applications, CLI tools require UX design focused on:
 #### Primary Persona: Sarah - Senior TypeScript Developer
 
 **Background:**
+
 - 5+ years TypeScript/JavaScript experience
 - Recently adopted Bun for new projects
 - Values code quality and testing
 - Time-conscious (wants quick setup)
 
 **Goals:**
+
 - Add mutation testing to Bun projects in under 5 minutes
 - Achieve 2-3x faster mutation testing than previous Jest setup
 - Integrate mutation testing into CI/CD pipeline
 - Understand test suite effectiveness
 
 **Pain Points:**
+
 - Existing mutation testing tools don't support Bun
 - Performance bottlenecks in large test suites
 - Complex configuration overwhelming
 - Cryptic error messages waste time
 
-**Technical Proficiency:** High - comfortable with CLI tools, TypeScript, testing frameworks
+**Technical Proficiency:** High - comfortable with CLI tools, TypeScript,
+testing frameworks
 
-**Usage Pattern:** Occasional interaction (setup, review results, troubleshoot issues)
+**Usage Pattern:** Occasional interaction (setup, review results, troubleshoot
+issues)
 
 ---
 
 #### Secondary Persona: Mike - Mid-Level Developer
 
 **Background:**
+
 - 2-3 years development experience
 - New to mutation testing concepts
 - Works in complex TypeScript monorepo
 - Company mandates mutation testing
 
 **Goals:**
+
 - Successfully set up mutation testing (first time)
 - Troubleshoot configuration issues independently
 - Learn mutation testing best practices
 - Document setup for team
 
 **Pain Points:**
+
 - Unfamiliar with mutation testing workflows
 - Complex project structure (monorepo, custom patterns)
 - Needs clear guidance when things fail
 - Unclear which configuration options are needed
 
-**Technical Proficiency:** Medium - comfortable with basic CLI, learning advanced concepts
+**Technical Proficiency:** Medium - comfortable with basic CLI, learning
+advanced concepts
 
 **Usage Pattern:** Frequent during initial setup, then occasional maintenance
 
@@ -90,33 +113,41 @@ Unlike graphical applications, CLI tools require UX design focused on:
 #### Tertiary Persona: Alex - Tech Lead
 
 **Background:**
+
 - 8+ years experience, team leadership role
 - Manages large codebase (500+ test files)
 - Performance-focused, CI/CD optimization expert
 - Makes tooling decisions for team
 
 **Goals:**
+
 - Optimize mutation testing for large scale (1000+ mutations)
 - Keep CI/CD pipeline fast (<15 minutes)
 - Track performance metrics over time
 - Minimize false positives/timeouts
 
 **Pain Points:**
+
 - Mutation testing too slow for CI/CD
 - Need visibility into performance bottlenecks
 - Version compatibility issues
 - Resource usage concerns at scale
 
-**Technical Proficiency:** Expert - deep CLI knowledge, performance optimization, infrastructure
+**Technical Proficiency:** Expert - deep CLI knowledge, performance
+optimization, infrastructure
 
-**Usage Pattern:** Strategic (performance analysis, configuration optimization, team guidance)
+**Usage Pattern:** Strategic (performance analysis, configuration optimization,
+team guidance)
 
 ### 1.2 Usability Goals
 
 #### 1. Ease of Learning (Primary Goal for Mike)
-**Target:** First-time users can successfully run mutation testing within 5 minutes without reading documentation
+
+**Target:** First-time users can successfully run mutation testing within 5
+minutes without reading documentation
 
 **Success Criteria:**
+
 - Zero-config setup works for 80% of standard Bun projects (NFR026)
 - `npx stryker init` → select bun-runner → `npx stryker run` succeeds
 - Error messages guide users to solutions, not documentation
@@ -127,9 +158,12 @@ Unlike graphical applications, CLI tools require UX design focused on:
 ---
 
 #### 2. Efficiency for Power Users (Primary Goal for Alex)
-**Target:** Expert users can optimize performance and troubleshoot issues without trial-and-error
+
+**Target:** Expert users can optimize performance and troubleshoot issues
+without trial-and-error
 
 **Success Criteria:**
+
 - Debug mode provides all necessary information for diagnosis
 - Performance metrics show exactly where time is spent
 - Configuration allows fine-tuning (timeouts, coverage modes, test patterns)
@@ -140,48 +174,60 @@ Unlike graphical applications, CLI tools require UX design focused on:
 ---
 
 #### 3. Error Prevention (Critical for All Personas)
+
 **Target:** Users receive clear validation before problems occur
 
 **Success Criteria:**
+
 - Version compatibility checked at initialization (FR005, FR030)
 - Configuration validated with clear error messages (FR004)
 - JSON schema prevents typos during editing (FR006)
 - Mutation activation verified to prevent false negatives (FR032)
 
-**Measurement:** Percentage of runs that fail due to preventable configuration errors (target: <5%)
+**Measurement:** Percentage of runs that fail due to preventable configuration
+errors (target: <5%)
 
 ---
 
 #### 4. Clear Feedback (Essential for Sarah)
+
 **Target:** Users always understand what the tool is doing and why
 
 **Success Criteria:**
+
 - Progress indicators show current phase (dry run, coverage, mutation testing)
 - Performance metrics displayed after completion (NFR004, FR023)
 - Error messages include: what failed, why it failed, how to fix it (FR024)
 - Success states show meaningful results (mutation score, surviving mutants)
 
-**Measurement:** User comprehension of error messages (target: 90% can resolve without external help)
+**Measurement:** User comprehension of error messages (target: 90% can resolve
+without external help)
 
 ---
 
 #### 5. Accessibility for All Skill Levels (Supporting Mike & Sarah)
-**Target:** Basic usage is simple, advanced features discoverable but not intrusive
+
+**Target:** Basic usage is simple, advanced features discoverable but not
+intrusive
 
 **Success Criteria:**
+
 - Default behavior requires zero decisions (FR036)
 - Advanced features (debug logging, custom timeouts) opt-in
 - Documentation layers: quick-start → configuration → troubleshooting → API
 - Error messages reference relevant documentation sections
 
-**Measurement:** Percentage of users requiring support channel assistance (target: <10%)
+**Measurement:** Percentage of users requiring support channel assistance
+(target: <10%)
 
 ### 1.3 Design Principles
 
 #### Principle 1: Convention Over Configuration
+
 **Definition:** Sensible defaults eliminate configuration for standard use cases
 
 **Application:**
+
 - Automatic test file discovery using Bun/Stryker conventions
 - Auto-select coverage mode based on Bun version capabilities
 - Default timeout multipliers based on dry run performance
@@ -192,25 +238,35 @@ Unlike graphical applications, CLI tools require UX design focused on:
 ---
 
 #### Principle 2: Progressive Disclosure
-**Definition:** Basic features are immediately visible; advanced features revealed when needed
+
+**Definition:** Basic features are immediately visible; advanced features
+revealed when needed
 
 **Application:**
+
 - Standard output: essential progress and results only
 - Debug mode (`--logLevel debug`): detailed execution information (FR025)
 - Structured logs (`--logLevel trace`): machine-parseable output
 - Documentation hierarchy: quick-start before advanced configuration
 
-**Trade-off:** Advanced users may need to search for features, but beginners aren't overwhelmed
+**Trade-off:** Advanced users may need to search for features, but beginners
+aren't overwhelmed
 
 ---
 
 #### Principle 3: Clear, Actionable Feedback
-**Definition:** Every error message provides specific next steps, not just problem description
+
+**Definition:** Every error message provides specific next steps, not just
+problem description
 
 **Application:**
-- "Bun not found in PATH" → "Install Bun from https://bun.sh or ensure it's in PATH"
-- "Coverage collection failed" → "Upgrade Bun to 1.0.15+ or set coverageAnalysis: 'all'"
-- "Test timeout" → "Increase timeoutMultiplier or check for infinite loops in [test-name]"
+
+- "Bun not found in PATH" → "Install Bun from https://bun.sh or ensure it's in
+  PATH"
+- "Coverage collection failed" → "Upgrade Bun to 1.0.15+ or set
+  coverageAnalysis: 'all'"
+- "Test timeout" → "Increase timeoutMultiplier or check for infinite loops in
+  [test-name]"
 - Error codes enable quick documentation lookup
 
 **Trade-off:** More verbose error messages, but dramatically faster resolution
@@ -218,11 +274,15 @@ Unlike graphical applications, CLI tools require UX design focused on:
 ---
 
 #### Principle 4: Performance Transparency
-**Definition:** Users see where time is spent and can make informed optimization decisions
+
+**Definition:** Users see where time is spent and can make informed optimization
+decisions
 
 **Application:**
+
 - Metrics breakdown: dry run time, coverage time, mutation testing time (FR023)
-- PerTest coverage shows test count reduction (e.g., "Running 5/50 tests for mutant 23")
+- PerTest coverage shows test count reduction (e.g., "Running 5/50 tests for
+  mutant 23")
 - Performance comparison when switching coverage modes
 - Timeout analysis helps identify slow tests
 
@@ -231,15 +291,20 @@ Unlike graphical applications, CLI tools require UX design focused on:
 ---
 
 #### Principle 5: Developer Empowerment
-**Definition:** Provide tools for self-diagnosis; assume users are capable developers
+
+**Definition:** Provide tools for self-diagnosis; assume users are capable
+developers
 
 **Application:**
+
 - Debug logging shows subprocess commands, output, and decisions (FR025)
 - Structured logs enable scripted analysis and monitoring
 - Configuration schema allows programmatic validation
-- Error sanitization preserves debugging context while protecting secrets (FR037)
+- Error sanitization preserves debugging context while protecting secrets
+  (FR037)
 
-**Trade-off:** More complex debugging surface, but reduces dependency on maintainer support
+**Trade-off:** More complex debugging surface, but reduces dependency on
+maintainer support
 
 ---
 
@@ -247,7 +312,9 @@ Unlike graphical applications, CLI tools require UX design focused on:
 
 ### 2.1 Command Structure and Integration Points
 
-Since this is a Stryker plugin, the primary interaction model flows through Stryker's CLI. The "site map" for a CLI tool represents command hierarchy and configuration structure.
+Since this is a Stryker plugin, the primary interaction model flows through
+Stryker's CLI. The "site map" for a CLI tool represents command hierarchy and
+configuration structure.
 
 #### Primary Command Flow
 
@@ -321,6 +388,7 @@ Error Message Anatomy:
 ```
 
 **Example:**
+
 ```
 [BUN_NOT_FOUND] Environment Error: Bun installation not detected
 
@@ -340,27 +408,30 @@ Documentation: https://docs.stryker-mutator.io/bun-runner/#installation
 
 #### User Journey Navigation Map
 
-For CLI tools, "navigation" means how users discover and access functionality through commands, flags, and configuration.
+For CLI tools, "navigation" means how users discover and access functionality
+through commands, flags, and configuration.
 
 #### 1. Discovery Layer (How users find features)
 
-| Feature | Discovery Method | Example |
-|---------|------------------|---------|
-| Basic usage | Quick-start docs | `npx stryker run` |
-| Configuration options | JSON schema autocomplete | IDE shows `bunRunner.*` options |
-| Debug logging | Error message suggestion | "Run with --logLevel debug for details" |
-| Performance tuning | Metrics output | "Coverage collection took 30s. Consider coverageAnalysis: 'all'" |
-| Version compatibility | Initialization validation | "Bun 0.9.x not supported. Upgrade to 1.0+" |
+| Feature               | Discovery Method          | Example                                                          |
+| --------------------- | ------------------------- | ---------------------------------------------------------------- |
+| Basic usage           | Quick-start docs          | `npx stryker run`                                                |
+| Configuration options | JSON schema autocomplete  | IDE shows `bunRunner.*` options                                  |
+| Debug logging         | Error message suggestion  | "Run with --logLevel debug for details"                          |
+| Performance tuning    | Metrics output            | "Coverage collection took 30s. Consider coverageAnalysis: 'all'" |
+| Version compatibility | Initialization validation | "Bun 0.9.x not supported. Upgrade to 1.0+"                       |
 
 #### 2. Progressive Complexity Layers
 
 **Layer 0: Zero Config** (Sarah's first run)
+
 ```bash
 npx stryker init    # Select bun-runner
 npx stryker run     # Just works
 ```
 
 **Layer 1: Basic Configuration** (Mike's monorepo)
+
 ```json
 {
   "testRunner": "bun-runner",
@@ -371,6 +442,7 @@ npx stryker run     # Just works
 ```
 
 **Layer 2: Performance Optimization** (Alex's large codebase)
+
 ```json
 {
   "testRunner": "bun-runner",
@@ -385,6 +457,7 @@ npx stryker run     # Just works
 ```
 
 **Layer 3: Advanced Debugging** (Alex troubleshooting)
+
 ```bash
 npx stryker run --logLevel debug --concurrency 1
 # Structured logs analysis
@@ -394,6 +467,7 @@ npx stryker run --logLevel trace > stryker-trace.json
 #### 3. Feedback Navigation Patterns
 
 **Real-time Progress** (during execution)
+
 ```
 [14:32:05] Stryker 🔪 Starting mutation testing...
 [14:32:05] Bun runner: Validating environment...
@@ -406,13 +480,16 @@ npx stryker run --logLevel trace > stryker-trace.json
 [14:32:15] Mutation testing: Testing mutants... ██░░░░░░░░░ 15% (1m 45s elapsed, ~10m remaining)
 ```
 
-**Interactive Feedback** (CLI tools can't be truly interactive in Stryker context, but can be responsive)
+**Interactive Feedback** (CLI tools can't be truly interactive in Stryker
+context, but can be responsive)
+
 - Progress bars update in real-time
 - Estimated completion time recalculates
 - Verbose mode shows per-mutant status
 - Debug mode shows subprocess commands and output
 
 **Post-Execution Feedback**
+
 ```
 Mutation testing complete!
 
@@ -442,6 +519,7 @@ View detailed report: ./reports/mutation/mutation.html
 #### 4. Configuration Access Patterns
 
 **IDE Integration** (Primary configuration method)
+
 ```
 stryker.config.json opened in VS Code
   └─> JSON schema loaded
@@ -453,6 +531,7 @@ stryker.config.json opened in VS Code
 ```
 
 **CLI Flags** (Override configuration)
+
 ```bash
 npx stryker run --logLevel debug          # Stryker flag
 npx stryker run --concurrency 1           # Stryker flag (useful for debugging)
@@ -460,6 +539,7 @@ npx stryker run --coverageAnalysis all    # Stryker flag (overrides config)
 ```
 
 **Environment Variables** (CI/CD automation)
+
 ```bash
 STRYKER_DASHBOARD_API_KEY=xxx npm run stryker   # Stryker integration
 BUN_RUNNER_DEBUG=1 npm run stryker               # Plugin-specific debug flag
@@ -471,11 +551,14 @@ BUN_RUNNER_DEBUG=1 npm run stryker               # Plugin-specific debug flag
 
 ### Flow 1: First-Time Setup and Initial Run (Sarah's Journey)
 
-**User Goal:** Install and run mutation testing for the first time in under 5 minutes
+**User Goal:** Install and run mutation testing for the first time in under 5
+minutes
 
-**Entry Point:** Developer has Bun project with existing tests, wants to add mutation testing
+**Entry Point:** Developer has Bun project with existing tests, wants to add
+mutation testing
 
 **Prerequisites:**
+
 - Bun 1.0+ installed
 - Node.js 18+ installed (for Stryker)
 - Existing test suite using `bun test`
@@ -525,18 +608,21 @@ flowchart TD
 ```
 
 **Decision Points:**
+
 1. **Bun installation check:** Clear error with installation link if not found
 2. **Test passing validation:** Must fix failing tests before mutation testing
 3. **Coverage fallback:** Graceful degradation if perTest fails
 4. **Score evaluation:** User decides next action based on results
 
 **Success Criteria:**
+
 - ✓ Setup completes in < 5 minutes (NFR024)
 - ✓ Zero manual configuration required (FR036)
 - ✓ Clear feedback at each phase
 - ✓ Performance gain visible in results
 
 **Error States:**
+
 - Bun not found → Installation guidance
 - Version incompatibility → Upgrade guidance with compatibility matrix
 - Failing tests → Fix tests first message
@@ -551,6 +637,7 @@ flowchart TD
 **Entry Point:** Initial run fails or produces unexpected results
 
 **Prerequisites:**
+
 - Plugin installed
 - Configuration file exists
 - Error occurred during execution
@@ -613,17 +700,21 @@ flowchart TD
 ```
 
 **Decision Points:**
-1. **Error classification:** Different paths for environment, config, pattern, coverage, timeout
+
+1. **Error classification:** Different paths for environment, config, pattern,
+   coverage, timeout
 2. **Debug mode decision:** When to enable detailed logging
 3. **Self-service vs support:** Documentation → GitHub issues → maintainer help
 
 **Success Criteria:**
+
 - ✓ 90% of errors resolvable from error messages alone (NFR025)
 - ✓ Debug mode provides sufficient info for diagnosis
 - ✓ IDE integration catches config errors before runtime
 - ✓ Resolution time < 15 minutes for common issues
 
 **Error States:**
+
 - Each error type has specific troubleshooting path
 - Debug logs provide additional context
 - Documentation linked from error messages
@@ -632,11 +723,13 @@ flowchart TD
 
 ### Flow 3: Performance Optimization for Large Codebase (Alex's Journey)
 
-**User Goal:** Reduce mutation testing time from 45 minutes to < 15 minutes for CI/CD
+**User Goal:** Reduce mutation testing time from 45 minutes to < 15 minutes for
+CI/CD
 
 **Entry Point:** Initial run works but too slow for production use
 
 **Prerequisites:**
+
 - Plugin working correctly
 - Large test suite (500+ tests, 1000+ mutations)
 - Performance baseline established
@@ -708,18 +801,21 @@ flowchart TD
 ```
 
 **Decision Points:**
+
 1. **Phase analysis:** Identify which phase needs optimization
 2. **Coverage mode:** perTest vs all (40-60% impact)
 3. **Concurrency tuning:** Balance parallelism vs resource usage
 4. **Acceptable performance:** Business decision on CI/CD time budget
 
 **Success Criteria:**
+
 - ✓ Achieve 2-3x performance improvement (NFR001)
 - ✓ PerTest provides 40-60% gain (NFR003)
 - ✓ Performance metrics guide decisions (FR023)
 - ✓ CI/CD time < 15 minutes
 
 **Edge Cases:**
+
 - Bun version doesn't support coverage → Upgrade or accept 'all' mode
 - Resource constraints limit concurrency → Find optimal balance
 - Test suite architecture issues → Outside plugin scope
@@ -728,7 +824,8 @@ flowchart TD
 
 ### Flow 4: Debugging Mutation Test Failures (All Personas)
 
-**User Goal:** Understand why specific mutations are surviving or failing unexpectedly
+**User Goal:** Understand why specific mutations are surviving or failing
+unexpectedly
 
 **Entry Point:** Mutation results show unexpected survivors or errors
 
@@ -809,12 +906,14 @@ flowchart TD
 ```
 
 **Decision Points:**
+
 1. **Issue classification:** Survivor, timeout, error, or no coverage
 2. **Debug depth:** Normal → debug → trace logs
 3. **Bug vs config:** Plugin issue vs user configuration issue
 4. **Resolution path:** Self-fix, configuration change, or report bug
 
 **Success Criteria:**
+
 - ✓ Debug logs sufficient for 90% of issues
 - ✓ Single-concurrency mode isolates race conditions
 - ✓ Trace logs provide complete subprocess visibility
@@ -893,18 +992,21 @@ flowchart TD
 ```
 
 **Decision Points:**
+
 1. **Environment setup:** Ensure CI has all prerequisites
 2. **Performance tuning:** Balance speed vs thoroughness for CI
 3. **Threshold setting:** Appropriate mutation score requirement
 4. **Regression response:** How to handle score/performance drops
 
 **Success Criteria:**
+
 - ✓ CI runs reliably without environment issues
 - ✓ Performance suitable for blocking PRs (NFR004)
 - ✓ Thresholds catch test quality regressions
 - ✓ Metrics enable proactive optimization
 
 **Edge Cases:**
+
 - CI resource constraints → Lower concurrency
 - Intermittent failures → Retry logic needed
 - Coverage breaks in CI → Fallback to 'all' mode acceptable
@@ -918,24 +1020,33 @@ flowchart TD
 
 #### CLI Design System Philosophy
 
-For a CLI tool integrated into the Stryker framework, the "design system" consists of:
+For a CLI tool integrated into the Stryker framework, the "design system"
+consists of:
+
 - **Output formatting standards** (consistent message structure)
 - **Terminal UI components** (progress bars, status indicators, tables)
 - **Error message templates** (standardized error anatomy)
 - **Log format patterns** (structured, parseable output)
 
-**Primary Constraint:** Must integrate seamlessly with Stryker's existing output style while maintaining distinct plugin identity.
+**Primary Constraint:** Must integrate seamlessly with Stryker's existing output
+style while maintaining distinct plugin identity.
 
 #### Design System Strategy
 
 **Hybrid Approach:**
-- **Inherit from Stryker:** Use Stryker's logging framework and output formatting where possible
-- **Extend for plugin-specific needs:** Add Bun runner-specific components (coverage feedback, performance metrics)
-- **Standard CLI patterns:** Follow Unix/POSIX conventions for exit codes, signals, output streams
+
+- **Inherit from Stryker:** Use Stryker's logging framework and output
+  formatting where possible
+- **Extend for plugin-specific needs:** Add Bun runner-specific components
+  (coverage feedback, performance metrics)
+- **Standard CLI patterns:** Follow Unix/POSIX conventions for exit codes,
+  signals, output streams
 
 **Technology Foundation:**
+
 - **Logging:** Stryker's logger API (via dependency injection)
-- **Progress Indicators:** CLI progress bars (using standard libraries like `cli-progress`)
+- **Progress Indicators:** CLI progress bars (using standard libraries like
+  `cli-progress`)
 - **Output Formatting:** ANSI color codes, box-drawing characters for tables
 - **Structured Output:** JSON for trace/debug mode (machine-readable)
 
@@ -960,6 +1071,7 @@ Stryker CLI Output Framework (inherited)
 **Purpose:** Communicate validation results, phase completion, and state changes
 
 **Variants:**
+
 - ✓ Success (green checkmark)
 - ✗ Failure (red X)
 - ⚠ Warning (yellow warning triangle)
@@ -968,11 +1080,13 @@ Stryker CLI Output Framework (inherited)
 - ○ No coverage (circle)
 
 **States:**
+
 - Default: Icon + message on single line
 - Verbose: Icon + message + details on multiple lines
 - Silent: No output (only in silent mode)
 
 **Usage:**
+
 ```
 ✓ Bun 1.0.15 detected
 ✓ 127 test files discovered
@@ -982,9 +1096,10 @@ Stryker CLI Output Framework (inherited)
 ```
 
 **API Example:**
+
 ```typescript
 logger.info('✓ Coverage mapping generated (127 tests → 450 mutants)');
-logger.warn('⚠ Coverage collection failed, falling back to \'all\' mode');
+logger.warn("⚠ Coverage collection failed, falling back to 'all' mode");
 logger.error('✗ Bun installation not found');
 ```
 
@@ -995,17 +1110,20 @@ logger.error('✗ Bun installation not found');
 **Purpose:** Show real-time progress for long-running operations
 
 **Variants:**
+
 - Standard progress (percentage + bar)
 - Timed progress (percentage + bar + elapsed + remaining)
 - Spinner (indeterminate progress)
 
 **States:**
+
 - Running: Animated bar/spinner
 - Complete: Full bar with checkmark
 - Failed: Partial bar with error indicator
 - Paused: Bar frozen (not applicable for this plugin)
 
 **Usage:**
+
 ```
 Dry run: Running tests... ████████████████████ 100% (3.2s)
 Coverage: Collecting perTest coverage... ████████░░░ 75% (8.5s elapsed)
@@ -1013,10 +1131,12 @@ Mutation testing: Testing mutants... ██░░░░░░░░░ 15% (1m 4
 ```
 
 **Implementation:**
+
 ```typescript
 const progressBar = new ProgressBar({
-  format: 'Mutation testing: Testing mutants... {bar} {percentage}% ({duration} / ~{eta})',
-  total: totalMutants
+  format:
+    'Mutation testing: Testing mutants... {bar} {percentage}% ({duration} / ~{eta})',
+  total: totalMutants,
 });
 ```
 
@@ -1027,6 +1147,7 @@ const progressBar = new ProgressBar({
 **Purpose:** Provide actionable error information with consistent structure
 
 **Anatomy:**
+
 ```
 [ERROR_CODE] Category: Specific Problem
 
@@ -1043,12 +1164,14 @@ Documentation: https://link-to-docs
 ```
 
 **Variants:**
+
 - Environment errors (Bun not found, version incompatible)
 - Configuration errors (invalid schema, missing fields)
 - Runtime errors (subprocess crash, timeout)
 - Coverage errors (collection failed, mapping invalid)
 
 **States:**
+
 - Normal: Full error template
 - Debug: Includes stack trace and subprocess output
 - Trace: Includes complete subprocess command and environment
@@ -1086,6 +1209,7 @@ ${this.docsUrl ? `Documentation: ${this.docsUrl}` : ''}
 ```
 
 **Error Code Categories:**
+
 - `ENV_*`: Environment errors (BUN_NOT_FOUND, VERSION_MISMATCH)
 - `CFG_*`: Configuration errors (INVALID_SCHEMA, MISSING_FIELD)
 - `RUN_*`: Runtime errors (SUBPROCESS_CRASH, TEST_TIMEOUT)
@@ -1098,6 +1222,7 @@ ${this.docsUrl ? `Documentation: ${this.docsUrl}` : ''}
 **Purpose:** Display performance breakdown after execution
 
 **Structure:**
+
 ```
 Performance Summary:
   Dry run:           3.2s
@@ -1110,16 +1235,19 @@ Performance Summary:
 ```
 
 **Variants:**
+
 - Compact: Single-line summary
 - Standard: Multi-line breakdown (shown above)
 - Detailed: Includes per-phase metrics and percentages
 
 **States:**
+
 - Complete: All phases shown
 - Partial: Only completed phases shown (if interrupted)
 - Comparison: Side-by-side with previous run (optional)
 
 **Implementation:**
+
 ```typescript
 interface PerformanceMetrics {
   dryRunTime: number;
@@ -1131,7 +1259,10 @@ interface PerformanceMetrics {
 }
 
 function formatMetrics(metrics: PerformanceMetrics): string {
-  const gain = ((1 - metrics.testsExecuted / metrics.totalPossibleTests) * 100).toFixed(1);
+  const gain = (
+    (1 - metrics.testsExecuted / metrics.totalPossibleTests) *
+    100
+  ).toFixed(1);
   return `
 Performance Summary:
   Dry run:           ${formatDuration(metrics.dryRunTime)}
@@ -1152,6 +1283,7 @@ Performance Summary:
 **Purpose:** Display final mutation testing results with status breakdown
 
 **Structure:**
+
 ```
 ╔═══════════════════════════════════════════╗
 ║ Mutation Score: 87.3% (393/450 killed)   ║
@@ -1166,16 +1298,19 @@ Status Breakdown:
 ```
 
 **Variants:**
+
 - Success (score ≥ threshold): Green border, positive messaging
 - Warning (score < threshold but > 50%): Yellow border, improvement suggestions
 - Failure (score ≤ 50%): Red border, test quality concerns
 
 **States:**
+
 - Complete: All mutants tested
 - Partial: Some mutants skipped (with explanation)
 - Interrupted: Run stopped early (resume guidance)
 
 **Implementation:**
+
 ```typescript
 interface MutationResults {
   killed: number;
@@ -1188,8 +1323,9 @@ interface MutationResults {
 }
 
 function formatResults(results: MutationResults): string {
-  const score = (results.killed / results.total * 100).toFixed(1);
-  const passedThreshold = !results.threshold || parseFloat(score) >= results.threshold;
+  const score = ((results.killed / results.total) * 100).toFixed(1);
+  const passedThreshold =
+    !results.threshold || parseFloat(score) >= results.threshold;
 
   const border = passedThreshold ? '═' : '─';
   const corner = passedThreshold ? '╔╗╚╝' : '┌┐└┘';
@@ -1200,11 +1336,11 @@ ${corner[0]}${border.repeat(45)}${corner[1]}
 ${corner[2]}${border.repeat(45)}${corner[3]}
 
 Status Breakdown:
-  ✓ Killed:      ${results.killed} (${(results.killed/results.total*100).toFixed(1)}%)
-  ✗ Survived:    ${results.survived} (${(results.survived/results.total*100).toFixed(1)}%)
-  ⏱ Timeout:     ${results.timeout} (${(results.timeout/results.total*100).toFixed(1)}%)
-  ⚠ Error:       ${results.error} (${(results.error/results.total*100).toFixed(1)}%)
-  ○ NoCoverage:  ${results.noCoverage} (${(results.noCoverage/results.total*100).toFixed(1)}%)
+  ✓ Killed:      ${results.killed} (${((results.killed / results.total) * 100).toFixed(1)}%)
+  ✗ Survived:    ${results.survived} (${((results.survived / results.total) * 100).toFixed(1)}%)
+  ⏱ Timeout:     ${results.timeout} (${((results.timeout / results.total) * 100).toFixed(1)}%)
+  ⚠ Error:       ${results.error} (${((results.error / results.total) * 100).toFixed(1)}%)
+  ○ NoCoverage:  ${results.noCoverage} (${((results.noCoverage / results.total) * 100).toFixed(1)}%)
 `.trim();
 }
 ```
@@ -1216,17 +1352,20 @@ Status Breakdown:
 **Purpose:** Structured debug output for troubleshooting
 
 **Variants:**
+
 - Normal log: Timestamped message
 - Subprocess log: Command + output + exit code
 - Coverage log: Test-to-mutant mapping details
 - Performance log: Timing breakdowns
 
 **States:**
+
 - Info: Standard information
 - Debug: Detailed execution information
 - Trace: Complete subprocess and state dumps
 
 **Format:**
+
 ```
 [14:32:15] [DEBUG] Spawning Bun subprocess
   Command: bun test --coverage
@@ -1244,6 +1383,7 @@ Status Breakdown:
 ```
 
 **Implementation:**
+
 ```typescript
 class DebugLogger {
   logSubprocess(cmd: string, cwd: string, env: Record<string, string>) {
@@ -1280,11 +1420,13 @@ class DebugLogger {
 **Purpose:** Provide feedback during configuration validation
 
 **Variants:**
+
 - Schema validation errors (JSON schema violations)
 - Semantic validation warnings (deprecated options, suboptimal settings)
 - Auto-correction notices (defaults applied, fallbacks activated)
 
 **Usage:**
+
 ```
 ✓ Configuration loaded from stryker.config.json
 ⚠ bunRunner.testFilePattern not set, using default: **/*.test.{ts,tsx,js,jsx}
@@ -1293,6 +1435,7 @@ class DebugLogger {
 ```
 
 **States:**
+
 - Valid: All checks passed
 - Warning: Valid but suboptimal
 - Invalid: Configuration cannot be used (errors must be fixed)
@@ -1302,11 +1445,13 @@ class DebugLogger {
 #### Component Naming Conventions
 
 **Terminal Output:**
+
 - Use Unicode symbols consistently (✓ ✗ ⚠ ℹ ⏱ ○)
 - Timestamps in `[HH:MM:SS]` format for normal output
 - ISO 8601 for structured logs: `2025-10-21T14:32:15.123Z`
 
 **Colors (via ANSI codes):**
+
 - Green: Success, positive metrics
 - Red: Errors, critical warnings
 - Yellow: Warnings, suggestions
@@ -1314,11 +1459,13 @@ class DebugLogger {
 - Gray: Debug information, less important details
 
 **Box Drawing:**
+
 - `═ ║ ╔ ╗ ╚ ╝` for strong emphasis (mutation score)
 - `─ │ ┌ ┐ └ ┘` for standard tables
 - `░ ▒ ▓ █` for progress bars
 
 **Accessibility Considerations:**
+
 - Don't rely solely on color (use symbols + color)
 - Support `NO_COLOR` environment variable
 - Structured logs work without ANSI codes
@@ -1332,23 +1479,26 @@ class DebugLogger {
 
 #### Terminal Color Strategy
 
-CLI tools must work across diverse terminal environments (dark/light themes, limited color support, screen readers). The color palette uses standard ANSI colors with semantic meanings.
+CLI tools must work across diverse terminal environments (dark/light themes,
+limited color support, screen readers). The color palette uses standard ANSI
+colors with semantic meanings.
 
 #### Primary Color Palette (ANSI)
 
-| Color | ANSI Code | Usage | Semantic Meaning |
-|-------|-----------|-------|------------------|
-| **Green** | `\x1b[32m` | Success states, positive metrics, checkmarks | ✓ Passed, completed successfully |
-| **Red** | `\x1b[31m` | Errors, failures, critical warnings | ✗ Failed, requires attention |
-| **Yellow** | `\x1b[33m` | Warnings, suggestions, fallbacks | ⚠ Caution, suboptimal but functional |
-| **Blue** | `\x1b[34m` | Info messages, neutral status | ℹ Information, no action required |
-| **Cyan** | `\x1b[36m` | Links, documentation references | Documentation, external resources |
-| **Gray** | `\x1b[90m` | Debug output, less important info | Secondary information |
-| **White** | `\x1b[37m` | Primary text, default output | Standard output |
+| Color      | ANSI Code  | Usage                                        | Semantic Meaning                      |
+| ---------- | ---------- | -------------------------------------------- | ------------------------------------- |
+| **Green**  | `\x1b[32m` | Success states, positive metrics, checkmarks | ✓ Passed, completed successfully      |
+| **Red**    | `\x1b[31m` | Errors, failures, critical warnings          | ✗ Failed, requires attention          |
+| **Yellow** | `\x1b[33m` | Warnings, suggestions, fallbacks             | ⚠ Caution, suboptimal but functional |
+| **Blue**   | `\x1b[34m` | Info messages, neutral status                | ℹ Information, no action required    |
+| **Cyan**   | `\x1b[36m` | Links, documentation references              | Documentation, external resources     |
+| **Gray**   | `\x1b[90m` | Debug output, less important info            | Secondary information                 |
+| **White**  | `\x1b[37m` | Primary text, default output                 | Standard output                       |
 
 #### Semantic Color Application
 
 **Success Flow:**
+
 ```
 ✓ Bun 1.0.15 detected                          [Green]
 ✓ Coverage mapping generated                   [Green]
@@ -1356,6 +1506,7 @@ Mutation Score: 87.3% (393/450 killed)         [Green if ≥ threshold]
 ```
 
 **Warning Flow:**
+
 ```
 ⚠ Coverage collection failed                   [Yellow]
 ⚠ Falling back to 'all' mode                   [Yellow]
@@ -1363,6 +1514,7 @@ Mutation Score: 87.3% (393/450 killed)         [Green if ≥ threshold]
 ```
 
 **Error Flow:**
+
 ```
 ✗ Bun installation not found                   [Red]
 [ENV_BUN_NOT_FOUND] Environment Error          [Red]
@@ -1370,6 +1522,7 @@ Resolution: Install Bun from https://bun.sh    [Cyan for URL]
 ```
 
 **Debug Flow:**
+
 ```
 [14:32:15] [DEBUG] Spawning subprocess         [Gray]
   Command: bun test --coverage                 [Gray]
@@ -1379,9 +1532,11 @@ Resolution: Install Bun from https://bun.sh    [Cyan for URL]
 #### Color Usage Rules
 
 1. **Never rely solely on color** - Always pair with symbols (✓ ✗ ⚠)
-2. **Support NO_COLOR** - Respect `NO_COLOR` environment variable (strips all ANSI codes)
+2. **Support NO_COLOR** - Respect `NO_COLOR` environment variable (strips all
+   ANSI codes)
 3. **Degrade gracefully** - Output readable without color support
-4. **Contrast requirements** - Ensure readability on both dark and light terminals
+4. **Contrast requirements** - Ensure readability on both dark and light
+   terminals
 5. **Accessibility** - Symbols and text convey same information as color
 
 #### Implementation
@@ -1395,7 +1550,7 @@ enum Color {
   Cyan = '\x1b[36m',
   Gray = '\x1b[90m',
   White = '\x1b[37m',
-  Reset = '\x1b[0m'
+  Reset = '\x1b[0m',
 }
 
 class ColorFormatter {
@@ -1431,36 +1586,42 @@ class ColorFormatter {
 
 #### Font Families
 
-CLI tools use monospace fonts provided by the terminal emulator. The plugin cannot control font choice but should design output assuming monospace characteristics.
+CLI tools use monospace fonts provided by the terminal emulator. The plugin
+cannot control font choice but should design output assuming monospace
+characteristics.
 
 **Expected Terminal Fonts:**
+
 - **macOS:** SF Mono, Menlo
 - **Linux:** DejaVu Sans Mono, Liberation Mono, Consolas
 - **Windows:** Consolas, Courier New
 
 **Design Assumptions:**
+
 - All characters have equal width (monospace)
 - Box-drawing characters (─ │ ┌) align properly
 - Unicode symbols (✓ ✗ ⚠) may have varying width support
 
 **Font Fallback Strategy:**
+
 - Use ASCII alternatives if Unicode not supported
 - Detect terminal capabilities via environment or testing
 - Provide plain text mode for minimal terminals
 
 #### Type Hierarchy (Semantic, not visual size)
 
-| Level | Usage | Visual Treatment | Example |
-|-------|-------|------------------|---------|
-| **H1 - Major Section** | Phase headers | Box borders, spacing | `╔═══════ Mutation Score ═══════╗` |
-| **H2 - Subsection** | Category headers | All caps or bold | `STATUS BREAKDOWN:` |
-| **Body - Standard** | Primary content | Normal weight | `✓ 127 test files discovered` |
-| **Detail - Secondary** | Supplemental info | Indented, gray color | `  Command: bun test --coverage` |
-| **Code - Monospace** | Commands, paths | Backticks in docs, raw in terminal | `npx stryker run` |
+| Level                  | Usage             | Visual Treatment                   | Example                            |
+| ---------------------- | ----------------- | ---------------------------------- | ---------------------------------- |
+| **H1 - Major Section** | Phase headers     | Box borders, spacing               | `╔═══════ Mutation Score ═══════╗` |
+| **H2 - Subsection**    | Category headers  | All caps or bold                   | `STATUS BREAKDOWN:`                |
+| **Body - Standard**    | Primary content   | Normal weight                      | `✓ 127 test files discovered`      |
+| **Detail - Secondary** | Supplemental info | Indented, gray color               | `  Command: bun test --coverage`   |
+| **Code - Monospace**   | Commands, paths   | Backticks in docs, raw in terminal | `npx stryker run`                  |
 
 **Visual Emphasis Techniques:**
 
 Since terminals don't support font size changes, use:
+
 - **UPPERCASE** for headers
 - **Indentation** for hierarchy
 - **Box drawing** for emphasis
@@ -1494,14 +1655,17 @@ Detail (Secondary):
 
 #### Spacing System
 
-Terminal output uses character-based spacing (not pixels). The spacing system defines vertical and horizontal rhythm.
+Terminal output uses character-based spacing (not pixels). The spacing system
+defines vertical and horizontal rhythm.
 
 **Vertical Spacing:**
+
 - **0 lines** - Related items (status breakdown entries)
 - **1 line** - Logical groups (sections within a phase)
 - **2 lines** - Major sections (between phases)
 
 **Horizontal Spacing:**
+
 - **0 spaces** - Continuous text
 - **2 spaces** - Indentation level 1 (details, sub-items)
 - **4 spaces** - Indentation level 2 (nested details)
@@ -1512,6 +1676,7 @@ Terminal output uses character-based spacing (not pixels). The spacing system de
 Terminal layout uses a character grid (typically 80 or 120 columns wide).
 
 **Design Constraints:**
+
 - **Minimum width:** 80 characters (standard terminal)
 - **Comfortable width:** 120 characters (modern terminals)
 - **Maximum width:** Content should wrap or scroll beyond 120
@@ -1519,6 +1684,7 @@ Terminal layout uses a character grid (typically 80 or 120 columns wide).
 **Layout Examples:**
 
 **Compact Layout (80 columns):**
+
 ```
 ╔═══════════════════════════════════════════╗
 ║ Mutation Score: 87.3% (393/450 killed)   ║
@@ -1531,6 +1697,7 @@ Status Breakdown:
 ```
 
 **Wide Layout (120 columns):**
+
 ```
 ╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 ║ Mutation Score: 87.3% (393/450 killed) ✓                                                                 ║
@@ -1545,6 +1712,7 @@ Status Breakdown:                              Performance Summary:
 #### Alignment Patterns
 
 **Left-aligned (default):**
+
 ```
 ✓ Bun 1.0.15 detected
 ✓ 127 test files discovered
@@ -1552,6 +1720,7 @@ Status Breakdown:                              Performance Summary:
 ```
 
 **Right-aligned (metrics):**
+
 ```
 Dry run:               3.2s
 Coverage:              8.5s
@@ -1559,6 +1728,7 @@ Mutation testing:  12m 34s
 ```
 
 **Column-aligned (tables):**
+
 ```
 Status      Count    Percentage
 Killed        393        87.3%
@@ -1578,10 +1748,12 @@ class LayoutFormatter {
     return `${label}${' '.repeat(Math.max(padding, 1))}${value}`;
   }
 
-  createTable(rows: Array<{label: string, count: number, percentage: number}>): string {
+  createTable(
+    rows: Array<{ label: string; count: number; percentage: number }>
+  ): string {
     const lines = [
       'Status        Count    Percentage',
-      '─────────────────────────────────'
+      '─────────────────────────────────',
     ];
 
     rows.forEach(row => {
@@ -1621,7 +1793,10 @@ class LayoutFormatter {
 
   indent(text: string, level: number = 1): string {
     const spaces = '  '.repeat(level);
-    return text.split('\n').map(line => spaces + line).join('\n');
+    return text
+      .split('\n')
+      .map(line => spaces + line)
+      .join('\n');
   }
 }
 ```
@@ -1631,21 +1806,25 @@ class LayoutFormatter {
 Since terminal width can vary, the output should adapt:
 
 **Wide terminal (≥120 columns):**
+
 - Two-column layouts for metrics
 - Full-width tables
 - Expanded progress bars
 
 **Standard terminal (80-119 columns):**
+
 - Single-column layouts
 - Compact tables
 - Standard progress bars
 
 **Narrow terminal (<80 columns):**
+
 - Simplified output
 - Abbreviated labels
 - Wrap long lines
 
 **Detection:**
+
 ```typescript
 const terminalWidth = process.stdout.columns || 80;
 
@@ -1661,6 +1840,7 @@ if (terminalWidth >= 120) {
 #### Box Drawing Reference
 
 **Characters Used:**
+
 ```
 ╔═╗  ┌─┐  Strong vs standard headers
 ║ ║  │ │  Vertical borders
@@ -1670,6 +1850,7 @@ if (terminalWidth >= 120) {
 ```
 
 **Usage Guidelines:**
+
 - Strong borders (`╔═╗`) for final results, critical information
 - Standard borders (`┌─┐`) for tables, secondary information
 - Horizontal rules (`─`) for separators
@@ -1681,17 +1862,19 @@ if (terminalWidth >= 120) {
 
 ### 6.1 Breakpoints (Terminal Width Adaptation)
 
-Unlike web applications with pixel-based breakpoints, CLI tools adapt to character-based terminal widths. The plugin detects terminal width and adjusts output formatting accordingly.
+Unlike web applications with pixel-based breakpoints, CLI tools adapt to
+character-based terminal widths. The plugin detects terminal width and adjusts
+output formatting accordingly.
 
 #### Terminal Width Breakpoints
 
-| Breakpoint | Width (columns) | Target Scenario | Layout Strategy |
-|------------|-----------------|-----------------|-----------------|
-| **XS - Minimal** | < 80 | Embedded terminals, mobile SSH | Simplified, vertical-only |
-| **S - Standard** | 80-99 | Traditional 80-column terminals | Single-column, compact |
-| **M - Comfortable** | 100-119 | Modern default terminals | Single-column, expanded |
-| **L - Wide** | 120-159 | Developer workstations | Two-column where beneficial |
-| **XL - Ultra-wide** | ≥ 160 | Ultra-wide monitors | Multi-column, detailed views |
+| Breakpoint          | Width (columns) | Target Scenario                 | Layout Strategy              |
+| ------------------- | --------------- | ------------------------------- | ---------------------------- |
+| **XS - Minimal**    | < 80            | Embedded terminals, mobile SSH  | Simplified, vertical-only    |
+| **S - Standard**    | 80-99           | Traditional 80-column terminals | Single-column, compact       |
+| **M - Comfortable** | 100-119         | Modern default terminals        | Single-column, expanded      |
+| **L - Wide**        | 120-159         | Developer workstations          | Two-column where beneficial  |
+| **XL - Ultra-wide** | ≥ 160           | Ultra-wide monitors             | Multi-column, detailed views |
 
 #### Detection Implementation
 
@@ -1733,16 +1916,19 @@ class ResponsiveFormatter {
 #### Pattern 1: Progress Bar Scaling
 
 **XS/S (< 100 columns):**
+
 ```
 Mutation: ████░░░░░░ 45%
 ```
 
 **M (100-119 columns):**
+
 ```
 Mutation testing: ████████████░░░░░░░░░░░░░░░░░░ 45% (2m 15s / ~5m)
 ```
 
 **L/XL (≥ 120 columns):**
+
 ```
 Mutation testing: Testing mutants... ████████████████████░░░░░░░░░░░░░░░░░░░░ 45% (2m 15s elapsed / ~5m remaining)
 ```
@@ -1750,6 +1936,7 @@ Mutation testing: Testing mutants... ██████████████�
 #### Pattern 2: Results Summary Layout
 
 **XS/S (< 100 columns):**
+
 ```
 Score: 87.3% (393/450)
 
@@ -1761,6 +1948,7 @@ Score: 87.3% (393/450)
 ```
 
 **M (100-119 columns):**
+
 ```
 ╔═══════════════════════════════════════════╗
 ║ Mutation Score: 87.3% (393/450 killed)   ║
@@ -1775,6 +1963,7 @@ Status Breakdown:
 ```
 
 **L/XL (≥ 120 columns):**
+
 ```
 ╔═══════════════════════════════════════════════════════════════════════════════════════════════════╗
 ║ Mutation Score: 87.3% (393/450 killed) ✓                                                         ║
@@ -1791,6 +1980,7 @@ Status Breakdown:                              Performance Summary:
 #### Pattern 3: Error Message Adaptation
 
 **XS/S (< 100 columns):**
+
 ```
 [ENV_BUN_NOT_FOUND] Error
 
@@ -1806,6 +1996,7 @@ Docs: [shortened URL]
 ```
 
 **M+ (≥ 100 columns):**
+
 ```
 [ENV_BUN_NOT_FOUND] Environment Error: Bun installation not detected
 
@@ -1824,6 +2015,7 @@ Documentation: https://docs.stryker-mutator.io/bun-runner/#installation
 #### Pattern 4: Table Adaptation
 
 **XS (< 80 columns):**
+
 ```
 Killed:   393 (87.3%)
 Survived:  42 (9.3%)
@@ -1831,6 +2023,7 @@ Timeout:    8 (1.8%)
 ```
 
 **S/M (80-119 columns):**
+
 ```
 Status        Count    Percentage
 ─────────────────────────────────
@@ -1840,6 +2033,7 @@ Timeout           8         1.8%
 ```
 
 **L/XL (≥ 120 columns):**
+
 ```
 Status            Count      Percentage      Description
 ──────────────────────────────────────────────────────────────────
@@ -1870,7 +2064,7 @@ class AdaptiveOutput {
   }
 
   private formatResultsCompact(results: MutationResults): string {
-    const score = (results.killed / results.total * 100).toFixed(1);
+    const score = ((results.killed / results.total) * 100).toFixed(1);
     return `
 Score: ${score}% (${results.killed}/${results.total})
 
@@ -1898,16 +2092,17 @@ Score: ${score}% (${results.killed}/${results.total})
 
 ### 7.1 Compliance Target
 
-**Target Standard:** CLI Accessibility Best Practices + WCAG 2.1 Principles (adapted for terminal context)
+**Target Standard:** CLI Accessibility Best Practices + WCAG 2.1 Principles
+(adapted for terminal context)
 
 Since WCAG is designed for web content, we adapt its principles to CLI tools:
 
-| WCAG Principle | CLI Adaptation | Implementation |
-|----------------|----------------|----------------|
-| **Perceivable** | Information available through text, not just visual | Symbols + color, NO_COLOR support, structured logs |
-| **Operable** | Works with keyboard, screen readers, alternative terminals | Keyboard-only (no mouse), screen reader compatible output |
-| **Understandable** | Clear language, predictable behavior | Consistent patterns, actionable errors |
-| **Robust** | Works across terminal emulators and assistive tech | ANSI fallbacks, plain text mode, semantic markup |
+| WCAG Principle     | CLI Adaptation                                             | Implementation                                            |
+| ------------------ | ---------------------------------------------------------- | --------------------------------------------------------- |
+| **Perceivable**    | Information available through text, not just visual        | Symbols + color, NO_COLOR support, structured logs        |
+| **Operable**       | Works with keyboard, screen readers, alternative terminals | Keyboard-only (no mouse), screen reader compatible output |
+| **Understandable** | Clear language, predictable behavior                       | Consistent patterns, actionable errors                    |
+| **Robust**         | Works across terminal emulators and assistive tech         | ANSI fallbacks, plain text mode, semantic markup          |
 
 **Compliance Level:** Best-effort WCAG 2.1 Level AA equivalency for CLI tools
 
@@ -1918,20 +2113,23 @@ Since WCAG is designed for web content, we adapt its principles to CLI tools:
 **Principle:** Never rely solely on color to convey information
 
 **Implementation:**
+
 - All status indicated by symbol + color (✓ ✗ ⚠)
 - Error messages include error codes, not just red text
 - Progress shown with bar + percentage, not just color gradient
 
 **Example:**
+
 ```typescript
 // Good: Symbol + color
-logger.info('✓ Coverage mapping generated');  // Green + checkmark
+logger.info('✓ Coverage mapping generated'); // Green + checkmark
 
 // Bad: Color only (don't do this)
-logger.info('Coverage mapping generated');  // Green but no symbol
+logger.info('Coverage mapping generated'); // Green but no symbol
 ```
 
-**Testing:** Run with `NO_COLOR=1` and verify all information still comprehensible
+**Testing:** Run with `NO_COLOR=1` and verify all information still
+comprehensible
 
 ---
 
@@ -1940,6 +2138,7 @@ logger.info('Coverage mapping generated');  // Green but no symbol
 **Principle:** Respect `NO_COLOR` environment variable
 
 **Implementation:**
+
 ```typescript
 const useColor = !process.env.NO_COLOR && process.stdout.isTTY;
 
@@ -1951,6 +2150,7 @@ class ColorFormatter {
 ```
 
 **Testing:**
+
 ```bash
 NO_COLOR=1 npx stryker run
 # All output should be readable without color codes
@@ -1960,14 +2160,17 @@ NO_COLOR=1 npx stryker run
 
 #### Requirement 3: Screen Reader Compatibility
 
-**Principle:** Output should be intelligible when read linearly by screen readers
+**Principle:** Output should be intelligible when read linearly by screen
+readers
 
 **Implementation:**
+
 - Avoid ASCII art that doesn't make sense when read aloud
 - Use semantic structure (headers, lists)
 - Provide alt-text equivalents for complex symbols
 
 **Good Practice:**
+
 ```
 Mutation Score: 87.3% (393 of 450 killed)
 
@@ -1977,6 +2180,7 @@ Status Breakdown:
 ```
 
 **Poor Practice (screen reader unfriendly):**
+
 ```
 ╔═══════════════════════════════════════════╗
 ║ 87.3% ████████████████████░░░░ 393/450   ║
@@ -1992,6 +2196,7 @@ Status Breakdown:
 **Principle:** All functionality accessible via keyboard (no mouse required)
 
 **Implementation:**
+
 - CLI tools are inherently keyboard-only (no mouse needed) ✓
 - No interactive menus that require arrow keys (Stryker handles all interaction)
 - All operations via command-line arguments and configuration files
@@ -2005,11 +2210,13 @@ Status Breakdown:
 **Principle:** Terminal output readable in both dark and light themes
 
 **Implementation:**
+
 - Use ANSI standard colors (work in both themes)
 - Test with common terminal color schemes
 - Avoid custom color codes that assume theme
 
 **Testing Scenarios:**
+
 - Dark theme (white on black)
 - Light theme (black on white)
 - High contrast themes
@@ -2022,6 +2229,7 @@ Status Breakdown:
 **Principle:** Provide machine-readable alternative to visual output
 
 **Implementation:**
+
 ```bash
 # Human-friendly output (default)
 npx stryker run
@@ -2034,6 +2242,7 @@ NO_COLOR=1 npx stryker run --reporters clear-text
 ```
 
 **JSON Structure:**
+
 ```json
 {
   "timestamp": "2025-10-21T14:32:15.123Z",
@@ -2054,12 +2263,14 @@ NO_COLOR=1 npx stryker run --reporters clear-text
 **Principle:** Errors clearly identify the problem and suggest recovery
 
 **Implementation:**
+
 - Error codes for reference (FR024)
 - Plain language descriptions
 - Specific resolution steps
 - Links to documentation
 
 **Example:**
+
 ```
 [ENV_BUN_NOT_FOUND] Environment Error: Bun installation not detected
 
@@ -2079,6 +2290,7 @@ Resolution:
 **Principle:** Output structure consistent across runs
 
 **Implementation:**
+
 - Phases always in same order (init → dry run → coverage → mutation → results)
 - Error messages follow same template
 - Progress indicators appear at predictable times
@@ -2091,6 +2303,7 @@ Resolution:
 **Principle:** No time limits on user actions
 
 **Compliance:** CLI tools don't time out user input, only test execution
+
 - User can read output at their own pace
 - No automatic clearing or timeouts on messages
 - Configuration can be done offline, no session timeouts
@@ -2102,12 +2315,14 @@ Resolution:
 **Principle:** Use clear language appropriate for technical audience
 
 **Implementation:**
+
 - Technical terms explained in context
 - Avoid jargon in error messages where possible
 - Reading level: Professional developer (assume domain knowledge)
 - Consistent terminology throughout
 
 **Example:**
+
 ```
 Good: "PerTest coverage analysis reduces tests executed per mutation"
 Avoid: "Leveraging granular test-mutant correlation heuristics for optimization"
@@ -2118,12 +2333,14 @@ Avoid: "Leveraging granular test-mutant correlation heuristics for optimization"
 ### Accessibility Testing Checklist
 
 **Automated Tests:**
+
 - [ ] All output passes with `NO_COLOR=1`
 - [ ] JSON structured logs parseable by machines
 - [ ] Terminal width adaptation works (80, 100, 120 columns)
 - [ ] No hardcoded absolute paths in output (relative only)
 
 **Manual Tests:**
+
 - [ ] Read output with screen reader (macOS VoiceOver, Linux Orca)
 - [ ] Verify in dark theme terminal
 - [ ] Verify in light theme terminal
@@ -2131,6 +2348,7 @@ Avoid: "Leveraging granular test-mutant correlation heuristics for optimization"
 - [ ] Test in SSH session (potential encoding issues)
 
 **User Tests:**
+
 - [ ] Users with color blindness can interpret all statuses
 - [ ] Users with screen readers understand error messages
 - [ ] Users in narrow terminals (< 80 cols) get usable output
@@ -2171,7 +2389,7 @@ class AccessibleOutput {
       Survived: '✗',
       Timeout: '⏱',
       Error: '⚠',
-      NoCoverage: '○'
+      NoCoverage: '○',
     };
     return symbols[status];
   }
@@ -2189,13 +2407,18 @@ class AccessibleOutput {
 
 ### 8.1 Terminal Interaction Principles
 
-CLI tools don't have traditional animations, but they do have temporal interaction patterns that create user perception of responsiveness and progress. These principles guide how the plugin communicates state changes and long-running operations.
+CLI tools don't have traditional animations, but they do have temporal
+interaction patterns that create user perception of responsiveness and progress.
+These principles guide how the plugin communicates state changes and
+long-running operations.
 
 #### Principle 1: Immediate Acknowledgment
 
-**Definition:** Respond immediately to user commands, even if the actual work takes time
+**Definition:** Respond immediately to user commands, even if the actual work
+takes time
 
 **Application:**
+
 ```
 $ npx stryker run
 [14:32:05] Stryker 🔪 Starting mutation testing...    [Immediate]
@@ -2204,6 +2427,7 @@ $ npx stryker run
 ```
 
 **Timing Guidelines:**
+
 - **< 100ms:** Instantaneous (no feedback needed beyond starting)
 - **100-1000ms:** Show phase header immediately, result when complete
 - **> 1s:** Show phase header + progress indicator
@@ -2212,9 +2436,11 @@ $ npx stryker run
 
 #### Principle 2: Progressive Disclosure of Detail
 
-**Definition:** Start with high-level status, reveal details as they become available
+**Definition:** Start with high-level status, reveal details as they become
+available
 
 **Application:**
+
 ```
 [14:32:05] Dry run: Running tests...                  [Start]
 [14:32:06] Dry run: Running tests... 25%              [Progress update]
@@ -2230,14 +2456,18 @@ $ npx stryker run
 
 #### Principle 3: Predictable Progress Feedback
 
-**Definition:** Update progress at consistent intervals with meaningful information
+**Definition:** Update progress at consistent intervals with meaningful
+information
 
 **Application:**
-- **Update frequency:** Every 250-500ms for fast operations, 1-2s for long operations
+
+- **Update frequency:** Every 250-500ms for fast operations, 1-2s for long
+  operations
 - **Information richness:** Percentage, elapsed time, estimated remaining time
 - **Smooth updates:** Progress never goes backward (except on retry)
 
 **Bad Example (unpredictable):**
+
 ```
 Mutation testing: 10%
 Mutation testing: 15%
@@ -2246,6 +2476,7 @@ Mutation testing: 45%  [Big jump - what happened?]
 ```
 
 **Good Example (smooth, predictable):**
+
 ```
 Mutation testing: 10% (30s / ~5m)
 Mutation testing: 15% (45s / ~5m)
@@ -2260,6 +2491,7 @@ Mutation testing: 25% (1m 15s / ~5m)
 **Definition:** Users can interrupt operations cleanly with Ctrl+C
 
 **Application:**
+
 ```typescript
 process.on('SIGINT', async () => {
   console.log('\n\n⚠ Mutation testing interrupted by user');
@@ -2274,6 +2506,7 @@ process.on('SIGINT', async () => {
 ```
 
 **User Experience:**
+
 ```
 Mutation testing: 45% (2m 15s / ~5m)
 ^C
@@ -2288,9 +2521,11 @@ Partial results saved. Run again to continue.
 
 #### Principle 5: Quiet Success, Verbose Failure
 
-**Definition:** Successful operations are concise; failures provide extensive detail
+**Definition:** Successful operations are concise; failures provide extensive
+detail
 
 **Success (brief):**
+
 ```
 ✓ Bun 1.0.15 detected
 ✓ 127 test files discovered
@@ -2298,6 +2533,7 @@ Partial results saved. Run again to continue.
 ```
 
 **Failure (detailed):**
+
 ```
 ✗ Bun installation not found
 
@@ -2322,6 +2558,7 @@ Documentation: https://docs.stryker-mutator.io/bun-runner/#installation
 **Use Case:** Operations with unknown duration or no measurable progress
 
 **Visual:**
+
 ```
 ⠋ Initializing plugin...
 ⠙ Initializing plugin...
@@ -2331,6 +2568,7 @@ Documentation: https://docs.stryker-mutator.io/bun-runner/#installation
 ```
 
 **Implementation:**
+
 ```typescript
 class Spinner {
   private frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
@@ -2354,6 +2592,7 @@ class Spinner {
 ```
 
 **Usage:**
+
 - Plugin initialization
 - Subprocess spawn (before test execution starts)
 - File system operations
@@ -2365,11 +2604,13 @@ class Spinner {
 **Use Case:** Operations with known total (tests, mutations)
 
 **Visual:**
+
 ```
 Mutation testing: ████████████████████░░░░░░░░░░░░░░░░░░░░ 45% (393/850)
 ```
 
 **Implementation:**
+
 ```typescript
 class ProgressBar {
   constructor(
@@ -2397,6 +2638,7 @@ class ProgressBar {
 ```
 
 **Usage:**
+
 - Dry run (test count)
 - Coverage collection (test count)
 - Mutation testing (mutant count)
@@ -2408,6 +2650,7 @@ class ProgressBar {
 **Use Case:** Operations producing continuous output (debug mode)
 
 **Visual:**
+
 ```
 [14:32:15] [DEBUG] Spawning Bun subprocess
 [14:32:15] [DEBUG]   Command: bun test --coverage
@@ -2421,6 +2664,7 @@ class ProgressBar {
 ```
 
 **Implementation:**
+
 ```typescript
 class StreamingLogger {
   log(level: LogLevel, message: string) {
@@ -2436,6 +2680,7 @@ class StreamingLogger {
 ```
 
 **Usage:**
+
 - Debug mode (`--logLevel debug`)
 - Trace mode (`--logLevel trace`)
 - Error diagnostics
@@ -2447,6 +2692,7 @@ class StreamingLogger {
 **Use Case:** Long operations with distinct phases
 
 **Visual:**
+
 ```
 [14:32:05] Phase 1/4: Initialization
 [14:32:05]   ✓ Environment validated
@@ -2465,20 +2711,23 @@ class StreamingLogger {
 ```
 
 **Implementation:**
+
 ```typescript
 class PhaseTracker {
   private phases = [
     'Initialization',
     'Dry Run',
     'Coverage Collection',
-    'Mutation Testing'
+    'Mutation Testing',
   ];
   private current = 0;
 
   startPhase(phase: number) {
     this.current = phase;
     const total = this.phases.length;
-    console.log(`\n[${new Date().toLocaleTimeString()}] Phase ${phase}/${total}: ${this.phases[phase - 1]}`);
+    console.log(
+      `\n[${new Date().toLocaleTimeString()}] Phase ${phase}/${total}: ${this.phases[phase - 1]}`
+    );
   }
 
   completePhase() {
@@ -2488,6 +2737,7 @@ class PhaseTracker {
 ```
 
 **Usage:**
+
 - Main mutation testing flow
 - Shows overall progress context
 
@@ -2498,6 +2748,7 @@ class PhaseTracker {
 **Use Case:** High-frequency events that would flood terminal
 
 **Problem:**
+
 ```
 Mutant 1 tested
 Mutant 2 tested
@@ -2506,6 +2757,7 @@ Mutant 3 tested
 ```
 
 **Solution (throttled):**
+
 ```
 Mutation testing: 10% (85/850)
 Mutation testing: 15% (128/850)  [Only updates every 5%]
@@ -2513,6 +2765,7 @@ Mutation testing: 20% (170/850)
 ```
 
 **Implementation:**
+
 ```typescript
 class ThrottledProgress {
   private lastUpdate = 0;
@@ -2536,6 +2789,7 @@ class ThrottledProgress {
 ```
 
 **Benefits:**
+
 - Reduces terminal flicker
 - Improves performance
 - Maintains readability
@@ -2546,17 +2800,18 @@ class ThrottledProgress {
 
 #### User Perception Thresholds
 
-| Duration | User Perception | Required Feedback |
-|----------|----------------|-------------------|
-| **< 100ms** | Instantaneous | None (silent success) |
-| **100ms - 1s** | Slight delay | Show phase start |
-| **1s - 10s** | Noticeable wait | Progress indicator (spinner or bar) |
-| **10s - 1m** | Long operation | Progress bar + elapsed time |
-| **> 1m** | Very long | Progress bar + elapsed + ETA |
+| Duration       | User Perception | Required Feedback                   |
+| -------------- | --------------- | ----------------------------------- |
+| **< 100ms**    | Instantaneous   | None (silent success)               |
+| **100ms - 1s** | Slight delay    | Show phase start                    |
+| **1s - 10s**   | Noticeable wait | Progress indicator (spinner or bar) |
+| **10s - 1m**   | Long operation  | Progress bar + elapsed time         |
+| **> 1m**       | Very long       | Progress bar + elapsed + ETA        |
 
 #### Feedback Timing Rules
 
 **Rule 1: Acknowledge within 100ms**
+
 ```typescript
 // Good
 console.log('Mutation testing starting...');
@@ -2568,6 +2823,7 @@ console.log('Mutation testing complete');
 ```
 
 **Rule 2: Update progress every 250-500ms**
+
 ```typescript
 const throttle = new ThrottledProgress(250); // 250ms
 
@@ -2578,6 +2834,7 @@ for (let i = 0; i < mutants.length; i++) {
 ```
 
 **Rule 3: Show ETA for operations > 10s**
+
 ```typescript
 if (estimatedDuration > 10000) {
   progressBar.showETA(true);
@@ -2585,6 +2842,7 @@ if (estimatedDuration > 10000) {
 ```
 
 **Rule 4: Clean up interrupted operations < 2s**
+
 ```typescript
 process.on('SIGINT', async () => {
   const cleanupTimeout = setTimeout(() => {
@@ -2605,6 +2863,7 @@ process.on('SIGINT', async () => {
 **When:** Short operations, complete results available
 
 **Pattern:**
+
 ```typescript
 // Collect all data
 const results = await runTests();
@@ -2614,11 +2873,13 @@ console.log(formatResults(results));
 ```
 
 **Advantages:**
+
 - Clean, organized output
 - No partial updates
 - Easy to read
 
 **Disadvantages:**
+
 - No progress feedback during operation
 - User uncertain if process is running
 
@@ -2629,9 +2890,10 @@ console.log(formatResults(results));
 **When:** Long operations, debug mode, real-time monitoring
 
 **Pattern:**
+
 ```typescript
 // Stream updates as they occur
-process.on('test-complete', (test) => {
+process.on('test-complete', test => {
   if (logLevel >= LogLevel.Debug) {
     console.log(`✓ ${test.name} (${test.duration}ms)`);
   }
@@ -2639,11 +2901,13 @@ process.on('test-complete', (test) => {
 ```
 
 **Advantages:**
+
 - Real-time visibility
 - Early problem detection
 - Sense of progress
 
 **Disadvantages:**
+
 - Verbose, harder to read
 - Terminal scrolling
 - Performance overhead
@@ -2653,6 +2917,7 @@ process.on('test-complete', (test) => {
 #### Hybrid Approach (Recommended)
 
 **Pattern:**
+
 ```typescript
 // Default: Progress bar (clean)
 progressBar.update(current, total);
@@ -2667,6 +2932,7 @@ console.log(formatFinalResults(results));
 ```
 
 **Configuration:**
+
 ```bash
 # Clean progress (default)
 npx stryker run
@@ -2685,6 +2951,7 @@ npx stryker run --logLevel error
 #### Retry with Backoff
 
 **Visual:**
+
 ```
 ⚠ Coverage collection failed
   Retrying in 2 seconds... 2
@@ -2700,6 +2967,7 @@ npx stryker run --logLevel error
 ```
 
 **Implementation:**
+
 ```typescript
 async function retryWithBackoff<T>(
   operation: () => Promise<T>,
@@ -2716,7 +2984,9 @@ async function retryWithBackoff<T>(
 
       // Countdown
       for (let i = backoff / 1000; i > 0; i--) {
-        process.stdout.write(`\r  Retrying in ${backoff / 1000} seconds... ${i}`);
+        process.stdout.write(
+          `\r  Retrying in ${backoff / 1000} seconds... ${i}`
+        );
         await sleep(1000);
       }
 
@@ -2736,7 +3006,8 @@ async function retryWithBackoff<T>(
 - ✓ Use `\n` for permanent output (results, errors)
 - ✓ Clear line before updating: `process.stdout.write('\r\x1b[K')`
 - ✓ Throttle high-frequency updates (250-500ms)
-- ✓ Flush stdout after critical messages: `process.stdout.write(); process.stdout.uncork();`
+- ✓ Flush stdout after critical messages:
+  `process.stdout.write(); process.stdout.uncork();`
 - ✓ Handle terminal resize gracefully
 - ✓ Respect `CI` environment variable (no progress bars in CI)
 
@@ -2759,17 +3030,20 @@ async function retryWithBackoff<T>(
 **Design Tool:** N/A (CLI tool - no graphical design files)
 
 **Reference Materials:**
+
 - This UX specification serves as the design system
 - Terminal output examples below serve as "wireframes"
 - TypeScript implementation code provides precise specifications
 - ANSI color codes and Unicode symbols are the "design assets"
 
 **Version Control:**
+
 - UX spec tracked in Git alongside codebase
 - Output examples updated with each feature
 - Terminal recording demos (asciinema) for complex flows
 
 **Developer Handoff:**
+
 - This document provides complete specification
 - Code examples show exact implementation
 - No separate design-to-development handoff needed (single team)
@@ -2778,9 +3052,11 @@ async function retryWithBackoff<T>(
 
 #### Screen 1: Successful Mutation Test Run (Happy Path)
 
-**Context:** Sarah runs mutation testing for the first time, everything works perfectly
+**Context:** Sarah runs mutation testing for the first time, everything works
+perfectly
 
 **Terminal Output:**
+
 ```
 $ npx stryker run
 
@@ -2850,6 +3126,7 @@ View detailed report: ./reports/mutation/mutation.html
 ```
 
 **Key UX Elements:**
+
 - ✓ Immediate acknowledgment (<100ms)
 - ✓ Progress indicators for long operations
 - ✓ Performance metrics shown
@@ -2863,6 +3140,7 @@ View detailed report: ./reports/mutation/mutation.html
 **Context:** Mike sets up mutation testing but has a typo in configuration
 
 **Terminal Output:**
+
 ```
 $ npx stryker run
 
@@ -2911,6 +3189,7 @@ $ npx stryker run
 ```
 
 **Key UX Elements:**
+
 - ✓ Clear error identification (config validation)
 - ✓ Specific problem stated (typo in value)
 - ✓ Actionable resolution steps
@@ -2925,6 +3204,7 @@ $ npx stryker run
 **Context:** Alex investigates why mutation testing is slow, uses debug mode
 
 **Terminal Output:**
+
 ```
 $ npx stryker run --logLevel debug --concurrency 1
 
@@ -2992,6 +3272,7 @@ Partial results saved. Run again to continue.
 ```
 
 **Key UX Elements:**
+
 - ✓ Debug logging shows internal decisions
 - ✓ Subprocess commands visible for troubleshooting
 - ✓ Timing information per operation
@@ -3006,6 +3287,7 @@ Partial results saved. Run again to continue.
 **Context:** Sarah tries to use plugin without Bun installed
 
 **Terminal Output:**
+
 ```
 $ npx stryker run
 
@@ -3032,6 +3314,7 @@ Need help? https://github.com/stryker-mutator/bun-runner/issues
 ```
 
 **Key UX Elements:**
+
 - ✓ Error caught early (before wasting time)
 - ✓ Clear error code for reference
 - ✓ Installation command provided
@@ -3043,9 +3326,11 @@ Need help? https://github.com/stryker-mutator/bun-runner/issues
 
 #### Screen 5: Coverage Fallback Warning (Wide Terminal Layout)
 
-**Context:** Alex's Bun version doesn't support coverage, plugin falls back gracefully (shown on 120+ column terminal)
+**Context:** Alex's Bun version doesn't support coverage, plugin falls back
+gracefully (shown on 120+ column terminal)
 
 **Terminal Output:**
+
 ```
 $ npx stryker run
 
@@ -3082,6 +3367,7 @@ Automatically falling back to 'all' coverage mode...
 ```
 
 **Key UX Elements:**
+
 - ✓ Warning early about Bun version
 - ✓ Fallback happens automatically
 - ✓ Clear explanation of performance impact
@@ -3102,6 +3388,7 @@ Automatically falling back to 'all' coverage mode...
 4. **Performance comparison** - Side-by-side: 'all' vs 'perTest' mode
 
 **Recording Commands:**
+
 ```bash
 # Record session
 asciinema rec demo-happy-path.cast
@@ -3116,6 +3403,7 @@ asciinema upload demo-happy-path.cast
 ```
 
 **Usage:**
+
 - Embed in README.md
 - Link from documentation
 - Use in presentations
@@ -3125,32 +3413,32 @@ asciinema upload demo-happy-path.cast
 
 **Different Terminal Widths:**
 
-| Feature | 80 cols | 120 cols | 160+ cols |
-|---------|---------|----------|-----------|
-| Progress bars | 20 chars | 40 chars | 60 chars |
-| Results layout | Single column | Single column | Two columns |
-| Error messages | Wrapped | Full width | Full width + extra |
-| Tables | Compact | Standard | Detailed |
-| Phase headers | Simple | Boxed | Boxed + icons |
+| Feature        | 80 cols       | 120 cols      | 160+ cols          |
+| -------------- | ------------- | ------------- | ------------------ |
+| Progress bars  | 20 chars      | 40 chars      | 60 chars           |
+| Results layout | Single column | Single column | Two columns        |
+| Error messages | Wrapped       | Full width    | Full width + extra |
+| Tables         | Compact       | Standard      | Detailed           |
+| Phase headers  | Simple        | Boxed         | Boxed + icons      |
 
 **Different Log Levels:**
 
-| Level | Output Style | Use Case |
-|-------|-------------|----------|
-| `error` | Errors only | CI/CD (minimal noise) |
-| `warn` | Errors + warnings | Default production |
-| `info` | Standard output | Normal interactive use |
-| `debug` | Detailed logs | Troubleshooting |
+| Level   | Output Style        | Use Case                 |
+| ------- | ------------------- | ------------------------ |
+| `error` | Errors only         | CI/CD (minimal noise)    |
+| `warn`  | Errors + warnings   | Default production       |
+| `info`  | Standard output     | Normal interactive use   |
+| `debug` | Detailed logs       | Troubleshooting          |
 | `trace` | Complete data dumps | Bug reports, development |
 
 **Different Coverage Modes:**
 
-| Mode | Description | Output Differences |
-|------|-------------|-------------------|
-| `off` | No coverage | Mutations marked NoCoverage |
-| `all` | All tests per mutant | No coverage phase, slower mutation phase |
+| Mode      | Description           | Output Differences                          |
+| --------- | --------------------- | ------------------------------------------- |
+| `off`     | No coverage           | Mutations marked NoCoverage                 |
+| `all`     | All tests per mutant  | No coverage phase, slower mutation phase    |
 | `perTest` | Intelligent filtering | Coverage phase shown, faster mutation phase |
-| `auto` | Auto-detect best mode | Shows mode selection in logs |
+| `auto`    | Auto-detect best mode | Shows mode selection in logs                |
 
 ---
 
@@ -3214,6 +3502,7 @@ asciinema upload demo-happy-path.cast
 ### 10.2 Design Handoff Checklist
 
 **UX Specification Completeness:**
+
 - [x] User personas defined (Sarah, Mike, Alex)
 - [x] Usability goals established with measurable criteria
 - [x] Design principles articulated (5 principles)
@@ -3227,6 +3516,7 @@ asciinema upload demo-happy-path.cast
 - [x] Terminal output examples (5 key screens)
 
 **Implementation Readiness:**
+
 - [x] All components have TypeScript implementation examples
 - [x] ANSI color codes specified
 - [x] Unicode symbols documented with fallbacks
@@ -3236,7 +3526,8 @@ asciinema upload demo-happy-path.cast
 - [x] Progress update frequency specified (250-500ms)
 
 **Documentation Handoff:**
-- [x] Error codes categorized (ENV_*, CFG_*, RUN_*, COV_*)
+
+- [x] Error codes categorized (ENV*\*, CFG*\_, RUN\_\_, COV\_\*)
 - [x] Configuration schema requirements documented
 - [x] IDE integration guidelines (JSON schema)
 - [x] Accessibility compliance target defined
@@ -3244,6 +3535,7 @@ asciinema upload demo-happy-path.cast
 - [x] Example output for all scenarios included
 
 **Quality Assurance Handoff:**
+
 - [x] Accessibility testing checklist provided
 - [x] Terminal width test scenarios defined
 - [x] Error recovery flows documented
@@ -3253,6 +3545,7 @@ asciinema upload demo-happy-path.cast
 **Ready for Implementation:** ✅ Yes
 
 **Estimated Development Effort:**
+
 - Core output components: 3-5 days
 - Responsive formatting: 2-3 days
 - Accessibility features: 2-3 days
@@ -3261,11 +3554,13 @@ asciinema upload demo-happy-path.cast
 - **Total: 12-18 days** (2-3 sprints for polish alongside feature development)
 
 **Dependencies:**
+
 - TypeScript project setup (Epic 1, Story 1.1)
 - Stryker plugin integration (Epic 1, Story 1.2-1.3)
 - Configuration validation (Epic 1, Story 1.4)
 
 **Success Metrics:**
+
 - [ ] 80% of first-time users succeed without reading docs (NFR024)
 - [ ] 90% of error messages lead to self-resolution (NFR025)
 - [ ] NO_COLOR mode passes all automated tests
@@ -3281,19 +3576,22 @@ asciinema upload demo-happy-path.cast
 
 - **PRD:** `/docs/PRD.md` - Product requirements and functional specifications
 - **Epics:** `/docs/epics.md` - Detailed story breakdown (52 stories, 5 epics)
-- **Workflow Status:** `/docs/bmm-workflow-status.md` - Project tracking and progress
-- **Product Brief:** `/docs/product-brief-stryker-mutator-bun-runner-2025-10-20.md`
+- **Workflow Status:** `/docs/bmm-workflow-status.md` - Project tracking and
+  progress
+- **Product Brief:**
+  `/docs/product-brief-stryker-mutator-bun-runner-2025-10-20.md`
 - **Technical Research:** `/docs/research-technical-2025-10-20.md`
 
 ### Version History
 
-| Date | Version | Changes | Author |
-| -------- | ------- | --------------------- | ------------- |
-| 2025-10-21 | 1.0 | Initial UX specification for CLI tool | Eduardo Menoncello |
+| Date       | Version | Changes                               | Author             |
+| ---------- | ------- | ------------------------------------- | ------------------ |
+| 2025-10-21 | 1.0     | Initial UX specification for CLI tool | Eduardo Menoncello |
 
 ### Glossary
 
 **CLI Terms:**
+
 - **ANSI codes:** Terminal escape sequences for colors and formatting
 - **NO_COLOR:** Environment variable standard for disabling color output
 - **TTY:** Teletypewriter - interactive terminal session
@@ -3301,6 +3599,7 @@ asciinema upload demo-happy-path.cast
 - **Monospace:** Fixed-width font used in terminals
 
 **Mutation Testing Terms:**
+
 - **Mutant:** Modified version of code to test if tests detect the change
 - **Mutation Score:** Percentage of mutants killed by tests
 - **Dry Run:** Initial test execution without mutations
@@ -3308,16 +3607,23 @@ asciinema upload demo-happy-path.cast
 - **Coverage Mapping:** Association between tests and code coverage
 
 **Stryker Terms:**
+
 - **TestRunner:** Plugin interface for test execution
 - **Coverage Analysis:** Mode for collecting test coverage (off/all/perTest)
-- **Mutation Status:** Result of mutation test (Killed, Survived, Timeout, Error, NoCoverage)
+- **Mutation Status:** Result of mutation test (Killed, Survived, Timeout,
+  Error, NoCoverage)
 
 ### Acknowledgments
 
-This UX specification was created for the **stryker-mutator-bun-runner** project, adapting traditional UX/UI design principles for command-line interface tools. The specification demonstrates that CLI tools benefit from the same rigorous UX design process as graphical applications, with adaptations for terminal-based interaction patterns.
+This UX specification was created for the **stryker-mutator-bun-runner**
+project, adapting traditional UX/UI design principles for command-line interface
+tools. The specification demonstrates that CLI tools benefit from the same
+rigorous UX design process as graphical applications, with adaptations for
+terminal-based interaction patterns.
 
-**Design Philosophy:**
-CLI tools serve developers who value efficiency, clarity, and control. This specification prioritizes:
+**Design Philosophy:** CLI tools serve developers who value efficiency, clarity,
+and control. This specification prioritizes:
+
 - Immediate feedback and progress transparency
 - Actionable error messages over generic failures
 - Performance visibility for optimization decisions
@@ -3325,6 +3631,7 @@ CLI tools serve developers who value efficiency, clarity, and control. This spec
 - Developer empowerment through comprehensive debugging tools
 
 **Special Thanks:**
+
 - Stryker team for creating the mutation testing framework
 - Bun team for the high-performance JavaScript runtime
 - CLI design community for NO_COLOR standard and accessibility guidelines
@@ -3342,6 +3649,6 @@ CLI tools serve developers who value efficiency, clarity, and control. This spec
 
 ### Version History
 
-| Date     | Version | Changes               | Author        |
-| -------- | ------- | --------------------- | ------------- |
+| Date       | Version | Changes               | Author             |
+| ---------- | ------- | --------------------- | ------------------ |
 | 2025-10-21 | 1.0     | Initial specification | Eduardo Menoncello |

@@ -5,13 +5,13 @@
 # Override agent name
 agent:
   metadata:
-    name: ""
+    name: ''
 
 # Replace entire persona (not merged)
 persona:
-  role: ""
-  identity: ""
-  communication_style: ""
+  role: ''
+  identity: ''
+  communication_style: ''
   principles: []
 
 # Add custom critical actions (appended after standard config loading)
@@ -37,8 +37,8 @@ critical_actions:
 # Add persistent memories for the agent
 memories:
   - "Story templates must use proper TypeScript types (NO 'any' - ADR-004)"
-  - "Template code must pass ESLint and Prettier checks"
-  - "Templates guide developers - must be production-ready"
+  - 'Template code must pass ESLint and Prettier checks'
+  - 'Templates guide developers - must be production-ready'
 
 # Add custom menu items (appended to base menu)
 # Don't include * prefix or help/exit - auto-injected
