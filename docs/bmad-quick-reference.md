@@ -142,6 +142,7 @@ node /Users/menoncello/repos/oss/bmad6/tools/cli/bmad-cli.js install
 ## Tips
 
 **Quality Gates (Zero-Tolerance):**
+
 - TypeScript: 0 errors (strict mode, NO 'any' types - ADR-004)
 - ESLint: 0 errors (no eslint-disable allowed)
 - Tests: 100% pass rate, ≥80% coverage
@@ -149,12 +150,14 @@ node /Users/menoncello/repos/oss/bmad6/tools/cli/bmad-cli.js install
 - Formatting: 100% Prettier compliance
 
 **Forbidden Practices:**
+
 - NEVER use `any` type (ADR-004, NFR018)
 - NEVER add `eslint-disable` comments
 - NEVER use `@ts-ignore` or `@ts-expect-error`
 - NEVER lower mutation testing thresholds
 
 **Architecture Requirements (docs/architecture.md:216-234):**
+
 - ALWAYS sanitize logs and errors (FR037)
 - ALWAYS cleanup resources in try/finally (FR027, FR028, FR038)
 - ALWAYS validate inputs before processing (FR004, FR034)
