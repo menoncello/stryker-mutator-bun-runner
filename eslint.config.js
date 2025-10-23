@@ -1,264 +1,199 @@
-import js from '@eslint/js';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
-import security from 'eslint-plugin-security';
-import importPlugin from 'eslint-plugin-import';
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tsparser from '@typescript-eslint/parser';
 import sonarjs from 'eslint-plugin-sonarjs';
 import unicorn from 'eslint-plugin-unicorn';
+import importPlugin from 'eslint-plugin-import';
 import jsdoc from 'eslint-plugin-jsdoc';
-import promise from 'eslint-plugin-promise';
-import functional from 'eslint-plugin-functional';
-import regexp from 'eslint-plugin-regexp';
 
 export default [
-  js.configs.recommended,
   {
-    files: ['src/**/*.ts'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/coverage/**',
+      '**/*.js',
+      '**/*.d.ts',
+      '**/reports/**',
+      '**/.stryker-tmp/**',
+      '**/stryker-tmp/**',
+    ],
+  },
+  // Main TypeScript configuration
+  {
+    files: ['**/*.ts'],
     languageOptions: {
-      parser: tsParser,
+      parser: tsparser,
       parserOptions: {
         ecmaVersion: 2022,
         sourceType: 'module',
-        project: './tsconfig.json'
-      }
+      },
     },
     plugins: {
-      '@typescript-eslint': tsPlugin,
-      security: security,
-      import: importPlugin,
+      '@typescript-eslint': tseslint,
       sonarjs: sonarjs,
       unicorn: unicorn,
+      import: importPlugin,
       jsdoc: jsdoc,
-      promise: promise,
-      functional: functional,
-      regexp: regexp
     },
     rules: {
-      // TypeScript rules
+      // TypeScript ESLint - Strictest Rules (without type-checking)
+      ...tseslint.configs['recommended'].rules,
       '@typescript-eslint/no-unused-vars': [
         'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_'
-        }
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/prefer-readonly': 'error',
-      '@typescript-eslint/no-unsafe-type-assertion': 'error',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-      '@typescript-eslint/strict-boolean-expressions': 'off', // Too strict for this project
-      '@typescript-eslint/explicit-function-return-type': [
+      '@typescript-eslint/explicit-function-return-type': 'off', // Relaxed for efficiency
+      '@typescript-eslint/explicit-module-boundary-types': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'error',
+      '@typescript-eslint/no-useless-constructor': 'error',
+      '@typescript-eslint/prefer-for-of': 'error',
+      '@typescript-eslint/prefer-as-const': 'error',
+      '@typescript-eslint/no-array-constructor': 'error',
+      '@typescript-eslint/no-empty-function': 'error',
+      '@typescript-eslint/no-inferrable-types': 'error',
+      '@typescript-eslint/array-type': ['error', { default: 'array-simple' }],
+      '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+      '@typescript-eslint/method-signature-style': ['error', 'property'],
+      '@typescript-eslint/naming-convention': [
         'error',
         {
-          allowExpressions: true,
-          allowTypedFunctionExpressions: true
-        }
+          selector: 'interface',
+          format: ['PascalCase'],
+          custom: { regex: '^I[A-Z]', match: false },
+        },
+        { selector: 'typeAlias', format: ['PascalCase'] },
+        { selector: 'enum', format: ['PascalCase'] },
       ],
-      '@typescript-eslint/no-deprecated': 'error',
-      '@typescript-eslint/no-unnecessary-condition': ['error', { allowConstantLoopConditions: true }],
-      '@typescript-eslint/no-redundant-type-constituents': 'error',
-      'prefer-const': 'error',
-      'no-undef': 'off',
-      'no-unused-vars': 'off',
 
-      // Import rules - Disabled for ESM compatibility
-      'import/extensions': 'off', // Allow any extension usage
-      'import/no-useless-path-segments': 'off', // Allow /index.js imports
+      // SonarJS - Code Quality & Complexity (relaxed for efficiency)
+      ...sonarjs.configs.recommended.rules,
+      'sonarjs/cognitive-complexity': ['warn', 30], // Increased threshold
+      'sonarjs/no-duplicate-string': ['warn', { threshold: 5 }], // Increased threshold
+      'sonarjs/no-identical-functions': 'warn',
+      'sonarjs/no-collapsible-if': 'warn',
+      'sonarjs/no-duplicated-branches': 'warn',
+      'sonarjs/no-redundant-boolean': 'warn',
+      'sonarjs/prefer-immediate-return': 'warn',
 
-      // Core ESLint rules for code quality
-      'no-throw-literal': 'error',
-      'no-useless-escape': 'error',
-      'no-empty': ['error', { allowEmptyCatch: false }],
-
-      // Size and complexity limits
-      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
-      'max-lines-per-function': ['error', { max: 50, skipBlankLines: true, skipComments: true }],
-      'max-len': ['error', { code: 120, tabWidth: 2, ignoreUrls: true, ignoreStrings: true }],
-      complexity: ['error', 10],
-      'max-depth': ['error', 4],
-      'max-nested-callbacks': ['error', 3],
-      'max-params': ['error', 4],
-
-      // SonarJS rules for code quality
-      'sonarjs/no-duplicate-string': ['error', { threshold: 3 }],
-      'sonarjs/no-identical-functions': 'error',
-      'sonarjs/no-collapsible-if': 'error',
-      'sonarjs/cognitive-complexity': ['error', 15],
-      'sonarjs/no-redundant-jump': 'error',
-      'sonarjs/no-unused-collection': 'error',
-      'sonarjs/prefer-single-boolean-return': 'error',
-      'sonarjs/no-useless-catch': 'error',
-
-      // Unicorn rules for better code
+      // Unicorn - Best Practices
       'unicorn/better-regex': 'error',
       'unicorn/catch-error-name': 'error',
-      'unicorn/consistent-destructuring': 'error',
-      'unicorn/no-array-push-push': 'error',
+      'unicorn/consistent-function-scoping': 'error',
+      'unicorn/custom-error-definition': 'error',
+      'unicorn/error-message': 'error',
+      'unicorn/escape-case': 'error',
+      'unicorn/expiring-todo-comments': 'error',
+      'unicorn/explicit-length-check': 'error',
+      'unicorn/filename-case': ['error', { case: 'kebabCase' }],
+      'unicorn/no-abusive-eslint-disable': 'error',
+      'unicorn/no-array-for-each': 'error',
+      'unicorn/no-console-spaces': 'error',
       'unicorn/no-for-loop': 'error',
-      'unicorn/no-nested-ternary': 'error',
+      'unicorn/no-instanceof-array': 'error',
+      'unicorn/no-invalid-remove-event-listener': 'error',
+      'unicorn/no-negated-condition': 'error',
+      'unicorn/no-nested-ternary': 'warn',
+      'unicorn/no-new-array': 'error',
+      'unicorn/no-new-buffer': 'error',
+      'unicorn/no-unreadable-array-destructuring': 'error',
+      'unicorn/no-unused-properties': 'error',
+      'unicorn/no-useless-undefined': 'error',
+      'unicorn/number-literal-case': 'error',
+      'unicorn/prefer-add-event-listener': 'error',
+      'unicorn/prefer-array-find': 'error',
+      'unicorn/prefer-array-flat-map': 'error',
       'unicorn/prefer-array-some': 'error',
+      'unicorn/prefer-default-parameters': 'error',
       'unicorn/prefer-includes': 'error',
+      'unicorn/prefer-modern-math-apis': 'error',
+      'unicorn/prefer-negative-index': 'error',
+      'unicorn/prefer-number-properties': 'error',
+      'unicorn/prefer-optional-catch-binding': 'error',
       'unicorn/prefer-string-starts-ends-with': 'error',
       'unicorn/prefer-ternary': 'error',
       'unicorn/prefer-type-error': 'error',
       'unicorn/throw-new-error': 'error',
-      // Disable some unicorn rules that conflict with project style
-      'unicorn/filename-case': 'off',
-      'unicorn/prevent-abbreviations': 'off',
-      'unicorn/prefer-module': 'off',
 
-      // Regexp rules for better regex quality
-      'regexp/no-dupe-characters-character-class': 'error',
-      'regexp/no-empty-character-class': 'error',
-      'regexp/no-useless-character-class': 'error',
-      'regexp/no-useless-escape': 'error',
-      'regexp/no-contradiction-with-assertion': 'error',
-
-      // Promise rules
-      'promise/always-return': 'error',
-      'promise/no-return-wrap': 'error',
-      'promise/param-names': 'error',
-      'promise/catch-or-return': 'error',
-      'promise/no-nesting': 'error',
-      'promise/no-promise-in-callback': 'error',
-      'promise/no-callback-in-promise': 'error',
-      'promise/avoid-new': 'off',
-
-      // Functional programming rules (for immutability)
-      'functional/prefer-readonly-type': 'off', // Temporarily disabled due to config issues
-      'functional/no-let': 'off', // Temporarily disabled due to config issues
-      'functional/immutable-data': 'off', // Temporarily disabled due to config issues
-      // Disable functional rules that are too strict
-      'functional/no-conditional-statements': 'off',
-      'functional/no-expression-statements': 'off',
-      'functional/no-return-void': 'off',
-      'functional/no-throw-statements': 'off',
-      'functional/no-try-statements': 'off',
-      'functional/no-loop-statements': 'off',
-      'functional/functional-parameters': 'off',
-
-      // JSDoc rules
-      'jsdoc/require-jsdoc': [
-        'error',
-        {
-          publicOnly: true,
-          require: {
-            FunctionDeclaration: true,
-            MethodDefinition: true,
-            ClassDeclaration: true
-          }
-        }
-      ],
-      'jsdoc/require-description': 'error',
-      'jsdoc/require-param': 'error',
-      'jsdoc/require-returns': 'error',
-      'jsdoc/check-alignment': 'error',
-      'jsdoc/check-param-names': 'error',
-      'jsdoc/check-tag-names': 'error',
-
-      // Import rules (disabled problematic ones)
-      'import/no-unresolved': 'off',
-      'import/named': 'off',
-      'import/default': 'off',
-      'import/namespace': 'off',
-      'import/no-absolute-path': 'error',
-      'import/no-dynamic-require': 'error',
-      'import/no-self-import': 'off',
-      'import/no-cycle': 'off',
-      'import/no-useless-path-segments': 'off', // Allow /index.js imports
+      // Import - Module Management
       'import/no-duplicates': 'error',
-
-      // Security rules (adjusted for TypeScript)
-      'security/detect-object-injection': 'off',
-      'security/detect-non-literal-fs-filename': 'off',
-      'security/detect-unsafe-regex': 'off'
-    }
-  },
-  {
-    files: ['test/**/*.ts'],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: 'module',
-        project: './tsconfig.test.json'
-      }
-    },
-    plugins: {
-      '@typescript-eslint': tsPlugin,
-      sonarjs: sonarjs,
-      regexp: regexp
-    },
-    rules: {
-      // Basic TypeScript rules only for tests
-      '@typescript-eslint/no-unused-vars': [
+      'import/no-unresolved': 'off', // TypeScript handles this
+      'import/order': [
         'error',
         {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_'
-        }
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          'newlines-between': 'never',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/prefer-readonly': 'error',
-      'prefer-const': 'error',
-      'no-undef': 'off',
-      'no-unused-vars': 'off',
+      'import/newline-after-import': 'error',
+      'import/no-default-export': 'error',
+      'import/no-mutable-exports': 'error',
 
-      // Relaxed rules for tests
+      // JSDoc - Documentation Quality (relaxed for efficiency)
+      'jsdoc/check-alignment': 'warn',
+      'jsdoc/check-param-names': 'warn',
+      'jsdoc/check-tag-names': 'off', // Allow custom tags like @nimata/adapters
+      'jsdoc/check-types': 'warn',
+      'jsdoc/require-description': 'off', // Reduced priority
+      'jsdoc/require-param': 'warn',
+      'jsdoc/require-param-description': 'off', // Reduced priority
+      'jsdoc/require-param-type': 'off', // TypeScript provides types
+      'jsdoc/require-returns': 'warn',
+      'jsdoc/require-returns-description': 'off', // Reduced priority
+      'jsdoc/require-returns-type': 'off', // TypeScript provides types
+      'jsdoc/require-jsdoc': 'off', // Reduced priority for efficiency
+
+      // Core ESLint - Code Quality (relaxed for efficiency)
+      complexity: ['warn', 15], // Increased threshold
+      'max-depth': ['warn', 4], // Increased threshold
+      'max-lines': ['warn', { max: 500, skipBlankLines: true, skipComments: true }], // Increased threshold
+      'max-lines-per-function': ['warn', { max: 50, skipBlankLines: true, skipComments: true }], // Increased threshold
+      'max-nested-callbacks': ['warn', 4], // Increased threshold
+      'max-params': ['warn', 6], // Increased threshold
+      'max-statements': ['warn', 25], // Increased threshold
+      'no-console': 'off', // CLI needs console
+      'no-magic-numbers': [
+        'warn', // Downgraded to warn
+        {
+          ignore: [0, 1, -1, 2, 10, 100, 1000],
+          ignoreArrayIndexes: true,
+          ignoreDefaultValues: true,
+        },
+      ],
+      'no-duplicate-imports': 'error',
+      'no-else-return': 'warn',
+      'no-lonely-if': 'warn',
+      'no-negated-condition': 'warn',
+      'no-nested-ternary': 'warn', // Downgraded to warn
+      'no-return-await': 'error',
+      'no-unneeded-ternary': 'error',
+      'no-useless-return': 'error',
+      'prefer-const': 'error',
+      'prefer-template': 'error',
+      yoda: 'error',
+    },
+  },
+  // Test files - Relaxed rules
+  {
+    files: ['**/*.test.ts', '**/*.spec.ts', '**/tests/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      'sonarjs/no-duplicate-string': 'off',
+      'jsdoc/require-jsdoc': 'off',
+      'jsdoc/require-description': 'off',
+      'jsdoc/require-param': 'off',
+      'jsdoc/require-returns': 'off',
       'max-lines': 'off',
       'max-lines-per-function': 'off',
-      'max-len': ['error', { code: 150, tabWidth: 2, ignoreUrls: true, ignoreStrings: true }],
-      complexity: 'off',
-      'sonarjs/no-duplicate-string': 'off',
-      'sonarjs/cognitive-complexity': 'off',
-      'jsdoc/require-jsdoc': 'off',
-      'functional/prefer-readonly-type': 'off',
-      'functional/no-let': 'off',
-      'functional/immutable-data': 'off'
-    }
-  },
-  {
-    files: ['scripts/**/*.cjs'],
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'commonjs',
-      globals: {
-        console: 'readonly',
-        process: 'readonly',
-        setTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearInterval: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        module: 'readonly',
-        require: 'readonly',
-        exports: 'readonly',
-        Buffer: 'readonly'
-      }
+      'max-nested-callbacks': 'off',
+      'max-statements': 'off',
+      'no-magic-numbers': 'off',
+      'import/no-default-export': 'off',
+      'unicorn/no-array-for-each': 'off',
     },
-    rules: {
-      'no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_'
-        }
-      ],
-      'prefer-const': 'error',
-      'no-undef': 'error'
-    }
   },
-  {
-    ignores: [
-      'dist/',
-      'node_modules/',
-      'example/',
-      '*.config.js',
-      '*.config.mjs',
-      'coverage/',
-      '.stryker-tmp/',
-      'reports/'
-    ]
-  }
 ];

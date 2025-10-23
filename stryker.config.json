@@ -1,27 +1,25 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
-  "_comment": "Using 'command' runner because this project IS the bun runner plugin. This causes Stryker to report '1 test' instead of individual test counts. In a real project, you would use testRunner: 'bun' for proper test counting.",
-  "packageManager": "npm",
-  "reporters": ["html", "clear-text", "progress", "json"],
-  "testRunner": "command",
-  "commandRunner": {
-    "command": "bun test test/ --bail"
+  "testRunner_comment": "Basic Stryker configuration for mutation testing",
+  "testRunner": "bun",
+  "coverageAnalysis": "off",
+  "mutate": [
+    "src/**/*.ts",
+    "!src/**/*.d.ts",
+    "!src/**/*.spec.ts",
+    "!src/**/*.test.ts"
+  ],
+  "logLevel": "info",
+  "concurrency": 2,
+  "reporters": ["html", "clear-text", "progress"],
+  "htmlReporter": {
+    "fileName": "mutation-report.html",
+    "baseDir": "reports/mutation"
   },
-  "coverageAnalysis": "perTest",
-  "mutate": ["src/**/*.ts", "!src/**/*.test.ts", "!src/**/*.spec.ts"],
+  "tempDirName": "stryker-tmp",
+  "cleanTempDir": true,
   "thresholds": {
     "high": 80,
-    "low": 60,
-    "break": 0
-  },
-  "tempDirName": ".stryker-tmp",
-  "cleanTempDir": true,
-  "concurrency": 8,
-  "timeoutMS": 10000,
-  "htmlReporter": {
-    "fileName": "reports/mutation/mutation.html"
-  },
-  "jsonReporter": {
-    "fileName": "reports/mutation/mutation.json"
+    "low": 60
   }
 }

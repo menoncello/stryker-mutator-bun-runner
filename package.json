@@ -1,113 +1,84 @@
 {
   "name": "@stryker-mutator/bun-runner",
-  "version": "0.4.0",
-  "description": "A test runner plugin to use Bun with StrykerJS, the JavaScript mutation testing framework",
+  "version": "1.0.0",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "description": "Stryker test runner plugin for Bun",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.mjs",
+    "dist/**/*.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc -w",
-    "test": "bun test test/",
-    "test:watch": "bun test test/ --watch",
-    "test:coverage": "bun test test/ --coverage --coverage-reporter=text --coverage-reporter=lcov",
+    "build": "node scripts/build.js",
+    "build:tsc": "tsc",
+    "build:bundle": "bun build src/index.ts --outdir dist --target node --format esm --outfile index.mjs",
+    "build:esm": "tsc --project tsconfig.esm.json",
+    "build:cjs": "tsc --project tsconfig.cjs.json",
+    "clean": "rm -rf dist",
+    "test": "bun test",
+    "test:unit": "bun test test/unit",
+    "test:integration": "bun test test/integration",
+    "test:coverage": "bun test --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src test",
-    "lint:fix": "eslint src test --fix",
-    "check": "npm run typecheck && npm run lint && npm run test",
-    "clean": "rm -rf dist coverage .nyc_output .stryker-tmp reports",
-    "clean:temp": "rm -f coverage/*.tmp coverage/.*.tmp",
-    "dev": "npm run build:watch",
-    "ci": "npm run clean && npm run build && npm run check && npm run test:coverage",
-    "cleanup": "node scripts/cleanup-processes.cjs",
-    "prepare": "husky",
-    "prepublishOnly": "npm test && npm run lint",
-    "version": "npm run lint:fix && git add -A src",
-    "postversion": "git push && git push --tags",
-    "diagnose": "node scripts/diagnose-process-explosion.cjs",
-    "stryker": "stryker run",
-    "check:mutation": "node scripts/check-mutation-score.js"
+    "test:mutate": "stryker run",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^18.19.130",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-jsdoc": "^48.0.0",
+    "eslint-plugin-sonarjs": "^0.25.0",
+    "eslint-plugin-unicorn": "^51.0.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@stryker-mutator/api": "^8.0.0",
+    "typed-inject": "^4.0.0"
+  },
+  "peerDependencies": {
+    "@stryker-mutator/core": "^8.0.0"
   },
   "keywords": [
     "stryker",
-    "stryker-plugin",
-    "stryker-test-runner",
+    "mutation-testing",
     "bun",
     "test-runner",
-    "mutation-testing"
+    "mutation",
+    "testing"
   ],
-  "author": "Eduardo Menoncello <eduardo.menoncello@gmail.com>",
-  "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/menoncello/stryker-mutator-bun-runner.git"
+    "url": "https://github.com/stryker-mutator/stryker-js.git",
+    "directory": "packages/bun-runner"
   },
+  "author": "Stryker Mutator Team <hello@stryker-mutator.io>",
+  "license": "Apache-2.0",
+  "homepage": "https://stryker-mutator.io",
   "bugs": {
-    "url": "https://github.com/menoncello/stryker-mutator-bun-runner/issues"
-  },
-  "homepage": "https://github.com/menoncello/stryker-mutator-bun-runner#readme",
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "files": [
-    "dist",
-    "src",
-    "schema",
-    "README.md"
-  ],
-  "peerDependencies": {
-    "@stryker-mutator/core": "^9.0.0",
-    "bun": ">=1.0.0"
-  },
-  "dependencies": {
-    "@stryker-mutator/api": "^9.0.1",
-    "@stryker-mutator/util": "^9.0.1",
-    "execa": "^9.6.0",
-    "glob": "^11.0.3",
-    "semver": "^7.5.4"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.30.1",
-    "@size-limit/preset-small-lib": "^11.2.0",
-    "@stryker-mutator/core": "^9.0.1",
-    "@types/node": "^22.0.0",
-    "@types/semver": "^7.5.0",
-    "@types/source-map": "^0.5.2",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "c8": "^10.1.3",
-    "eslint": "^9.0.0",
-    "eslint-plugin-functional": "^9.0.2",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-jsdoc": "^51.3.4",
-    "eslint-plugin-promise": "^7.2.1",
-    "eslint-plugin-regexp": "^2.9.0",
-    "eslint-plugin-security": "^3.0.1",
-    "eslint-plugin-sonarjs": "^3.0.4",
-    "eslint-plugin-unicorn": "^59.0.1",
-    "husky": "^9.1.7",
-    "jscpd": "^4.0.5",
-    "lint-staged": "^16.1.2",
-    "madge": "^8.0.0",
-    "prettier": "^3.6.2",
-    "size-limit": "^11.2.0",
-    "source-map": "^0.7.4",
-    "typescript": "^5.0.0"
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "bash -c 'npm run typecheck'"
-    ],
-    "*.{js,jsx,ts,tsx,json,md}": [
-      "prettier --write"
-    ],
-    "src/**/*.ts": [
-      "bash -c 'npm run check:mutation'"
-    ]
+    "url": "https://github.com/stryker-mutator/stryker-js/issues"
   }
 }

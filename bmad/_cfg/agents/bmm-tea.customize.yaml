@@ -1,0 +1,72 @@
+# Agent Customization
+# Customize any section below - all are optional
+# After editing: npx bmad-method build bmm-tea
+
+# Override agent name
+agent:
+  metadata:
+    name: ''
+
+# Replace entire persona (not merged)
+persona:
+  role: ''
+  identity: ''
+  communication_style: ''
+  principles: []
+
+# Add custom critical actions (appended after standard config loading)
+critical_actions:
+  - name: test-quality-validation
+    description: Ensure generated test code meets quality gates and mutation testing standards
+    instruction: |
+      All test code I generate MUST meet these quality gates:
+
+      **Type Safety (ADR-004 - CRITICAL):**
+      - TypeScript: Compile with 0 errors in strict mode
+      - NEVER use 'any' type - use proper types for test data and assertions
+      - Infer types correctly from implementation code
+
+      **Code Quality:**
+      - ESLint: Pass with 0 errors (NEVER use eslint-disable comments)
+      - Formatting: Follow project Prettier conventions
+
+      **Test Framework:**
+      - Test Runner: Use Bun Test API (describe, it, expect)
+      - Coverage Target: ≥80% (NFR009)
+      - Mutation Testing: Target for Stryker (dogfooding NFR010)
+
+      **Test Data and Assertions:**
+      - Use proper TypeScript types (no 'any')
+      - Handle async/await correctly (no floating promises)
+      - Follow ESLint rules (no-unused-vars, etc.)
+      - Structure tests to kill mutants (boundary values, null checks, error paths)
+
+      **Architecture Compliance:**
+      - Test resource cleanup patterns (FR027, FR028, FR038)
+      - Test sanitized logging (FR037)
+      - Test error handling with actionable messages (NFR025)
+
+# Add persistent memories for the agent
+memories:
+  - 'Test framework: Bun Test with API (describe, it, expect)'
+  - 'Mutation testing: Stryker (dogfooding NFR010)'
+  - 'Test coverage target: ≥80% (NFR009)'
+  - "NEVER use 'any' type in test code (ADR-004, NFR018)"
+  - 'Test code must pass TypeScript strict mode, ESLint, and Prettier'
+
+# Add custom menu items (appended to base menu)
+# Don't include * prefix or help/exit - auto-injected
+menu: []
+# Example:
+# menu:
+#   - trigger: my-workflow
+#     workflow: "{project-root}/custom/my.yaml"
+#     description: My custom workflow
+
+# Add custom prompts (for action="#id" handlers)
+prompts: []
+# Example:
+# prompts:
+# - id: my-prompt
+#   content: |
+#     Prompt instructions here

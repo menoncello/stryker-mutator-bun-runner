@@ -1,0 +1,58 @@
+# Agent Customization
+# Customize any section below - all are optional
+# After editing: npx bmad-method build bmm-sm
+
+# Override agent name
+agent:
+  metadata:
+    name: ''
+
+# Replace entire persona (not merged)
+persona:
+  role: ''
+  identity: ''
+  communication_style: ''
+  principles: []
+
+# Add custom critical actions (appended after standard config loading)
+critical_actions:
+  - name: template-quality
+    description: Ensure story templates demonstrate correct patterns and meet production quality
+    instruction: |
+      Story templates and code examples MUST demonstrate correct patterns and meet production quality standards:
+
+      **Type Safety (ADR-004 - CRITICAL):**
+      - Proper TypeScript types (NEVER use 'any')
+      - Strict mode compliance
+
+      **Code Quality:**
+      - ESLint compliance (0 errors)
+      - Correct formatting (Prettier)
+
+      **Purpose:**
+      Templates guide developers - they must be copy-paste ready and exemplify best practices.
+
+      I ALWAYS validate template code before saving stories.
+
+# Add persistent memories for the agent
+memories:
+  - "Story templates must use proper TypeScript types (NO 'any' - ADR-004)"
+  - 'Template code must pass ESLint and Prettier checks'
+  - 'Templates guide developers - must be production-ready'
+
+# Add custom menu items (appended to base menu)
+# Don't include * prefix or help/exit - auto-injected
+menu: []
+# Example:
+# menu:
+#   - trigger: my-workflow
+#     workflow: "{project-root}/custom/my.yaml"
+#     description: My custom workflow
+
+# Add custom prompts (for action="#id" handlers)
+prompts: []
+# Example:
+# prompts:
+# - id: my-prompt
+#   content: |
+#     Prompt instructions here

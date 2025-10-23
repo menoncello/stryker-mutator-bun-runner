@@ -1,3 +1,8 @@
-export { BunProcessPool } from './BunProcessPool.js';
-export { WorkerManager, type PooledProcess } from './WorkerManager.js';
-export { ProcessPoolSingleton } from './ProcessPoolSingleton.js';
+/**
+ * Process Module Barrel Export
+ *
+ * @author Stryker Mutator Bun Runner Plugin Team
+ * @version 1.0.0
+ */
+
+export { ProcessExecutor } from './process-executor.js';
